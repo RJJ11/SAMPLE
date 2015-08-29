@@ -1,9 +1,14 @@
+import httplib
+import endpoints
+from protorpc import messages
+from google.appengine.ext import ndb
+
 class Profile(ndb.Model):
     """Profile -- User profile object"""
-    name = ndb.StringProperty()
-    email = ndb.StringProperty()
-    password = ndb.StringProperty()
-    phone = ndb.StringProperty()
+    name = ndb.StringProperty(required=True)
+    email = ndb.StringProperty(required=True)
+    password = ndb.StringProperty(required=True)
+    phone = ndb.StringProperty(required=True)
     userHash = ndb.StringProperty()
     picture = ndb.BlobProperty()
     batch = ndb.StringProperty()
@@ -11,12 +16,12 @@ class Profile(ndb.Model):
     follows = ndb.StringProperty(repeated=True)
     tags = ndb.StringProperty(repeated=True)
     clubsJoined = ndb.StringProperty(repeated=True)
-    pid = ndb.StringProperty()
-    gcmId = ndb.StringProperty()
-    isAlumni = ndb.StringProperty()
+    pid = ndb.StringProperty(required=True)
+    gcmId = ndb.StringProperty() # make gcmid compulsory
+    isAlumni = ndb.StringProperty(required=True)
     company = ndb.StringProperty()
     location = ndb.StringProperty()
-    collegeId = ndb.StringProperty()
+    collegeId = ndb.StringProperty(required=True)
 
 class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- What's shown on the UI"""
@@ -34,16 +39,16 @@ class ProfileMiniForm(messages.Message):
 
 
 class Club(ndb.Model):
-	name = ndb.StringProperty()
-	clubId = ndb.StringProperty()
-	admin = ndb.StringProperty()
-	description = ndb.StringProperty()
+	name = ndb.StringProperty(required=True)
+	clubId = ndb.StringProperty(required=True)
+	admin = ndb.StringProperty(required=True)
+	description = ndb.StringProperty(required=True)
 	members = ndb.StringProperty(repeated=True)
 	followers = ndb.StringProperty(repeated=True) # Only includes the set of people apart from members. By default a member of a club follows it.
 	abbreviation = ndb.StringProperty()
 	photo = ndb.BlobProperty()
-	isAlumni = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	isAlumni = ndb.StringProperty(required=True)
+	collegeId = ndb.StringProperty(required=True)
 
 class ClubMiniForm(messages.Message):
     """ClubMiniForm -- What's shown on the UI for a club"""
@@ -52,15 +57,15 @@ class ClubMiniForm(messages.Message):
     '''photo =''' 
 
 class Post(ndb.Model):
-	title = ndb.StringProperty()
+	title = ndb.StringProperty(required=True)
 	description = ndb.StringProperty()
 	photo = ndb.BlobProperty()
-	clubId = ndb.StringProperty()
+	clubId = ndb.StringProperty(required=True)
 	likes = ndb.IntegerProperty()
-	postId = ndb.StringProperty()
+	postId = ndb.StringProperty(required=True)
 	views = ndb.StringProperty()
-	post_creator = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	post_creator = ndb.StringProperty(required=True)
+	collegeId = ndb.StringProperty(required=True)
  
  
 class PostMiniForm(messages.Message):
@@ -74,21 +79,22 @@ class PostMiniForm(messages.Message):
     '''photo ='''     
     
 class Event(ndb.Model):
-	title = ndb.StringProperty()
+	title = ndb.StringProperty(required=True)
 	description = ndb.StringProperty()
 	photo = ndb.BlobProperty()
-	clubId = ndb.StringProperty()
-	eventId = ndb.StringProperty()
-	venue = ndb.StringProperty()
-	date = ndb.DateProperty()
-	start_time = ndb.TimeProperty()
-	end_time = ndb.TimeProperty()
+	clubId = ndb.StringProperty(required=True)
+	eventId = ndb.StringProperty(required=True)
+	venue = ndb.StringProperty(required=True)
+	date = ndb.DateProperty(required=True)
+	start_time = ndb.TimeProperty(required=True)
+	end_time = ndb.TimeProperty(required=True)
 	attendees = ndb.StringProperty(repeated=True)
-	completed = ndb.IntegerProperty()
+	completed = ndb.StringProperty(required=True)
 	views = ndb.StringProperty()
-	isAlumni = ndb.StringProperty()
-	event_creator = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	isAlumni = ndb.StringProperty(required=True)
+	event_creator = ndb.StringProperty(required=True)
+	collegeId = ndb.StringProperty(required=True)
+	
 class EventMiniForm(messages.Message):
     """EventMiniForm -- What's shown on the UI for an event"""
     title = messages.StringField(1,required=True)
@@ -103,12 +109,12 @@ class EventMiniForm(messages.Message):
     '''photo ='''
 
 class Post_Request(ndb.Model):
-	from_pid = ndb.StringProperty()
-	to_pid = ndb.StringProperty()
-	club_id = ndb.StringProperty()
-	description = ndb.StringProperty()
-	status = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	from_pid = ndb.StringProperty(required=True)
+	to_pid = ndb.StringProperty(required=True)
+	club_id = ndb.StringProperty(required=True)
+	description = ndb.StringProperty(required=True)
+	status = ndb.StringProperty(required=True)
+	collegeId = ndb.StringProperty(required=True)
  
 class PostRequestMiniForm(messages.Message):
     """PostRequestMiniForm -- What's shown on the UI for an post request"""
@@ -118,13 +124,13 @@ class PostRequestMiniForm(messages.Message):
     
 
 class Club_Creation(ndb.Model):
-	from_pid = ndb.StringProperty()
-	to_pid = ndb.StringProperty()
-	club_id = ndb.StringProperty()
-	club_name = ndb.StringProperty()
-	abbreviation = ndb.StringProperty()
-	isAlumni = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	from_pid = ndb.StringProperty(required=True)
+	to_pid = ndb.StringProperty(required=True)
+	club_id = ndb.StringProperty(required=True)
+	club_name = ndb.StringProperty(required=True)
+	abbreviation = ndb.StringProperty(required=True)
+	isAlumni = ndb.StringProperty(required=True)
+	collegeId = ndb.StringProperty(required=True)
 
 class ClubRequestMiniForm(messages.Message):
     """ClubRequestMiniForm -- What's shown on the UI for an club request"""
@@ -135,11 +141,11 @@ class ClubRequestMiniForm(messages.Message):
 
 
 class Join_Request(ndb.Model):
-	from_pid = ndb.StringProperty()
-	to_pid = ndb.StringProperty()
-	club_id = ndb.StringProperty()
-	status = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	from_pid = ndb.StringProperty(required=True)
+	to_pid = ndb.StringProperty(required=True)
+	club_id = ndb.StringProperty(required=True)
+	status = ndb.StringProperty(required=True)
+	collegeId = ndb.StringProperty(required=True)
 
 class JoinRequestMiniForm(messages.Message):
     """JoinRequestMiniForm -- What's shown on the UI for an join request"""
@@ -149,20 +155,20 @@ class JoinRequestMiniForm(messages.Message):
 
 
 class Comments(ndb.Model):
-	pid = ndb.StringProperty()
-	postId = ndb.StringProperty()
+	pid = ndb.StringProperty(required=True)
+	postId = ndb.StringProperty(required=True)
 	comment_body = ndb.StringProperty()
 	timestamp = ndb.TimeProperty()
 	likes = ndb.IntegerProperty()
-	collegeId = ndb.StringProperty()
+	collegeId = ndb.StringProperty(required=True)
 
 class CollegeDb(ndb.Model):
-	name = ndb.StringProperty()
+	name = ndb.StringProperty(required=True)
 	abbreviation = ndb.StringProperty()
 	location = ndb.StringProperty()
 	student_count = ndb.IntegerProperty()
 	group_count = ndb.IntegerProperty()
 	group_list = ndb.StringProperty(repeated=True)
-	student_sup = ndb.StringProperty() 
+	student_sup = ndb.StringProperty(required=True) 
 	alumni_sup = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
+	collegeId = ndb.StringProperty(required=True)
