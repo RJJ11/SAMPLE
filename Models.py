@@ -54,14 +54,8 @@ class Profile(ndb.Model):
     isAlumni = ndb.StringProperty(required=True)
     company = ndb.StringProperty()
     location = ndb.StringProperty()
-<<<<<<< HEAD
-    collegeId = ndb.StringProperty(required=True)
-    id = pid
-||||||| merged common ancestors
-    collegeId = ndb.StringProperty(required=True)
-=======
     collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many people
->>>>>>> cda0651c6ca0b05140a43fe311a19610a28564de
+    id = pid
 
 class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- What's shown on the UI"""
