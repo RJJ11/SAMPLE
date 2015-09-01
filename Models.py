@@ -4,37 +4,6 @@ import endpoints
 from protorpc import messages
 from google.appengine.ext import ndb
 
-class CollegeDb(ndb.Model):
-	 name = ndb.StringProperty(required=True)
-	 abbreviation = ndb.StringProperty()
-	 location = ndb.StringProperty()
-	 student_count = ndb.IntegerProperty()
-	 group_count = ndb.IntegerProperty()
-	 group_list = ndb.StringProperty(repeated=True)
-	 student_sup = ndb.StringProperty(required=True) 
-	 alumni_sup = ndb.StringProperty()
-	 collegeId = ndb.StringProperty(required=True)
-	 id=collegeId
-  
-class Club(ndb.Model):
-	name = ndb.StringProperty(required=True)
-	clubId = ndb.StringProperty(required=True)
-	admin = ndb.StringProperty(required=True)
-	description = ndb.StringProperty(required=True)
-	#members = ndb.ListProperty(ndb.Key)# Many clubs can have many members
-	#followers = ndb.ListProperty(ndb.Key) # Only includes the set of people apart from members. By default a member of a club follows it.
-	abbreviation = ndb.StringProperty()
-	photo = ndb.BlobProperty()
-	isAlumni = ndb.StringProperty(required=True)
-	collegeId = ndb.KeyProperty(kind = 'CollegeDb',required=True)# One college has many clubs
-
-class ClubMiniForm(messages.Message):
-    """ClubMiniForm -- What's shown on the UI for a club"""
-    name = messages.StringField(1,required=True)
-    abbreviation = messages.StringField(2,required=True)
-    '''photo =''' 
-
-
 class Profile(ndb.Model):
     """Profile -- User profile object"""
     name = ndb.StringProperty(required=True)
@@ -219,3 +188,11 @@ class CollegeDb(ndb.Model):
 	student_sup = ndb.StringProperty(required=True) 
 	alumni_sup = ndb.StringProperty()
 	collegeId = ndb.StringProperty(required=True)
+
+class CollegeDbMiniForm(messages.Message):
+    """JoinRequestMiniForm -- What's shown on the UI for an join request"""
+    name = messages.StringField(1,required=True)
+    abbreviation = messages.StringField(2,required=True)
+    location = messages.StringField(3,required=True)
+    student_sup = messages.StringField(4,required=True)
+    alumni_sup = messages.StringField(5)
