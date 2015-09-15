@@ -43,20 +43,25 @@ class ProfileMiniForm(messages.Message):
 class Club(ndb.Model):
 	name = ndb.StringProperty(required=True)
 	clubId = ndb.StringProperty(required=True)
-	admin = ndb.StringProperty(required=True)
-	description = ndb.StringProperty(required=True)
+	admin = ndb.KeyProperty(kind='Profile',required=True)
+	description = ndb.StringProperty()
 	members = ndb.StringProperty(repeated=True)
 	followers = ndb.StringProperty(repeated=True) # Only includes the set of people apart from members. By default a member of a club follows it.
 	abbreviation = ndb.StringProperty()
 	photo = ndb.BlobProperty()
 	isAlumni = ndb.StringProperty(required=True)
-	collegeId = ndb.StringProperty(required=True)
+	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)
 
 class ClubMiniForm(messages.Message):
-    """ClubMiniForm -- What's shown on the UI for a club"""
-    name = messages.StringField(1,required=True)
-    abbreviation = messages.StringField(2,required=True)
-    '''photo =''' 
+	name = messages.StringField(1,required=True)
+	clubId = messages.StringField(2,required=True)
+	admin = messages.StringField(3)
+	description = messages.StringField(4)
+	members = messages.StringField(5)
+	followers = messages.StringField(6) # Only includes the set of people apart from members. By default a member of a club follows it.
+	abbreviation = messages.StringField(7,required=True)
+	#photo = ndb.BlobProperty()
+	collegeName =  messages.StringField(8,required=True)
 
 class Post(ndb.Model):
 	title = ndb.StringProperty(required=True)
