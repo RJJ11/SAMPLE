@@ -1,0 +1,6 @@
+// API Reference Manual : All fields compulsory unless explicitly stated.
+
+1) createCollegeDb
+   API to create an instance of a particular college.
+   Expected Inputs: name, abbreviation , location , student_sup, admin_sup(Not compulsory)
+   Expected Output: String confirming college creation.		
