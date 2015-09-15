@@ -13,6 +13,7 @@ from Models import Club_Creation
 from Models import Profile
 from Models import CollegeDb
 from Models import CollegeDbMiniForm
+from Models import ClubMiniForm
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
@@ -26,17 +27,22 @@ class ClubApi(remote.Service):
    def createClub(self,requestentity=None):
         
         #When createClubRequest is called  
+
+
         clubRequest = Club_Creation()
         college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
         college_key = college.put()
 
+
+
+
+
+
         if requestentity:
-            for field in ('abbreviation','club_name','from_pid','to_pid','club_id','isAlumni','collegeId'):
+            for field in ('abbreviation','club_name','from_pid','to_pid','club_id','isAlumni','collegeId','club_creation_id'):
                 if hasattr(requestentity, field):
-                    print(field,"is there")
                     val = getattr(requestentity, field)
                     if val:
-                        print("Value is",val)
                         setattr(clubRequest, field, str(val))
                 elif field == "from_pid":
                     profile =  Profile(
@@ -50,7 +56,7 @@ class ClubApi(remote.Service):
 
                             )
                     profile_key = profile.put()
-                    print("Finished frompid")
+                    #print("Finished frompid")
                     setattr(clubRequest, field, profile_key)
                   
 
@@ -66,7 +72,7 @@ class ClubApi(remote.Service):
 
                                )
                     profile_key = profile.put()
-                    print("Finished topid")
+
                     setattr(clubRequest, field, profile_key)
                 elif field == "club_id":
                     setattr(clubRequest, field, "9999")
@@ -74,12 +80,57 @@ class ClubApi(remote.Service):
                     setattr(clubRequest, field, "N")
                 elif field == "collegeId":
                     setattr(clubRequest, field, college_key)
+                elif field == "club_creation_id":
+                    setattr(clubRequest, field, "1")
                 
-        print("About to createClubRequest")
-        print(clubRequest)
+        #print(clubRequest)
         clubRequest.put()
         
         return clubRequest
+
+
+   def createClubAfterApproval(self,requestentity=None):
+
+        if requestentity:
+            newClub = Club()
+            newClub.abbreviation = requestentity.abbreviation
+            newClub.clubId = requestentity.club_id
+            newClub.admin = requestentity.from_pid
+            newClub.collegeId = requestentity.collegeId
+            newClub.name = requestentity.club_name
+            newClub.isAlumni = requestentity.isAlumni
+
+            newClub.put()
+        return newClub
+
+   @endpoints.method(ClubRequestMiniForm,ClubMiniForm,path='getClub', http_method='POST', name='getClub')
+   def getClub(self,requestentity=None):
+
+        print("Request entity is",requestentity)
+
+        if requestentity:
+
+
+            clubQuery = Club.query(Club.name == requestentity.name).filter(Club.abbreviation == requestentity.abbreviation).fetch(1)
+            print(clubQuery)
+
+            if clubQuery:
+             college = CollegeDb.query(CollegeDb.collegeId == requestentity.collegeId.get().collegeId).fetch(1)
+             profile = Profile.query(Profile.pid == requestentity.admin.get().pid).fetch(1)
+             retClub = ClubMiniForm()
+             retClub.clubId = requestentity.clubId
+             retClub.admin = profile[0].name
+             retClub.abbreviation = requestentity.abbreviation
+             retClub.name = requestentity.name
+             retClub.collegeName = college[0].name
+
+
+
+        return retClub
+
+
+
+
 
    def createCollege(self, requestentity=None):
         
@@ -143,11 +194,14 @@ class ClubApi(remote.Service):
 
 
 
-   @endpoints.method(ClubRequestMiniForm,message_types.VoidMessage,path='club', http_method='POST', name='createClubRequest')
+   @endpoints.method(ClubRequestMiniForm,ClubMiniForm,path='club', http_method='POST', name='createClubRequest')
    def createClubRequest(self, request):
-        print("Entered here")
         clubRequest = self.createClub(request)
-        print("Finished")
+        #insert logic for request approval
+        newClub = self.createClubAfterApproval(clubRequest)
+        retClub = self.getClub(newClub)
+        return retClub
+
 
    @endpoints.method(CollegeDbMiniForm,message_types.VoidMessage,path='collegeDB', http_method='POST', name='createCollege')
    def createCollegeDb(self, request):
