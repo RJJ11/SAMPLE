@@ -7,8 +7,8 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models import ClubRequestMiniForm
-from Models import Club
+from Models import ClubRequestMiniForm, PostMiniForm
+from Models import Club, Post_Request, Post
 from Models import Club_Creation
 from Models import Profile
 from Models import CollegeDb
@@ -69,7 +69,6 @@ class ClubApi(remote.Service):
                                pid = '5678',
                                isAlumni='N',
                                collegeId=college_key
-
                                )
                     profile_key = profile.put()
 
@@ -139,8 +138,16 @@ class ClubApi(remote.Service):
         print "The data got on querying is " , query , " type is ", type(query), "\n"
         count = 0
         names = []
-        location = []       
-        
+        location = []
+        """profile =  Profile(name = 'RJJ',
+                            email = 'rohitjjoseph@gmail.com',
+                            phone = '7760532293',
+                            password = '13211',
+                            pid = '1234',
+                            isAlumni='N',
+                            collegeId= 'NIoTK')
+        profile_key = profile.put()
+        """
         for records in query:
            print"The name of the college is ", records.name , " and location is " , records.location
            names.append(records.name)
@@ -186,11 +193,133 @@ class ClubApi(remote.Service):
         else:
             print "Unique"
             newCollege.put()
-        
-        return newCollege
-    
-                
 
+        return newCollege
+
+   def postRequest(self, requestentity=None):
+
+        post_request = Post_Request()
+        college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
+        college_key = college.put()
+        query = CollegeDb.query()
+        profile =  Profile(name = 'RJJ',
+                            email = 'rohitjjoseph@gmail.com',
+                            phone = '7760532293',
+                            password = '13211',
+                            pid = '1234',
+                            isAlumni='N',
+                            collegeId= college_key)
+        profile_key = profile.put()
+        print("Finished frompid")
+                    #setattr(clubRequest, field, profile_key)
+
+
+        if requestentity:
+            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title'):
+                if hasattr(requestentity, field):
+                    print(field,"is there")
+                    val = getattr(requestentity, field)
+                    if(field=="club_id"):
+                        setattr(post_request, field, college_key)
+                    elif val:
+                        print("Value is",val)
+                        setattr(post_request, field, str(val))
+
+
+
+                elif field == "to_pid":
+                    """profile =  Profile(
+                               name = 'SiddharthRec',
+                               email = 'sid.tiger183@gmail.com',
+                               phone = '7760531994',
+                               password = '1803mutd',
+                               pid = '5678',
+                               isAlumni='N',
+                               collegeId=college_key
+                               )
+                    profile_key = profile.put()"""
+                    person = profile_key.get()
+                    print "Person's email-id ", person.email
+                    person_collegeId = person.collegeId
+                    print "His college Id ", person.collegeId
+                    college_details = person_collegeId.get()
+                    print "The sup is ", college_details.student_sup
+                    print("Finished to-pid")
+
+                    setattr(post_request, field, profile_key)
+                    setattr(post_request, 'from_pid', profile_key)
+                elif field == "status":
+                    setattr(post_request, field, "Yes")
+                elif field == "post_request_id":
+                    setattr(post_request, field, "ABCD123")
+                elif field == "collegeId":
+                    setattr(post_request, field, person_collegeId)
+
+        print("About to createClubRequest")
+        print(post_request)
+        post_request.put()
+
+        return post_request
+
+   def postEntry(self,requestentity=None):
+
+        newPost = Post()
+        college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
+        college_key = college.put()
+        query = CollegeDb.query()
+        profile =  Profile(name = 'RJJ',
+                            email = 'rohitjjoseph@gmail.com',
+                            phone = '7760532293',
+                            password = '13211',
+                            pid = '1234',
+                            isAlumni='N',
+                            collegeId= college_key)
+        profile_key = profile.put()
+        print("Finished from pid")
+                    #setattr(clubRequest, field, profile_key)
+
+        #Change the below portion once you incorporate actual Ids.
+
+        if requestentity:
+            for field in ('title','description','club_id','from_pid','likes','postId','views','collegeId'):
+
+                if hasattr(requestentity, field):
+                    print(field,"is there")
+                    val = getattr(requestentity, field)
+                    if(field=="club_id"):
+                        print "Club_Id stage"
+                        setattr(newPost, field, college_key)
+
+                    elif field == "from_pid":
+                        print "Entered here"
+                        person = profile_key.get()
+                        print "Person's email-id ", person.email
+                        person_collegeId = person.collegeId
+                        print "His college Id ", person.collegeId
+                        college_details = person_collegeId.get()
+                        print "The sup is ", college_details.student_sup
+                        setattr(newPost, field, "SDBJFB")
+                        print "Put PID"
+                        setattr(newPost,'collegeId',person_collegeId)
+                        print "Put college id"
+
+                    elif val:
+                        print("Value is",val)
+                        setattr(newPost, field, str(val))
+
+                elif field == "likes":
+                    setattr(newPost, field, 0)
+                elif field == "postId":
+                    setattr(newPost, field, "ABCD123")
+                elif field == "views":
+                    setattr(newPost, field, 0)
+
+
+        print("About to createClubRequest")
+        print(newPost)
+        newPost.put()
+
+        return newPost
 
 
 
@@ -207,7 +336,21 @@ class ClubApi(remote.Service):
    def createCollegeDb(self, request):
         print("Entered CollegeDb Portion")
         clubRequest = self.createCollege(request)
-        print("Finished entering a college")     
+        print("Finished entering a college")
+
+
+   @endpoints.method(PostMiniForm,message_types.VoidMessage,path='postRequest', http_method='POST', name='postRequest')
+   def createPostRequest(self, request):
+        print("Entered Post Request Portion")
+        clubRequest = self.postRequest(request)
+        print("Inserted into the post request table")
+
+
+   @endpoints.method(PostMiniForm,message_types.VoidMessage,path='postEntry', http_method='POST', name='postEntry')
+   def createPost(self, request):
+        print("Entered Post Entry Portion")
+        clubRequest = self.postEntry(request)
+        print("Inserted into the posts table")
         
 
 
