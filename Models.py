@@ -68,19 +68,36 @@ class Post(ndb.Model):
 	description = ndb.StringProperty()
 	from_pid = ndb.StringProperty(required=True)#ancestor relationship here?
 	photo = ndb.BlobProperty()
-	club_id = ndb.KeyProperty(kind='CollegeDb',required=True)#Many posts belong to one club
+	club_id = ndb.KeyProperty(kind='Club',required=True)#Many posts belong to one club
 	likes = ndb.IntegerProperty()
 	postId = ndb.StringProperty(required=True)
 	views = ndb.IntegerProperty()
  	id = postId
 	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many posts
 
+class PostForm(messages.Message):
+	title = messages.StringField(1)
+	description = messages.StringField(2)
+	from_pid = messages.StringField(3)#ancestor relationship here?
+	photo = messages.StringField(4)
+	#club_id = ndb.KeyProperty(kind='Club',required=True)#Many posts belong to one club
+	likes = messages.StringField(5)
+	postId = messages.StringField(6)
+	views = messages.StringField(7)
+
+class Posts(messages.Message):
+	items = messages.MessageField(PostForm, 1, repeated=True)
+
+class GetAllPosts(messages.Message):
+	collegeId =  messages.StringField(1)
+	clubId = messages.StringField(2)
+
 class Post_Request(ndb.Model):
 	title = ndb.StringProperty(required = True)
 	description = ndb.StringProperty(required=True)
 	from_pid = ndb.KeyProperty(kind='Profile',required=True) #This is the post creator
 	to_pid = ndb.KeyProperty(kind='Profile',required=True)# many requests to one profile
-	club_id = ndb.KeyProperty(kind='CollegeDb',required=True)
+	club_id = ndb.KeyProperty(kind='Club',required=True)
 	status = ndb.StringProperty(required=True)
 	post_request_id = ndb.StringProperty(required=True)
 	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many post requests
@@ -108,12 +125,29 @@ class Event(ndb.Model):
 	completed = ndb.StringProperty(required=True)
 	views = ndb.StringProperty()
 	isAlumni = ndb.StringProperty(required=True)
-	event_creator = ndb.StringProperty(required=True)
-	collegeId = ndb.StringProperty(required=True)
 	event_creator = ndb.StringProperty(required=True)#ancestor relationship?
 	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many events
 	id=eventId	
-	
+
+class Event_Request(messages.Message):
+	title = messages.StringField(1,required=True)
+	description = messages.StringField(2)
+	#photo = ndb.BlobProperty()
+	clubId = messages.StringField(3,required=True)#Many events belong to one club
+	#eventId = messages.StringField(4,required=True)
+	venue = messages.StringField(4,required=True)
+	date = messages.StringField(5,required=True)
+	start_time = messages.StringField(6,required=True)
+	end_time = messages.StringField(7,required=True)
+	attendees = messages.StringField(8)
+	completed = messages.StringField(9,required=True)
+	views = messages.StringField(10)
+	isAlumni = messages.StringField(11,required=True)
+	event_creator = messages.StringField(12,required=True)
+	collegeId = messages.StringField(13,required=True)
+	#id=eventId
+
+
 class EventMiniForm(messages.Message):
     """EventMiniForm -- What's shown on the UI for an event"""
     title = messages.StringField(1,required=True)
@@ -198,3 +232,6 @@ class CollegeDbMiniForm(messages.Message):
     location = messages.StringField(3,required=True)
     student_sup = messages.StringField(4,required=True)
     alumni_sup = messages.StringField(5)
+
+class Colleges(messages.Message):
+	collegeList = messages.StringField(1)
