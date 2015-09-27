@@ -14,6 +14,11 @@ from Models import Profile
 from Models import CollegeDb
 from Models import CollegeDbMiniForm
 from Models import ClubMiniForm
+from Models import GetClubMiniForm
+from Models import JoinClubMiniForm
+from Models import FollowClubMiniForm
+from Models import ClubListResponse
+from Models import ProfileMiniForm
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
@@ -28,24 +33,28 @@ class ClubApi(remote.Service):
         
         #When createClubRequest is called  
 
-
+        print("Request Entity for Create Club ", requestentity)
         clubRequest = Club_Creation()
-        college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
-        college_key = college.put()
+        #college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
+        #college_key = college.put()
 
+        college = CollegeDb.query(CollegeDb.name == requestentity.college_name).fetch(1)
+        print(college[0])
+        college_key = college[0].key
 
+        print("Retrieved College Key is ",college_key)
 
-
-
-
-        if requestentity:
+        if requestentity and college :
             for field in ('abbreviation','club_name','from_pid','to_pid','club_id','isAlumni','collegeId','club_creation_id'):
                 if hasattr(requestentity, field):
+                    
                     val = getattr(requestentity, field)
                     if val:
+                        print("entered second val")
                         setattr(clubRequest, field, str(val))
                 elif field == "from_pid":
-                    profile =  Profile(
+                     print("Entered from_pid")
+                     profile =  Profile(
                             name = 'SiddharthSend',
                             email = 'sid.tiger184@gmail.com',
                             phone = '7760531993',
@@ -53,15 +62,13 @@ class ClubApi(remote.Service):
                             pid = '1234',
                             isAlumni='N',
                             collegeId=college_key
-
                             )
-                    profile_key = profile.put()
-                    #print("Finished frompid")
-                    setattr(clubRequest, field, profile_key)
-                  
-
+                     profile_key = profile.put()
+                     print("Finished frompid")
+                     setattr(clubRequest, field, profile_key)
                 elif field == "to_pid":
-                    profile =  Profile(
+                     print("Entered To PID")
+                     profile =  Profile(
                                name = 'SiddharthRec',
                                email = 'sid.tiger183@gmail.com',
                                phone = '7760531994',
@@ -70,21 +77,19 @@ class ClubApi(remote.Service):
                                isAlumni='N',
                                collegeId=college_key
                                )
-                    profile_key = profile.put()
+                     profile_key = profile.put()
 
-                    setattr(clubRequest, field, profile_key)
+                     setattr(clubRequest, field, profile_key)
                 elif field == "club_id":
-                    setattr(clubRequest, field, "9999")
+                     setattr(clubRequest, field, "9999")
                 elif field == "isAlumni":
-                    setattr(clubRequest, field, "N")
+                     setattr(clubRequest, field, "N")
                 elif field == "collegeId":
-                    setattr(clubRequest, field, college_key)
+                     setattr(clubRequest, field, college_key)
                 elif field == "club_creation_id":
-                    setattr(clubRequest, field, "1")
-                
-        #print(clubRequest)
+                     setattr(clubRequest, field, "1")
         clubRequest.put()
-        
+
         return clubRequest
 
 
@@ -100,16 +105,26 @@ class ClubApi(remote.Service):
             newClub.isAlumni = requestentity.isAlumni
 
             newClub.put()
+
+            #print("college Id of new ", newClub.collegeId.get())
+            college = newClub.collegeId.get()
+            #college = CollegeDb.query(CollegeDb.collegeId == newClub.collegeId.get().collegeId).fetch(1)
+            print ("The retrieved college is ",college)
+
+            if(college):
+              college.group_list.append(newClub.key)
+              print(college.group_list)
+
+              college.put()
+
         return newClub
 
-   @endpoints.method(ClubRequestMiniForm,ClubMiniForm,path='getClub', http_method='POST', name='getClub')
+   #@endpoints.method(ClubRequestMiniForm,ClubMiniForm,path='getClub', http_method='POST', name='getClub')
    def getClub(self,requestentity=None):
 
         print("Request entity is",requestentity)
 
         if requestentity:
-
-
             clubQuery = Club.query(Club.name == requestentity.name).filter(Club.abbreviation == requestentity.abbreviation).fetch(1)
             print(clubQuery)
 
@@ -117,7 +132,6 @@ class ClubApi(remote.Service):
              college = CollegeDb.query(CollegeDb.collegeId == requestentity.collegeId.get().collegeId).fetch(1)
              profile = Profile.query(Profile.pid == requestentity.admin.get().pid).fetch(1)
              retClub = ClubMiniForm()
-             retClub.clubId = requestentity.clubId
              retClub.admin = profile[0].name
              retClub.abbreviation = requestentity.abbreviation
              retClub.name = requestentity.name
@@ -126,6 +140,131 @@ class ClubApi(remote.Service):
 
 
         return retClub
+
+   @endpoints.method(GetClubMiniForm,ClubMiniForm,path='getClub', http_method='POST', name='getClub')
+   def getClubApi(self,request):
+
+        print("Request entity is",request)
+
+        if request:
+            clubQuery = Club.query(Club.name == request.name).filter(Club.abbreviation == request.abbreviation).fetch(1)
+            #print(clubQuery)
+            collegeidret = clubQuery[0].collegeId
+            adminret = clubQuery[0].admin
+            #print(collegeidret)
+            #print("Admin ret",adminret)
+            if clubQuery:
+             college = CollegeDb.query(CollegeDb.collegeId == collegeidret.get().collegeId).fetch(1)
+             profile = Profile.query(Profile.pid == adminret.get().pid).fetch(1)
+             retClub = ClubMiniForm()
+             retClub.clubId = clubQuery[0].clubId
+             retClub.admin = profile[0].name
+             retClub.abbreviation = clubQuery[0].abbreviation
+             retClub.name = clubQuery[0].name
+             retClub.collegeName = college[0].name
+
+
+
+        return retClub
+
+   @endpoints.method(JoinClubMiniForm,ClubMiniForm,path='joinClub', http_method='POST', name='joinClub')
+   def joinClubApi(self,request):
+
+        #print("Request entity is",request)
+
+        if request:
+
+
+            collegequery = CollegeDb.query(CollegeDb.name == request.college_name).fetch(1)
+            collegekey = collegequery[0].key
+            clubQuery = Club.query(Club.name == request.club_name).filter(Club.collegeId == collegekey).fetch(1) #rretrieved the club
+            profileret = Profile.query(Profile.name == request.name).filter(Profile.email == request.email).fetch(1)
+            #print("Retrieved Profile ",profileret)
+
+
+            if (collegequery and clubQuery and profileret) :
+                #add profile to club
+                currentClub = clubQuery[0]
+                currentClub.members.append(profileret[0].key)
+                currentClub.followers.append(profileret[0].key)
+                currentClub.put()
+
+                currentProfile = profileret[0]
+                currentProfile.clubsJoined.append(currentClub.key)
+                currentProfile.follows.append(currentClub.key)
+                currentProfile.put()
+
+
+
+        return None
+
+   @endpoints.method(FollowClubMiniForm,ClubMiniForm,path='followClub', http_method='POST', name='followClub')
+   def followClubApi(self,request):
+
+        print("Request entity is",request)
+
+        if request:
+
+            collegequery = CollegeDb.query(CollegeDb.name == request.college_name).fetch(1)
+            collegekey = collegequery[0].key
+            clubQuery = Club.query(Club.name == request.club_name).filter(Club.collegeId == collegekey).fetch(1) #rretrieved the club
+            profileret = Profile.query(Profile.name == request.name).filter(Profile.email == request.email).fetch(1)
+            #print("Retrieved Profile ",profileret)
+
+
+            if (collegequery and clubQuery and profileret) :
+                #add profile to club
+                currentClub = clubQuery[0]
+                currentClub.followers.append(profileret[0].key)
+                currentClub.put()
+
+                currentProfile = profileret[0]
+                currentProfile.follows.append(currentClub.key)
+                currentProfile.put()
+
+
+
+        return None
+
+   @endpoints.method(CollegeDbMiniForm,ClubListResponse,path='getClubList', http_method='POST', name='getClubList')
+   def getClubListApi(self,request):
+
+
+        list_of_clubs = ClubListResponse()
+        print("Request entity is",request)
+
+        if request:
+            collegequery = CollegeDb.query(CollegeDb.name == request.name).fetch(1)
+            print("Have i retrieved the college ", collegequery)
+
+            if(collegequery[0]):
+
+
+                for obj in collegequery[0].group_list :
+                   ret_club = obj.get()
+
+                   format_club = ClubMiniForm()
+
+                   format_club.name = ret_club.name
+
+                   format_club.abbreviation = ret_club.abbreviation
+
+                   format_club.admin = ret_club.admin.get().name
+
+                   format_club.collegeName = ret_club.collegeId.get().name
+
+                   format_club.description = ret_club.description
+
+
+                   list_of_clubs.list.append(format_club)
+
+                print("List of Objects ",list_of_clubs)
+
+
+
+
+        return list_of_clubs
+
 
 
 
@@ -325,10 +464,21 @@ class ClubApi(remote.Service):
 
    @endpoints.method(ClubRequestMiniForm,ClubMiniForm,path='club', http_method='POST', name='createClubRequest')
    def createClubRequest(self, request):
-        clubRequest = self.createClub(request)
-        #insert logic for request approval
-        newClub = self.createClubAfterApproval(clubRequest)
-        retClub = self.getClub(newClub)
+
+        retClub = ClubMiniForm()
+        college_ret = CollegeDb.query(CollegeDb.name == request.college_name).fetch(1)
+
+        print("College Ret",college_ret)
+        if(college_ret):
+           club_ret = Club.query(Club.name == request.club_name).filter(Club.abbreviation == request.abbreviation).filter(Club.collegeId == college_ret[0].key).fetch(1)
+
+           print("Club Ret",club_ret)
+           if(len(club_ret) == 0):
+              clubRequest = self.createClub(request)
+              #insert logic for request approval
+              newClub = self.createClubAfterApproval(clubRequest)
+              print ("The new club is",newClub)
+              retClub = self.getClub(newClub)
         return retClub
 
 
@@ -354,7 +504,29 @@ class ClubApi(remote.Service):
         
 
 
+   @endpoints.method(message_types.VoidMessage,message_types.VoidMessage,path='insertUnique', http_method='POST', name='insertUnique')
+   def insertUnique(self,request):
 
+        #This method is just a reference in order for you to reuse this code in order to insert unique entries in the DB
+        college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
+        college_key = college.put()
+        query = CollegeDb.query()
 
+        profile =  Profile(name = 'RJJ',
+                            email = 'rohitjjoseph@gmail.com',
+                            phone = '7760532293',
+                            password = '13211',
+                            pid = '1234',
+                            isAlumni='N',
+                            collegeId= college_key)
+
+        profileret = Profile.query(Profile.pid == profile.pid).fetch(1)
+
+        print("A is ", profileret)
+        if profileret :
+          print("Not inserting")
+        else :
+          print("Inserting")
+          profile_key = profile.put()
 
 api = endpoints.api_server([ClubApi]) # register API	
