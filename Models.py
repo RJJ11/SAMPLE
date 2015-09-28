@@ -72,7 +72,8 @@ class Post(ndb.Model):
 	likes = ndb.IntegerProperty()
 	postId = ndb.StringProperty(required=True)
 	views = ndb.IntegerProperty()
- 	id = postId
+ 	#id = postId
+	likers = ndb.KeyProperty(kind='Profile',repeated=True)
 	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many posts
 
 class PostForm(messages.Message):
@@ -84,6 +85,7 @@ class PostForm(messages.Message):
 	likes = messages.StringField(5)
 	postId = messages.StringField(6)
 	views = messages.StringField(7)
+	likers = messages.StringField(8)
 
 class Posts(messages.Message):
 	items = messages.MessageField(PostForm, 1, repeated=True)
@@ -109,8 +111,15 @@ class PostMiniForm(messages.Message):
     club_id = messages.StringField(2,required=True)
     title = messages.StringField(3,required=True)
     description = messages.StringField(4,required=True)
-    '''photo ='''     
-    
+    likers = messages.StringField(5)
+    #'''photo ='''
+
+
+class LikePost(messages.Message):
+	from_pid = messages.StringField(1,required=True)
+	postId = messages.StringField(2,required=True)
+
+
 class Event(ndb.Model):
 	title = ndb.StringProperty(required=True)
 	description = ndb.StringProperty()
@@ -222,8 +231,8 @@ class CollegeDb(ndb.Model):
 	group_list = ndb.StringProperty(repeated=True)
 	student_sup = ndb.StringProperty(required=True) 
 	alumni_sup = ndb.StringProperty()
-	collegeId = ndb.StringProperty(required=True)
-	id = collegeId
+	collegeId = ndb.StringProperty()
+	#id = collegeId
 
 class CollegeDbMiniForm(messages.Message):
     """JoinRequestMiniForm -- What's shown on the UI for an join request"""

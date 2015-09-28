@@ -7,7 +7,7 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts
+from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost
 from Models import Club, Post_Request, Post, Event_Request, PostForm
 from Models import Club_Creation
 from Models import Profile
@@ -206,7 +206,7 @@ class ClubApi(remote.Service):
                     #setattr(clubRequest, field, profile_key)
 
         if requestentity:
-            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid'):
+            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid','likers'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
@@ -411,6 +411,16 @@ class ClubApi(remote.Service):
                 setattr(pf, field.name, str(getattr(post, field.name)))
         return pf
 
+   def likePost(self,request):
+       lp = LikePost()
+       post_id = ndb.Key('Post',int(request.postId))
+       from_pid = ndb.Key('Profile',int(request.from_pid))
+       post = post_id.get()
+       post.likes = post.likes+1
+       post.likers.append(from_pid)
+       post.put()
+
+       return "Updated"
 
 
 
@@ -464,6 +474,11 @@ class ClubApi(remote.Service):
             print "None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             posts = Post.query(Post.collegeId==collegeId)
+        elif(temp==None):
+            print "None"
+            clubId = ndb.Key('Club',int(temp2))
+            posts = Post.query(Post.club_id==clubId)
+
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
@@ -473,6 +488,11 @@ class ClubApi(remote.Service):
         return Posts(items=[self.copyPostToForm(x) for x in posts])
         #clubRequest = self.postEntry(request)
         #print("Inserted into the events table")
+
+   @endpoints.method(LikePost,message_types.VoidMessage,path='likePost', http_method='POST', name='likePosts')
+   def likePosts(self, request):
+       print "Entered the Like Posts Section"
+       return self.likePost(request)
 
 
 api = endpoints.api_server([ClubApi]) # register API	
