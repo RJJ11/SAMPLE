@@ -48,8 +48,9 @@ class Club(ndb.Model):
     clubId = ndb.StringProperty(required=True)
     admin = ndb.KeyProperty(kind='Profile', required=True)
     description = ndb.StringProperty()
-    members = ndb.KeyProperty(kind='Profile',repeated=True)
-    follows = ndb.KeyProperty(kind='Profile', repeated=True)  # Only includes the set of people apart from members. By default a member of a club follows it.
+    members = ndb.KeyProperty(kind='Profile', repeated=True)
+    follows = ndb.KeyProperty(kind='Profile',
+                              repeated=True)  # Only includes the set of people apart from members. By default a member of a club follows it.
     abbreviation = ndb.StringProperty()
     photo = ndb.BlobProperty()
     isAlumni = ndb.StringProperty(required=True)
@@ -75,52 +76,41 @@ class GetClubMiniForm(messages.Message):
 
 
 class Post(ndb.Model):
-<<<<<<< HEAD
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty()
     from_pid = ndb.StringProperty(required=True)  # ancestor relationship here?
     photo = ndb.BlobProperty()
-    club_id = ndb.KeyProperty(kind='CollegeDb', required=True)  # Many posts belong to one club
+    club_id = ndb.KeyProperty(kind='Club', required=True)  # Many posts belong to one club
     likes = ndb.IntegerProperty()
     postId = ndb.StringProperty(required=True)
     views = ndb.IntegerProperty()
-    id = postId
+    # id = postId
+    likers = ndb.KeyProperty(kind='Profile', repeated=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many posts
 
-=======
-	title = ndb.StringProperty(required=True)
-	description = ndb.StringProperty()
-	from_pid = ndb.StringProperty(required=True)#ancestor relationship here?
-	photo = ndb.BlobProperty()
-	club_id = ndb.KeyProperty(kind='Club',required=True)#Many posts belong to one club
-	likes = ndb.IntegerProperty()
-	postId = ndb.StringProperty(required=True)
-	views = ndb.IntegerProperty()
- 	#id = postId
-	likers = ndb.KeyProperty(kind='Profile',repeated=True)
-	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many posts
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
 
 class PostForm(messages.Message):
-	title = messages.StringField(1)
-	description = messages.StringField(2)
-	from_pid = messages.StringField(3)#ancestor relationship here?
-	photo = messages.StringField(4)
-	#club_id = ndb.KeyProperty(kind='Club',required=True)#Many posts belong to one club
-	likes = messages.StringField(5)
-	postId = messages.StringField(6)
-	views = messages.StringField(7)
-	likers = messages.StringField(8)
+    title = messages.StringField(1)
+    description = messages.StringField(2)
+    from_pid = messages.StringField(3)  # ancestor relationship here?
+    photo = messages.StringField(4)
+    # club_id = ndb.KeyProperty(kind='Club',required=True)#Many posts belong to one club
+    likes = messages.StringField(5)
+    postId = messages.StringField(6)
+    views = messages.StringField(7)
+    likers = messages.StringField(8)
+
 
 class Posts(messages.Message):
-	items = messages.MessageField(PostForm, 1, repeated=True)
+    items = messages.MessageField(PostForm, 1, repeated=True)
+
 
 class GetAllPosts(messages.Message):
-	collegeId =  messages.StringField(1)
-	clubId = messages.StringField(2)
+    collegeId = messages.StringField(1)
+    clubId = messages.StringField(2)
+
 
 class Post_Request(ndb.Model):
-<<<<<<< HEAD
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty(required=True)
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # This is the post creator
@@ -130,15 +120,6 @@ class Post_Request(ndb.Model):
     post_request_id = ndb.StringProperty(required=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many post requests
     id = post_request_id
-
-
-class PostMiniForm(messages.Message):
-    """PostMiniForm -- What's shown on the UI for a post"""
-    from_pid = messages.StringField(1, required=True)
-    club_id = messages.StringField(2, required=True)
-    title = messages.StringField(3, required=True)
-    description = messages.StringField(4, required=True)
-    '''photo ='''
 
 
 class Event(ndb.Model):
@@ -158,68 +139,59 @@ class Event(ndb.Model):
     event_creator = ndb.StringProperty(required=True)  # ancestor relationship?
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many events
     id = eventId
-=======
-	title = ndb.StringProperty(required = True)
-	description = ndb.StringProperty(required=True)
-	from_pid = ndb.KeyProperty(kind='Profile',required=True) #This is the post creator
-	to_pid = ndb.KeyProperty(kind='Profile',required=True)# many requests to one profile
-	club_id = ndb.KeyProperty(kind='Club',required=True)
-	status = ndb.StringProperty(required=True)
-	post_request_id = ndb.StringProperty(required=True)
-	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many post requests
-	id = post_request_id
+
 
 class PostMiniForm(messages.Message):
     """PostMiniForm -- What's shown on the UI for a post"""
-    from_pid = messages.StringField(1,required=True)
-    club_id = messages.StringField(2,required=True)
-    title = messages.StringField(3,required=True)
-    description = messages.StringField(4,required=True)
+    from_pid = messages.StringField(1, required=True)
+    club_id = messages.StringField(2, required=True)
+    title = messages.StringField(3, required=True)
+    description = messages.StringField(4, required=True)
     likers = messages.StringField(5)
-    #'''photo ='''
+    # '''photo ='''
 
 
 class LikePost(messages.Message):
-	from_pid = messages.StringField(1,required=True)
-	postId = messages.StringField(2,required=True)
+    from_pid = messages.StringField(1, required=True)
+    postId = messages.StringField(2, required=True)
 
 
 class Event(ndb.Model):
-	title = ndb.StringProperty(required=True)
-	description = ndb.StringProperty()
-	photo = ndb.BlobProperty()
-	clubId = ndb.KeyProperty(kind='Club',required=True)#Many events belong to one club
-	eventId = ndb.StringProperty(required=True)
-	venue = ndb.StringProperty(required=True)
-	date = ndb.DateProperty(required=True)
-	start_time = ndb.TimeProperty(required=True)
-	end_time = ndb.TimeProperty(required=True)
-	attendees = ndb.StringProperty(repeated=True)
-	completed = ndb.StringProperty(required=True)
-	views = ndb.StringProperty()
-	isAlumni = ndb.StringProperty(required=True)
-	event_creator = ndb.StringProperty(required=True)#ancestor relationship?
-	collegeId = ndb.KeyProperty(kind='CollegeDb',required=True)# One college has many events
-	id=eventId	
+    title = ndb.StringProperty(required=True)
+    description = ndb.StringProperty()
+    photo = ndb.BlobProperty()
+    clubId = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
+    eventId = ndb.StringProperty(required=True)
+    venue = ndb.StringProperty(required=True)
+    date = ndb.DateProperty(required=True)
+    start_time = ndb.TimeProperty(required=True)
+    end_time = ndb.TimeProperty(required=True)
+    attendees = ndb.StringProperty(repeated=True)
+    completed = ndb.StringProperty(required=True)
+    views = ndb.StringProperty()
+    isAlumni = ndb.StringProperty(required=True)
+    event_creator = ndb.StringProperty(required=True)  # ancestor relationship?
+    collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many events
+    id = eventId
+
 
 class Event_Request(messages.Message):
-	title = messages.StringField(1,required=True)
-	description = messages.StringField(2)
-	#photo = ndb.BlobProperty()
-	clubId = messages.StringField(3,required=True)#Many events belong to one club
-	#eventId = messages.StringField(4,required=True)
-	venue = messages.StringField(4,required=True)
-	date = messages.StringField(5,required=True)
-	start_time = messages.StringField(6,required=True)
-	end_time = messages.StringField(7,required=True)
-	attendees = messages.StringField(8)
-	completed = messages.StringField(9,required=True)
-	views = messages.StringField(10)
-	isAlumni = messages.StringField(11,required=True)
-	event_creator = messages.StringField(12,required=True)
-	collegeId = messages.StringField(13,required=True)
-	#id=eventId
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
+    title = messages.StringField(1, required=True)
+    description = messages.StringField(2)
+    # photo = ndb.BlobProperty()
+    clubId = messages.StringField(3, required=True)  # Many events belong to one club
+    # eventId = messages.StringField(4,required=True)
+    venue = messages.StringField(4, required=True)
+    date = messages.StringField(5, required=True)
+    start_time = messages.StringField(6, required=True)
+    end_time = messages.StringField(7, required=True)
+    attendees = messages.StringField(8)
+    completed = messages.StringField(9, required=True)
+    views = messages.StringField(10)
+    isAlumni = messages.StringField(11, required=True)
+    event_creator = messages.StringField(12, required=True)
+    collegeId = messages.StringField(13, required=True)
+# id=eventId
 
 
 class EventMiniForm(messages.Message):
@@ -264,7 +236,6 @@ class ClubRequestMiniForm(messages.Message):
     college_name = messages.StringField(3, required=True)
 
 
-
 class Join_Request(ndb.Model):
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many join requests
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to join one club
@@ -280,17 +251,20 @@ class JoinRequestMiniForm(messages.Message):
     from_pid = messages.StringField(1, required=True)
     club_id = messages.StringField(2, required=True)
 
+
 class JoinClubMiniForm(messages.Message):
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
     club_name = messages.StringField(3, required=True)
     college_name = messages.StringField(4, required=True)
 
+
 class FollowClubMiniForm(messages.Message):
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
     club_name = messages.StringField(3, required=True)
     college_name = messages.StringField(4, required=True)
+
 
 class Comments(ndb.Model):
     pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many comments
@@ -304,30 +278,16 @@ class Comments(ndb.Model):
 
 
 class CollegeDb(ndb.Model):
-<<<<<<< HEAD
     name = ndb.StringProperty(required=True)
     abbreviation = ndb.StringProperty()
     location = ndb.StringProperty()
     student_count = ndb.IntegerProperty()
     group_count = ndb.IntegerProperty()
-    group_list = ndb.KeyProperty(repeated=True)
+    group_list = ndb.StringProperty(repeated=True)
     student_sup = ndb.StringProperty(required=True)
     alumni_sup = ndb.StringProperty()
-    collegeId = ndb.StringProperty(required=True)
-    id = collegeId
+    collegeId = ndb.StringProperty()
 
-=======
-	name = ndb.StringProperty(required=True)
-	abbreviation = ndb.StringProperty()
-	location = ndb.StringProperty()
-	student_count = ndb.IntegerProperty()
-	group_count = ndb.IntegerProperty()
-	group_list = ndb.StringProperty(repeated=True)
-	student_sup = ndb.StringProperty(required=True) 
-	alumni_sup = ndb.StringProperty()
-	collegeId = ndb.StringProperty()
-	#id = collegeId
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
 
 class CollegeDbMiniForm(messages.Message):
     """JoinRequestMiniForm -- What's shown on the UI for an join request"""
@@ -337,14 +297,12 @@ class CollegeDbMiniForm(messages.Message):
     student_sup = messages.StringField(4, required=True)
     alumni_sup = messages.StringField(5)
 
-<<<<<<< HEAD
 
-
-#Define Response Classes here
+# Define Response Classes here
 
 class ClubListResponse(messages.Message):
-     list = messages.MessageField(ClubMiniForm, 1, repeated=True)
-=======
+    list = messages.MessageField(ClubMiniForm, 1, repeated=True)
+
+
 class Colleges(messages.Message):
-	collegeList = messages.StringField(1)
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
+    collegeList = messages.StringField(1)

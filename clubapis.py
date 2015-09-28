@@ -37,7 +37,7 @@ class ClubApi(remote.Service):
 
         print("Request Entity for Create Club ", requestentity)
         clubRequest = Club_Creation()
-<<<<<<< HEAD
+
         #college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
         #college_key = college.put()
 
@@ -48,12 +48,6 @@ class ClubApi(remote.Service):
         print("Retrieved College Key is ",college_key)
 
         if requestentity and college :
-=======
-        college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
-        college_key = college.put()
-
-        if requestentity:
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
             for field in ('abbreviation','club_name','from_pid','to_pid','club_id','isAlumni','collegeId','club_creation_id'):
                 if hasattr(requestentity, field):
                     
@@ -128,10 +122,6 @@ class ClubApi(remote.Service):
 
         return newClub
 
-<<<<<<< HEAD
-   #@endpoints.method(ClubRequestMiniForm,ClubMiniForm,path='getClub', http_method='POST', name='getClub')
-=======
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
    def getClub(self,requestentity=None):
 
         print("Request entity is",requestentity)
@@ -179,7 +169,7 @@ class ClubApi(remote.Service):
 
         return retClub
 
-   @endpoints.method(JoinClubMiniForm,ClubMiniForm,path='joinClub', http_method='POST', name='joinClub')
+   @endpoints.method(JoinClubMiniForm,message_types.VoidMessage,path='joinClub', http_method='POST', name='joinClub')
    def joinClubApi(self,request):
 
         #print("Request entity is",request)
@@ -188,17 +178,22 @@ class ClubApi(remote.Service):
 
 
             collegequery = CollegeDb.query(CollegeDb.name == request.college_name).fetch(1)
+            print(collegequery)
             collegekey = collegequery[0].key
             clubQuery = Club.query(Club.name == request.club_name).filter(Club.collegeId == collegekey).fetch(1) #rretrieved the club
+            print(clubQuery)
             profileret = Profile.query(Profile.name == request.name).filter(Profile.email == request.email).fetch(1)
-            #print("Retrieved Profile ",profileret)
+            print("Retrieved Profile ",profileret)
 
 
             if (collegequery and clubQuery and profileret) :
                 #add profile to club
+                print("entered here")
+
+                print(profileret[0])
                 currentClub = clubQuery[0]
                 currentClub.members.append(profileret[0].key)
-                currentClub.followers.append(profileret[0].key)
+                currentClub.follows.append(profileret[0].key)
                 currentClub.put()
 
                 currentProfile = profileret[0]
@@ -208,7 +203,7 @@ class ClubApi(remote.Service):
 
 
 
-        return None
+        return message_types.VoidMessage()
 
    @endpoints.method(FollowClubMiniForm,ClubMiniForm,path='followClub', http_method='POST', name='followClub')
    def followClubApi(self,request):
@@ -227,7 +222,7 @@ class ClubApi(remote.Service):
             if (collegequery and clubQuery and profileret) :
                 #add profile to club
                 currentClub = clubQuery[0]
-                currentClub.followers.append(profileret[0].key)
+                currentClub.follows.append(profileret[0].key)
                 currentClub.put()
 
                 currentProfile = profileret[0]
@@ -624,7 +619,6 @@ class ClubApi(remote.Service):
         print("Entered get all colleges Portion")
         return self.getColleges()
 
-<<<<<<< HEAD
    @endpoints.method(message_types.VoidMessage,message_types.VoidMessage,path='insertUnique', http_method='POST', name='insertUnique')
    def insertUnique(self,request):
 
@@ -642,7 +636,14 @@ class ClubApi(remote.Service):
                             collegeId= college_key)
 
         profileret = Profile.query(Profile.pid == profile.pid).fetch(1)
-=======
+        print("A is ", profileret)
+        if profileret:
+          print("Not inserting")
+        else :
+          print("Inserting")
+          profile_key = profile.put()
+
+
    @endpoints.method(Event_Request,message_types.VoidMessage,path='eventEntry', http_method='POST', name='eventEntry')
    def createEvent(self, request):
         print("Entered Event Entry Portion")
@@ -678,13 +679,7 @@ class ClubApi(remote.Service):
    def likePosts(self, request):
        print "Entered the Like Posts Section"
        return self.likePost(request)
->>>>>>> 9307717f4f88247df8345d9e990c21d27be747a6
 
-        print("A is ", profileret)
-        if profileret :
-          print("Not inserting")
-        else :
-          print("Inserting")
-          profile_key = profile.put()
+
 
 api = endpoints.api_server([ClubApi]) # register API	
