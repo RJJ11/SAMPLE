@@ -1,6 +1,101 @@
-// API Reference Manual : All fields compulsory unless explicitly stated.
+API Specifications Sheet:
 
-1) createCollegeDb
-   API to create an instance of a particular college.
-   Expected Inputs: name, abbreviation , location , student_sup, admin_sup(Not compulsory)
-   Expected Output: String confirming college creation.		
+Please follow the format mentioned below in filling details about your API. 
+
+<API Name>
+<One line description of API,why it is called etc. Be specific if required>
+<Expected inputs>
+<Expected outputs>
+
+The ‘expected inputs’ are the keys in ‘key-value’ pairs sent by the front-end, so please ensure it matches what is in your code.
+Please specify if any of the input parameters require a particular format(eg if its a date time field) or type(say integer). All inputs are expected as String otherwise.
+
+P.S: All input fields are compulsory unless explicitly stated.
+
+createCollege
+This API is called in the beginning when you want to get a college on to the platform.  This will be used once just for registering the college on the platform.
+Expected inputs: name, abbreviation , location , student_sup(name,not an ID), admin_sup(Not compulsory)
+Expected output: A confirmation message saying college has been created. 
+
+getColleges
+This API is used on the ‘Sign In’ page. Because when a user signs in he is given textboxes to enter his details as well as a drop down of the colleges on the platform. This API is used to populate that drop down list.
+Expected inputs: <No input required. Just a call to the ‘/getColleges’ URL>
+Expected outputs: Abbreviation, collegeId. [The abbreviation goes into the drop down, please keep the corresponding collegeId as well because that will be used in any requests sent to the server] 
+
+postEntry
+This API is used when the user wants to post something. Front end please note that this API is to be called only when the user belongs to the club he’s posting about(you do this by checking if the club Id is in the list of clubs that he follows). If he doesn’t belong to the club then please use the ‘postRequest’ API.
+Expected Inputs: from_pid,club_id,title,description,likers(not compulsory)
+Expected Outputs: A confirmation message saying that the post has been created.
+
+postRequest
+Use this API when the user wants to post something about a club that he does not belong to.
+Expected inputs: from_pid,club_id,title,description,likers(not compulsory)
+Expected Outputs: A confirmation message saying that the request has been sent for approval.
+
+getPosts
+This API is used when you populate a club’s page(returns all posts related to that club) or on your college main page when you want all posts related to anything in college.
+Expected inputs: collegeId, clubId.
+Expected outputs: title, description, photo, postId(keep note of this postId, needed when you like or comment on the post),from_pid(who created the post),likes,views,likers(set of names).
+
+likePosts
+This API is used when you want to like a particular post.
+Expected inputs: from_pid,postId
+Expected output: A string saying action complete.
+
+editPost
+This API is used when you want to edit a particular post.
+Expected inputs: title(not compulsory), description(not compulsory), photo(not compulsory), postId
+Expected output: A confirmation message saying action has been completed.
+
+comments
+This API is used when the user comments about a particular post.
+Expected inputs: pid,comment_body,timestamp(will get back to you about expected format required), postId.
+Expected output: A confirmation message saying action has been completed.
+
+eventEntry
+This API is used when the user wants to create an event. As of now we only allow a person who belongs to a club to create an event, so front-end call this API only after that check is done.
+Expected inputs: title,description,clubId,views(not compulsory),event_creator,venue,date(will specify format soon),start_time(will specify format soon),end_time(will specify format soon)
+Expected outputs: Confirmation message saying event created.
+
+10) getClubApi
+This API is used when the user wishes to get the details of a certain club.
+Expected Inputs : The club_id that will be present in the return object tothe front end. When the listed club is clicked, the id is passed as input.
+Expected outputs : The details of the club such as name,description,college name, Images(needs to be done),admin,clubId(not to be displayed)
+
+  
+11) joinClubApi
+
+This api is for a Profile to become a member (and implicitly,a follower) of a given club.
+
+Expected Input :club_id : ID of the club under consideration and profile_pid :ID of the user who is going to become the member
+Expected output: If successful/failed response then front end needs to indicate that. 
+
+
+
+12)followClubApi
+
+This api is for a Profile to become a follower (but not a member) of a given club.
+
+Expected Input :club_id : ID of the club under consideration and profile_pid :ID of the user who is going to become the member
+Expected output: If successful/failed response then front end needs to indicate that.
+
+
+
+13)getClubListApi
+
+This API is to list all the clubs that belong to a given college
+
+Expected Input: college_id : ID of the college under consideration
+Expected Output: list of Club objects. Responsibility of front end team to list them properly
+
+14)createClubRequest
+
+This API is to generate a club creation request by a profile (who eventually becomes an admin,member and follower). If the request is approved, the club is created. No specific API for create club is created at this moment but there is an unexposed method that takes care of it on a successful request.
+
+Expected Input: club_name,club_description,abbreviation,from_pid(profile ID),college_id
+
+Expected Output:If successful/failed response then front end needs to indicate that.
+
+
+	
+
