@@ -20,13 +20,13 @@ class Profile(ndb.Model):
     clubsJoined = ndb.KeyProperty(kind='Club',
                                   repeated=True)  # One club, many students ndb.StringProperty(repeated=True)
     phone_type = ndb.StringProperty()
-    pid = ndb.StringProperty(required=True)
+    #pid = ndb.StringProperty(required=True)
     gcmId = ndb.StringProperty()  # make gcmid compulsory
     isAlumni = ndb.StringProperty(required=True)
     company = ndb.StringProperty()
     location = ndb.StringProperty()
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many people
-    id = pid
+    #id = pid
 
 
 class ProfileMiniForm(messages.Message):
@@ -46,7 +46,7 @@ class ProfileMiniForm(messages.Message):
 
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
-    clubId = ndb.StringProperty(required=True)
+    #clubId = ndb.StringProperty(required=True)
     admin = ndb.KeyProperty(kind='Profile', required=True)
     description = ndb.StringProperty()
     members = ndb.KeyProperty(kind='Profile', repeated=True)
@@ -60,7 +60,6 @@ class Club(ndb.Model):
 
 class ClubMiniForm(messages.Message):
     name = messages.StringField(1, required=True)
-
     admin = messages.StringField(2)
     description = messages.StringField(3)
     members = messages.StringField(4)
@@ -69,11 +68,10 @@ class ClubMiniForm(messages.Message):
     abbreviation = messages.StringField(6, required=True)
     # photo = ndb.BlobProperty()
     collegeName = messages.StringField(7, required=True)
-
+    club_id = messages.StringField(8,required=True)
 
 class GetClubMiniForm(messages.Message):
-    name = messages.StringField(1, required="True")
-    abbreviation = messages.StringField(2, required="True")
+    club_id = messages.StringField(1, required="True")
 
 
 class Post(ndb.Model):
@@ -237,13 +235,13 @@ class PostRequestMiniForm(messages.Message):
 class Club_Creation(ndb.Model):
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many club creation requests
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to student council admin
-    club_id = ndb.StringProperty(required=True)
+   # club_id = ndb.StringProperty(required=True)
     club_name = ndb.StringProperty(required=True)
     abbreviation = ndb.StringProperty(required=True)
     isAlumni = ndb.StringProperty(required=True)
-    club_creation_id = ndb.StringProperty(required=True)
+    #club_creation_id = ndb.StringProperty(required=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many club creation requests
-    id = club_creation_id
+    #id = club_creation_id
 
 
 class ClubRequestMiniForm(messages.Message):
@@ -251,7 +249,9 @@ class ClubRequestMiniForm(messages.Message):
     # from_pid = messages.StringField(1,required=True)
     club_name = messages.StringField(1, required=True)
     abbreviation = messages.StringField(2, required=True)
-    college_name = messages.StringField(3, required=True)
+    description = messages.StringField(3, required=True)
+    from_pid = messages.StringField(4, required=True)
+    college_id = messages.StringField(5, required=True)
 
 
 class Join_Request(ndb.Model):
@@ -271,17 +271,13 @@ class JoinRequestMiniForm(messages.Message):
 
 
 class JoinClubMiniForm(messages.Message):
-    name = messages.StringField(1, required=True)
-    email = messages.StringField(2, required=True)
-    club_name = messages.StringField(3, required=True)
-    college_name = messages.StringField(4, required=True)
+    club_id = messages.StringField(1, required=True)
+    from_pid = messages.StringField(2, required=True)
 
 
 class FollowClubMiniForm(messages.Message):
-    name = messages.StringField(1, required=True)
-    email = messages.StringField(2, required=True)
-    club_name = messages.StringField(3, required=True)
-    college_name = messages.StringField(4, required=True)
+    club_id = messages.StringField(1, required=True)
+    from_pid = messages.StringField(2, required=True)
 
 
 class Comments(ndb.Model):
@@ -305,7 +301,7 @@ class CollegeDb(ndb.Model):
     location = ndb.StringProperty()
     student_count = ndb.IntegerProperty()
     group_count = ndb.IntegerProperty()
-    group_list = ndb.StringProperty(repeated=True)
+    group_list = ndb.KeyProperty(repeated=True)
     student_sup = ndb.StringProperty(required=True)
     alumni_sup = ndb.StringProperty()
     collegeId = ndb.StringProperty()
@@ -328,6 +324,10 @@ class ClubListResponse(messages.Message):
 class GetCollege(messages.Message):
     abbreviation = messages.StringField(1)
     collegeId = messages.StringField(2)
+
+class ClubRetrievalMiniForm(messages.Message):
+    """JoinRequestMiniForm -- What's shown on the UI for an join request"""
+    college_id = messages.StringField(1, required=True)
 
 class Colleges(messages.Message):
     collegeList = messages.MessageField(GetCollege,1,repeated=True)
