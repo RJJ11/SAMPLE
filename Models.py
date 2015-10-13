@@ -9,9 +9,7 @@ class Profile(ndb.Model):
     """Profile -- User profile object"""
     name = ndb.StringProperty(required=True)
     email = ndb.StringProperty(required=True)
-    password = ndb.StringProperty(required=True)
     phone = ndb.StringProperty(required=True)
-    userHash = ndb.StringProperty()
     picture = ndb.BlobProperty()
     batch = ndb.StringProperty()
     branch = ndb.StringProperty()
@@ -19,7 +17,6 @@ class Profile(ndb.Model):
     tags = ndb.StringProperty(repeated=True)
     clubsJoined = ndb.KeyProperty(kind='Club',
                                   repeated=True)  # One club, many students ndb.StringProperty(repeated=True)
-    phone_type = ndb.StringProperty()
     #pid = ndb.StringProperty(required=True)
     gcmId = ndb.StringProperty()  # make gcmid compulsory
     isAlumni = ndb.StringProperty(required=True)
@@ -33,8 +30,6 @@ class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- What's shown on the UI"""
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
-    password = messages.StringField(3, required=True)
-    phone = messages.StringField(4, required=True)
     '''picture ='''
     tags = messages.StringField(5, repeated=True)
     batch = messages.StringField(6, required=True)
@@ -138,24 +133,6 @@ class UpdatePostRequests(messages.Message):
     postRequestId = messages.StringField(1,required=True)
     action = messages.StringField(2,required=True)
 
-class Event(ndb.Model):
-    title = ndb.StringProperty(required=True)
-    description = ndb.StringProperty()
-    photo = ndb.BlobProperty()
-    clubId = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
-    eventId = ndb.StringProperty(required=True)
-    venue = ndb.StringProperty(required=True)
-    date = ndb.DateProperty(required=True)
-    start_time = ndb.TimeProperty(required=True)
-    end_time = ndb.TimeProperty(required=True)
-    attendees = ndb.StringProperty(repeated=True)
-    completed = ndb.StringProperty(required=True)
-    views = ndb.StringProperty()
-    isAlumni = ndb.StringProperty(required=True)
-    event_creator = ndb.StringProperty(required=True)  # ancestor relationship?
-    collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many events
-    id = eventId
-
 
 class PostMiniForm(messages.Message):
     """PostMiniForm -- What's shown on the UI for a post"""
@@ -177,21 +154,20 @@ class Event(ndb.Model):
     description = ndb.StringProperty()
     photo = ndb.BlobProperty()
     clubId = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
-    eventId = ndb.StringProperty(required=True)
     venue = ndb.StringProperty(required=True)
     date = ndb.DateProperty(required=True)
-    start_time = ndb.TimeProperty(required=True)
-    end_time = ndb.TimeProperty(required=True)
-    attendees = ndb.StringProperty(repeated=True)
+    start_time = ndb.TimeProperty()#make this required
+    #end_time = ndb.TimeProperty()
+    attendees = ndb.KeyProperty(kind='Profile',repeated=True)
     completed = ndb.StringProperty(required=True)
-    views = ndb.StringProperty()
+    views = ndb.IntegerProperty()
     isAlumni = ndb.StringProperty(required=True)
-    event_creator = ndb.StringProperty(required=True)  # ancestor relationship?
+    event_creator = ndb.KeyProperty(kind='Profile',required=True)  # ancestor relationship?
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many events
-    id = eventId
+    tags = ndb.StringProperty(repeated=True)
 
 
-class Event_Request(messages.Message):
+class EventMiniForm(messages.Message):
     title = messages.StringField(1, required=True)
     description = messages.StringField(2)
     # photo = ndb.BlobProperty()
@@ -200,28 +176,41 @@ class Event_Request(messages.Message):
     venue = messages.StringField(4, required=True)
     date = messages.StringField(5, required=True)
     start_time = messages.StringField(6, required=True)
-    end_time = messages.StringField(7, required=True)
+    #end_time = messages.StringField(7, required=True)
     attendees = messages.StringField(8)
     completed = messages.StringField(9, required=True)
     views = messages.StringField(10)
     isAlumni = messages.StringField(11, required=True)
     event_creator = messages.StringField(12, required=True)
-    collegeId = messages.StringField(13, required=True)
+    tags = messages.StringField(7)
+
+class EventForm(messages.Message):
+    title = messages.StringField(1)
+    description = messages.StringField(2)
+    # photo = ndb.BlobProperty()
+    clubId = messages.StringField(3)  # Many events belong to one club
+    # eventId = messages.StringField(4,required=True)
+    venue = messages.StringField(4)
+    date = messages.StringField(5)
+    start_time = messages.StringField(6)
+    #end_time = messages.StringField(7)
+    attendees = messages.StringField(8)
+    completed = messages.StringField(9)
+    views = messages.StringField(10)
+    isAlumni = messages.StringField(11)
+    event_creator = messages.StringField(12)
+    collegeId = messages.StringField(13)
+    eventId = messages.StringField(14)
+    tags = messages.StringField(7)
 # id=eventId
 
+class ModifyEvent(messages.Message):
+    from_pid = messages.StringField(1, required=True)
+    eventId = messages.StringField(2, required=True)
 
-class EventMiniForm(messages.Message):
-    """EventMiniForm -- What's shown on the UI for an event"""
-    title = messages.StringField(1, required=True)
-    description = messages.StringField(2, required=True)
-    clubId = messages.StringField(3, required=True)
-    views = messages.StringField(4)
-    event_creator = messages.StringField(5, required=True)
-    venue = messages.StringField(6, required=True)
-    date = messages.StringField(7, required=True)
-    start_time = messages.StringField(8, required=True)
-    end_time = messages.StringField(9, required=True)
-    '''photo ='''
+
+class Events(messages.Message):
+    items = messages.MessageField(EventForm,1,repeated=True)
 
 
 """
@@ -324,6 +313,8 @@ class ClubListResponse(messages.Message):
 class GetCollege(messages.Message):
     abbreviation = messages.StringField(1)
     collegeId = messages.StringField(2)
+    location = messages.StringField(3)
+    name = messages.StringField(4)
 
 class ClubRetrievalMiniForm(messages.Message):
     """JoinRequestMiniForm -- What's shown on the UI for an join request"""

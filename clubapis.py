@@ -7,9 +7,8 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, \
-    GetPostRequestsForm
-from Models import Club, Post_Request, Post, Event_Request, PostForm, GetCollege, EditPostForm
+from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm
+from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile
 from Models import CollegeDb
@@ -19,12 +18,12 @@ from Models import GetClubMiniForm
 from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm
 from Models import ClubListResponse
-from Models import ProfileMiniForm
+from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm
 from CollegesAPI import getColleges,createCollege
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
-from EventsAPI import eventEntry
+from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromUser
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID
@@ -221,9 +220,10 @@ class ClubApi(remote.Service):
           profile_key = profile.put()
 
 
-   @endpoints.method(Event_Request,message_types.VoidMessage,path='eventEntry', http_method='POST', name='eventEntry')
+   @endpoints.method(EventMiniForm,message_types.VoidMessage,path='eventEntry', http_method='POST', name='eventEntry')
    def createEvent(self, request):
         print("Entered Event Entry Portion")
+        print request.clubId
         clubRequest = eventEntry(request)
         print("Inserted into the events table")
         return message_types.VoidMessage()
@@ -274,7 +274,7 @@ class ClubApi(remote.Service):
        return message_types.VoidMessage()
 
 
-   @endpoints.method(ProfileMiniForm, ProfileMiniForm,
+   @endpoints.method(message_types.VoidMessage, ProfileMiniForm,
             path='profile', http_method='GET', name='getProfile')
    def getProfile(self, request):
         """Return user profile."""
@@ -321,6 +321,40 @@ class ClubApi(remote.Service):
         update(request)
         return message_types.VoidMessage()
 
+   @endpoints.method(GetAllPosts,Events,path='getEvents', http_method='GET', name='getEvents')
+   def getEvents(self, request):
+        print("Entered Get Events Portion")
+        temp = request.collegeId
+        temp2 = request.clubId
+        print "temp2" + str(temp2)
+        if(temp2==None):
+            print "No CLubId"
+            collegeId = ndb.Key('CollegeDb',int(temp))
+            events = Event.query(Event.collegeId==collegeId)
+        elif(temp==None):
+            print "No collegeID"
+            clubId = ndb.Key('Club',int(temp2))
+            events = Event.query(Event.clubId==clubId)
 
+        else:
+            print "Not None"
+            collegeId = ndb.Key('CollegeDb',int(temp))
+            clubId = ndb.Key('Club',int(temp2))
+            events = Post.query(Event.collegeId==collegeId,Event.clubId==clubId)
+
+        return Events(items=[copyEventToForm(x) for x in events])
+
+   @endpoints.method(ModifyEvent,message_types.VoidMessage,
+            path='deleteEvent', http_method='DELETE', name='delEvent')
+   def delEvent(self, request):
+        """Update & return user profile."""
+        deleteEvent(request)
+        return message_types.VoidMessage()
+
+   @endpoints.method(ModifyEvent,message_types.VoidMessage,path='attendEvent', http_method='POST', name='attendEvents')
+   def attendEvents(self, request):
+       print "Entered the Like Posts Section"
+       x = attendEvent(request)
+       return message_types.VoidMessage()
 
 api = endpoints.api_server([ClubApi]) # register API	

@@ -7,7 +7,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import GetCollege,CollegeDb
+from Models import GetCollege,CollegeDb,Event
 
 def createCollege(requestentity=None):
 

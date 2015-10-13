@@ -36,8 +36,6 @@ def _getProfileFromUser():
             return Profile(name = '',
                            email = '',
                            phone = '',
-                           password = '',
-                           pid = '',
                            isAlumni='N',
                            )
         #else:

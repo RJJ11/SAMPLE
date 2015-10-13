@@ -42,7 +42,6 @@ def createClub(request=None):
                             name = 'SiddharthSend',
                             email = 'sid.tiger184@gmail.com',
                             phone = '7760531993',
-                            password = '1803mutd1',
                             isAlumni='N',
                             collegeId=college_key
                             )
@@ -55,7 +54,6 @@ def createClub(request=None):
                                name = 'SiddharthRec',
                                email = 'sid.tiger183@gmail.com',
                                phone = '7760531994',
-                               password = '1803mutd',
 
                                isAlumni='N',
                                collegeId=college_key
