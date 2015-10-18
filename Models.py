@@ -32,13 +32,13 @@ class ProfileMiniForm(messages.Message):
     email = messages.StringField(2, required=True)
     '''picture ='''
     tags = messages.StringField(5, repeated=True)
-    batch = messages.StringField(6, required=True)
-    branch = messages.StringField(7, required=True)
+    batch = messages.StringField(6)
+    branch = messages.StringField(7)
     follows = messages.StringField(8, repeated=True)
-    clubsJoined = messages.StringField(9, repeated=True)
+    clubsJoined = messages.StringField(9)
     collegeId = messages.StringField(10,required=True)
     isAlumni = messages.StringField(12)
-    phone=messages.StringField(13)
+    phone=messages.StringField(13,required=True)
 
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
@@ -81,7 +81,7 @@ class Post(ndb.Model):
     # id = postId
     likers = ndb.KeyProperty(kind='Profile', repeated=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many posts
-
+    timestamp = ndb.DateTimeProperty()
 
 class PostForm(messages.Message):
     title = messages.StringField(1)
@@ -92,6 +92,8 @@ class PostForm(messages.Message):
     likes = messages.StringField(5)
     views = messages.StringField(6)
     likers = messages.StringField(7)
+    date = messages.StringField(8)
+    time = messages.StringField(9)
 
 class EditPostForm(messages.Message):
     title = messages.StringField(1)
@@ -115,6 +117,7 @@ class Post_Request(ndb.Model):
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to one profile
     club_id = ndb.KeyProperty(kind='Club', required=True)
     status = ndb.StringProperty(required=True)
+    timestamp = ndb.DateTimeProperty()
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many post requests
 
 class GetInformation(messages.Message):
@@ -126,6 +129,8 @@ class GetPostRequestsForm(messages.Message):
     person_from = messages.StringField(3)
     club_name = messages.StringField(4)
     postRequestId = messages.StringField(5)
+    date = messages.StringField(6)
+    time = messages.StringField(7)
 
 class GetAllPostRequests(messages.Message):
     items = messages.MessageField(GetPostRequestsForm,1,repeated=True)
@@ -142,6 +147,8 @@ class PostMiniForm(messages.Message):
     title = messages.StringField(3, required=True)
     description = messages.StringField(4, required=True)
     likers = messages.StringField(5)
+    date = messages.StringField(6)
+    time = messages.StringField(7)
     # '''photo ='''
 
 
@@ -156,9 +163,8 @@ class Event(ndb.Model):
     photo = ndb.BlobProperty()
     clubId = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
     venue = ndb.StringProperty(required=True)
-    date = ndb.DateProperty(required=True)
-    start_time = ndb.TimeProperty()#make this required
-    #end_time = ndb.TimeProperty()
+    start_time = ndb.DateTimeProperty(required=True)#make this required
+    end_time = ndb.DateTimeProperty(required=True)
     attendees = ndb.KeyProperty(kind='Profile',repeated=True)
     completed = ndb.StringProperty(required=True)
     views = ndb.IntegerProperty()
@@ -175,15 +181,16 @@ class EventMiniForm(messages.Message):
     clubId = messages.StringField(3, required=True)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
     venue = messages.StringField(4, required=True)
-    date = messages.StringField(5, required=True)
+    start_date = messages.StringField(5, required=True)
     start_time = messages.StringField(6, required=True)
-    #end_time = messages.StringField(7, required=True)
-    attendees = messages.StringField(8)
-    completed = messages.StringField(9, required=True)
-    views = messages.StringField(10)
-    isAlumni = messages.StringField(11, required=True)
-    event_creator = messages.StringField(12, required=True)
-    tags = messages.StringField(7)
+    end_time = messages.StringField(7, required=True)
+    end_date = messages.StringField(8,required=True)
+    attendees = messages.StringField(9)
+    completed = messages.StringField(10, required=True)
+    views = messages.StringField(11)
+    isAlumni = messages.StringField(12, required=True)
+    event_creator = messages.StringField(13, required=True)
+    tags = messages.StringField(14)
 
 class EventForm(messages.Message):
     title = messages.StringField(1)
@@ -192,17 +199,18 @@ class EventForm(messages.Message):
     clubId = messages.StringField(3)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
     venue = messages.StringField(4)
-    date = messages.StringField(5)
+    start_date = messages.StringField(5)
     start_time = messages.StringField(6)
-    #end_time = messages.StringField(7)
-    attendees = messages.StringField(8)
-    completed = messages.StringField(9)
-    views = messages.StringField(10)
-    isAlumni = messages.StringField(11)
-    event_creator = messages.StringField(12)
-    collegeId = messages.StringField(13)
-    eventId = messages.StringField(14)
-    tags = messages.StringField(7)
+    end_time = messages.StringField(7)
+    end_date = messages.StringField(8)
+    attendees = messages.StringField(9)
+    completed = messages.StringField(10)
+    views = messages.StringField(11)
+    isAlumni = messages.StringField(12)
+    event_creator = messages.StringField(13)
+    collegeId = messages.StringField(14)
+    eventId = messages.StringField(15)
+    tags = messages.StringField(16)
 # id=eventId
 
 class ModifyEvent(messages.Message):
@@ -304,7 +312,8 @@ class CollegeDbMiniForm(messages.Message):
     location = messages.StringField(3, required=True)
     student_sup = messages.StringField(4, required=True)
     alumni_sup = messages.StringField(5)
-
+    email = messages.StringField(6,required=True)
+    phone = messages.StringField(7,required=True)
 
 # Define Response Classes here
 

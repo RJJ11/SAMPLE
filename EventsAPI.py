@@ -15,10 +15,12 @@ def eventEntry(requestentity=None):
         #college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
         #college_key = college.put()
         query = CollegeDb.query()
-
+        start = ""
+        end = ""
+        flag = 0
         if requestentity:
             print "Begun"
-            for field in ('title','description','clubId','venue','date','start_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId'):
+            for field in ('title','description','clubId','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
@@ -50,14 +52,17 @@ def eventEntry(requestentity=None):
 
                     #setattr(event_request, 'from_pid', profile_key)
 
-                    elif field == "date":
-                        temp = datetime.strptime(getattr(requestentity,field),"%Y-%m-%d").date()
-                        setattr(event_request,field,temp)
-
                     elif field == "start_time":
-                        temp = datetime.strptime(getattr(requestentity,field),"%H:%M:%S").time()
-                        setattr(event_request,field,temp)
+                        temp = datetime.strptime(getattr(requestentity,"start_date"),"%Y-%m-%d").date()
+                        temp1 = datetime.strptime(getattr(requestentity,field),"%H:%M:%S").time()
+                        setattr(event_request,field,datetime.combine(temp,temp1))
+                        start = datetime.combine(temp,temp1)
 
+                    elif field == "end_time":
+                        temp = datetime.strptime(getattr(requestentity,"end_date"),"%Y-%m-%d").date()
+                        temp1 = datetime.strptime(getattr(requestentity,field),"%H:%M:%S").time()
+                        setattr(event_request,field,datetime.combine(temp,temp1))
+                        end = datetime.combine(temp,temp1)
 
                     #elif field == "end_time":
                      #   temp = datetime.strptime(getattr(requestentity,field),"%H:%M:%S").time()
@@ -93,7 +98,11 @@ def eventEntry(requestentity=None):
 
         print("About to create Event")
         print(event_request)
-        event_request.put()
+        if(start<end):
+            flag=1
+
+        if(flag==1):
+            event_request.put()
 
         return event_request
 
@@ -101,7 +110,14 @@ def copyEventToForm(event):
         pf = EventForm()
         for field in pf.all_fields():
             if hasattr(event, field.name):
-                setattr(pf, field.name, str(getattr(event, field.name)))
+                if field.name == 'start_time':
+                    setattr(pf,"start_date", str(event.start_time.strftime("%Y-%m-%d")))
+                    setattr(pf, field.name, str(event.start_time.strftime("%H:%M:%S")))
+                elif field.name == 'end_time':
+                    setattr(pf, "end_date", str(event.end_time.strftime("%Y-%m-%d")))
+                    setattr(pf, field.name, str(event.end_time.strftime("%H:%M:%S")))
+                else:
+                    setattr(pf, field.name, str(getattr(event, field.name)))
             if field.name == 'eventId':
                 setattr(pf, field.name, str(event.key.id()))
         return pf

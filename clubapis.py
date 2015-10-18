@@ -237,17 +237,17 @@ class ClubApi(remote.Service):
         if(temp2==None):
             print "None"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            posts = Post.query(Post.collegeId==collegeId)
+            posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
         elif(temp==None):
             print "None"
             clubId = ndb.Key('Club',int(temp2))
-            posts = Post.query(Post.club_id==clubId)
+            posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId)
+            posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId).order(-Post.timestamp)
 
         return Posts(items=[copyPostToForm(x) for x in posts])
         #clubRequest = self.postEntry(request)
@@ -310,7 +310,7 @@ class ClubApi(remote.Service):
         """Update & return user profile."""
 
         to_pid = ndb.Key('Profile',int(request.pid))
-        query = Post_Request.query(Post_Request.to_pid==to_pid)
+        query = Post_Request.query(Post_Request.to_pid==to_pid).order(-Post_Request.timestamp)
 
 
         return GetAllPostRequests(items=[copyPostRequestToForm(x) for x in query])
@@ -332,17 +332,17 @@ class ClubApi(remote.Service):
         if(temp2==None):
             print "No CLubId"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            events = Event.query(Event.collegeId==collegeId)
+            events = Event.query(Event.collegeId==collegeId).order(-Event.start_time)
         elif(temp==None):
             print "No collegeID"
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.clubId==clubId)
+            events = Event.query(Event.clubId==clubId).order(-Event.start_time)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            events = Post.query(Event.collegeId==collegeId,Event.clubId==clubId)
+            events = Event.query(Event.collegeId==collegeId,Event.clubId==clubId).order(-Event.start_time)
 
         return Events(items=[copyEventToForm(x) for x in events])
 

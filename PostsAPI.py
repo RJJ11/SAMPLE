@@ -1,5 +1,6 @@
 __author__ = 'rohit'
 import endpoints
+from datetime import datetime,date,time
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -25,7 +26,7 @@ def postRequest(requestentity=None):
                     #setattr(clubRequest, field, profile_key)
 
         if requestentity:
-            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid','likers'):
+            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid','likers','timestamp'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
@@ -58,6 +59,11 @@ def postRequest(requestentity=None):
                     setattr(post_request, field, "ABCD123")
                 elif field == "collegeId":
                     setattr(post_request, field, person_collegeId)
+
+                elif field == "timestamp":
+                    temp = datetime.strptime(getattr(requestentity,"date"),"%Y-%m-%d").date()
+                    temp1 = datetime.strptime(getattr(requestentity,"time"),"%H:%M:%S").time()
+                    setattr(post_request,field,datetime.combine(temp,temp1))
 
         print("About to createClubRequest")
         print(post_request)
@@ -110,7 +116,7 @@ def postEntry(requestentity=None,check=0):
 
         if(flag==1 and flag1==1):
             if requestentity:
-                for field in ('title','description','club_id','from_pid','likes','views'):
+                for field in ('title','description','club_id','from_pid','likes','views','timestamp'):
 
                     if hasattr(requestentity, field):
                         print(field,"is there")
@@ -137,7 +143,13 @@ def postEntry(requestentity=None,check=0):
                             setattr(newPost, field, str(val))
 
 
+
                     else:
+                        if field == "timestamp":
+                            temp = datetime.strptime(getattr(requestentity,"date"),"%Y-%m-%d").date()
+                            temp1 = datetime.strptime(getattr(requestentity,"time"),"%H:%M:%S").time()
+                            setattr(newPost,field,datetime.combine(temp,temp1))
+
                         setattr(newPost, "likes", 0)
                         setattr(newPost, "views", 0)
 
@@ -194,6 +206,10 @@ def copyPostToForm(post):
                 setattr(pf, field.name, str(getattr(post, field.name)))
             if field.name == 'postId':
                 setattr(pf, field.name, str(post.key.id()))
+            if field.name == 'date':
+                setattr(pf, field.name, str(post.timestamp.strftime("%Y-%m-%d")))
+            if field.name == 'time':
+                setattr(pf, field.name, str(post.timestamp.strftime("%H:%M:%S")))
         return pf
 
 def likePost(request):
@@ -261,6 +277,11 @@ def copyPostRequestToForm(request):
            elif(field.name=="club_name"):
                club = request.club_id.get().name
                setattr(reply,field.name,club)
+
+           elif field.name == 'date':
+                setattr(reply, field.name, str(request.timestamp.strftime("%Y-%m-%d")))
+           elif field.name == 'time':
+                setattr(reply, field.name, str(request.timestamp.strftime("%H:%M:%S")))
 
            else:
                setattr(reply,"postRequestId",str(request.key.id()))

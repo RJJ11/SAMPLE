@@ -7,7 +7,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import GetCollege,CollegeDb,Event
+from Models import GetCollege,CollegeDb,Event,Profile
 
 def createCollege(requestentity=None):
 
@@ -72,7 +72,22 @@ def createCollege(requestentity=None):
 
         else:
             print "Unique"
-            newCollege.put()
+            email = getattr(requestentity, "email")
+            phone = getattr(requestentity, "phone")
+            if(getattr(requestentity, "student_sup")==None):
+                isAlumni = "Yes"
+                person_name = getattr(requestentity, "alumni_sup")
+            else:
+                isAlumni = "No"
+                person_name = getattr(requestentity, "student_sup")
+
+            collegeId = newCollege.put()
+            profile =  Profile(name = person_name ,
+                            email = email,
+                            phone = phone,
+                            isAlumni=isAlumni,
+                            collegeId= collegeId)
+            profile.put()
 
         return newCollege
 
