@@ -13,8 +13,10 @@ def _copyProfileToForm(prof):
         for field in pf.all_fields():
             if hasattr(prof, field.name):
                 if field.name=='collegeId':
-                    collegeId=getattr(prof,field.name).get().collegeId
-                    setattr(pf,field.name,collegeId)
+                    collegeId=getattr(prof,field.name)
+                    print "College Id"
+                    print collegeId
+                    setattr(pf,field.name,str(collegeId.id()))
                 else:
                     setattr(pf, field.name, getattr(prof, field.name))
         pf.check_initialized()
@@ -39,22 +41,28 @@ def _getProfileFromEmail(email):
 def _doProfile(email,save_request=None):
         """Get user Profile and return to user, possibly updating it first."""
         prof = _getProfileFromEmail(email)
-        
+        flag=0
         if save_request:
             pf = ProfileMiniForm()
             for field in pf.all_fields():
-                collegeLocation=getattr(save_request,'collegeLocation')
-                print collegeLocation,"is location"
+                #collegeLocation=getattr(save_request,'collegeLocation')
+                #print collegeLocation,"is location"
                 if hasattr(save_request, field.name):
                     val = getattr(save_request, field.name)
-                    if field.name is 'collegeLocation':
-                        continue
-                    if field.name is 'collegeName':
-                        college=CollegeDb.query(CollegeDb.name==val,CollegeDb.location==collegeLocation).fetch()
-                        setattr(prof,'collegeId',college[0].key)
+
+                    if field.name is 'collegeId':
+                        #college=CollegeDb.query(CollegeDb.name==val,CollegeDb.location==collegeLocation).fetch()
+                        collegeId = ndb.Key('CollegeDb',int(val))
+                        pylist = [x.key for x in CollegeDb.query()]
+                        if(collegeId in pylist):
+                            flag = 1
+                            setattr(prof,'collegeId',collegeId)
+                        else:
+                            flag =0
                     else:
                         setattr(prof,field.name,val)
-            prof.put()
+            if flag==1:
+                prof.put()
 
         return _copyProfileToForm(prof)
 

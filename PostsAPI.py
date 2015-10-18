@@ -86,6 +86,9 @@ def postEntry(requestentity=None,check=0):
         club_key = key1
         profile_key = key2
         flag = 0
+        flag1 = 0
+        clubs = Club.query()
+
         print "Profile Key " + str(profile_key)
         for x in persons:
             print x.key
@@ -94,9 +97,18 @@ def postEntry(requestentity=None,check=0):
                 flag=1
             else:
                 print "NOPE"
+
+        for x in clubs:
+            print x.key
+            if(x.key == club_key):
+                print "Same"
+                flag1=1
+            else:
+                print "NOPE"
+
                     #setattr(clubRequest, field, profile_key)
 
-        if(flag==1):
+        if(flag==1 and flag1==1):
             if requestentity:
                 for field in ('title','description','club_id','from_pid','likes','views'):
 
@@ -135,7 +147,7 @@ def postEntry(requestentity=None,check=0):
 
 
         else:
-             print "Invalid Person"
+             print "Invalid Entry"
 
 
 

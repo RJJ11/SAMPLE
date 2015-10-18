@@ -36,8 +36,7 @@ class ProfileMiniForm(messages.Message):
     branch = messages.StringField(7, required=True)
     follows = messages.StringField(8, repeated=True)
     clubsJoined = messages.StringField(9, repeated=True)
-    collegeName = messages.StringField(10)
-    collegeLocation = messages.StringField(11)
+    collegeId = messages.StringField(10,required=True)
     isAlumni = messages.StringField(12)
     phone=messages.StringField(13)
 
