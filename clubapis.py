@@ -7,7 +7,7 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm
+from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile
@@ -25,7 +25,7 @@ from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commen
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub
-from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromUser
+from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -273,19 +273,21 @@ class ClubApi(remote.Service):
        return commentForm(request)
        return message_types.VoidMessage()
 
-
-   @endpoints.method(message_types.VoidMessage, ProfileMiniForm,
+   @endpoints.method(ProfileRetrievalMiniForm, ProfileMiniForm,
             path='profile', http_method='GET', name='getProfile')
    def getProfile(self, request):
         """Return user profile."""
-        return _doProfile()
+        email=getattr(request,"email")
+        return _doProfile(email)
 
 
    @endpoints.method(ProfileMiniForm,ProfileMiniForm,
             path='profile', http_method='POST', name='saveProfile')
    def saveProfile(self, request):
         """Update & return user profile."""
-        return _doProfile(request)
+        email=getattr(request,"email")
+        return _doProfile(email,request)
+
 
 
    @endpoints.method(LikePost,message_types.VoidMessage,

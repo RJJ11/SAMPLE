@@ -38,6 +38,8 @@ class ProfileMiniForm(messages.Message):
     clubsJoined = messages.StringField(9, repeated=True)
     collegeName = messages.StringField(10)
     collegeLocation = messages.StringField(11)
+    isAlumni = messages.StringField(12)
+    phone=messages.StringField(13)
 
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
@@ -324,4 +326,5 @@ class Colleges(messages.Message):
     collegeList = messages.MessageField(GetCollege,1,repeated=True)
 
 
-
+class ProfileRetrievalMiniForm(messages.Message):
+    email=messages.StringField(1,required=True)
