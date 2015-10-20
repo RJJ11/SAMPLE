@@ -26,12 +26,12 @@ from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
-from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID
+from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
 @endpoints.api(name='clubs', version='v1',
-    allowed_client_ids=[ANROID_CLIENT_ID,WEB_CLIENT_ID,API_EXPLORER_CLIENT_ID],
+    allowed_client_ids=[ANROID_CLIENT_ID,WEB_CLIENT_ID,API_EXPLORER_CLIENT_ID,ANDROID_ID2],
     scopes=[EMAIL_SCOPE])
 
 # GETSTREAM KEY - urgm3xjebe9d
