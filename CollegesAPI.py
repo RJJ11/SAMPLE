@@ -39,7 +39,7 @@ def createCollege(requestentity=None):
 
         collegeName = ""
         if requestentity:
-            for field in ('name','abbreviation','location','student_sup','alumni_sup'):
+            for field in ('name','abbreviation','location','student_sup','alumni_sup','email'):
                 val = getattr(requestentity, field)
                 if field == "name":
                     collegeName = getattr(requestentity, field).strip()
@@ -52,6 +52,7 @@ def createCollege(requestentity=None):
             setattr(newCollege, 'group_count', 0)
             newlist = []
             setattr(newCollege, 'group_list', newlist)
+            setattr(newCollege,'sup_emailId',requestentity.email)
             # Making CollegeId
             newString = ""
             newString = collegeName[0]
