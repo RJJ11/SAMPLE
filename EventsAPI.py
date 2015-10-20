@@ -20,11 +20,11 @@ def eventEntry(requestentity=None):
         flag = 0
         if requestentity:
             print "Begun"
-            for field in ('title','description','clubId','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId'):
+            for field in ('title','description','club_id','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId','timestamp'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
-                    if(field=="clubId"):
+                    if(field=="club_id"):
                         club_key=ndb.Key('Club',int(getattr(requestentity,field)))
                         setattr(event_request, field, club_key)
 
@@ -96,6 +96,12 @@ def eventEntry(requestentity=None):
                 elif field == "collegeId":
                     setattr(event_request, field, person_collegeId)
 
+                elif field == "timestamp":
+                            temp = datetime.strptime(getattr(requestentity,"date"),"%Y-%m-%d").date()
+                            temp1 = datetime.strptime(getattr(requestentity,"time"),"%H:%M:%S").time()
+                            setattr(event_request,field,datetime.combine(temp,temp1))
+
+
         print("About to create Event")
         print(event_request)
         if(start<end):
@@ -120,13 +126,17 @@ def copyEventToForm(event):
                     setattr(pf, field.name, str(getattr(event, field.name)))
             if field.name == 'eventId':
                 setattr(pf, field.name, str(event.key.id()))
+            if field.name == 'date':
+                setattr(pf, field.name, str(event.timestamp.strftime("%Y-%m-%d")))
+            if field.name == 'time':
+                setattr(pf, field.name, str(event.timestamp.strftime("%H:%M:%S")))
         return pf
 
 def deleteEvent(request):
         event_id = ndb.Key('Event',int(request.eventId))
         from_pid = ndb.Key('Profile',int(request.from_pid))
         event = event_id.get()
-        club_admin = event.clubId.get().admin
+        club_admin = event.club_id.get().admin
         flag=0
         if (event.event_creator==from_pid or club_admin==from_pid):
             print "Same"

@@ -37,7 +37,7 @@ def createClub(request=None):
                     clubRequest.description = request.description
 
                 elif field == "from_pid":
-                     print("Entered from_pid")
+                     """print("Entered from_pid")
                      profile =  Profile(
                             name = 'SiddharthSend',
                             email = 'sid.tiger184@gmail.com',
@@ -46,11 +46,13 @@ def createClub(request=None):
                             collegeId=college_key
                             )
                      profile_key = profile.put()
+                     """
+                     profile_key=ndb.Key("Profile",int(request.from_pid))
                      print("Finished frompid")
                      setattr(clubRequest, field, profile_key)
                 elif field == "to_pid":
                      print("Entered To PID")
-                     profile =  Profile(
+                     """profile =  Profile(
                                name = 'SiddharthRec',
                                email = 'sid.tiger183@gmail.com',
                                phone = '7760531994',
@@ -59,8 +61,12 @@ def createClub(request=None):
                                collegeId=college_key
                                )
                      profile_key = profile.put()
+                     """
+                     collegeObj = college_key.get()
+                     person = Profile.query(Profile.email==collegeObj.email)
 
-                     setattr(clubRequest, field, profile_key)
+                     setattr(clubRequest, field, person.key)
+
                 elif field == "isAlumni":
                      setattr(clubRequest, field, "N")
                 elif field == "collegeId":

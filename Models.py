@@ -122,6 +122,7 @@ class Post_Request(ndb.Model):
 
 class GetInformation(messages.Message):
     pid = messages.StringField(1)
+    collegeId = messages.StringField(2)
 
 class GetPostRequestsForm(messages.Message):
     title = messages.StringField(1)
@@ -161,7 +162,7 @@ class Event(ndb.Model):
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty()
     photo = ndb.BlobProperty()
-    clubId = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
+    club_id = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
     venue = ndb.StringProperty(required=True)
     start_time = ndb.DateTimeProperty(required=True)#make this required
     end_time = ndb.DateTimeProperty(required=True)
@@ -172,13 +173,14 @@ class Event(ndb.Model):
     event_creator = ndb.KeyProperty(kind='Profile',required=True)  # ancestor relationship?
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many events
     tags = ndb.StringProperty(repeated=True)
-
+    likers = ndb.KeyProperty(kind='Profile', repeated=True)
+    timestamp = ndb.DateTimeProperty()
 
 class EventMiniForm(messages.Message):
     title = messages.StringField(1, required=True)
     description = messages.StringField(2)
     # photo = ndb.BlobProperty()
-    clubId = messages.StringField(3, required=True)  # Many events belong to one club
+    club_id = messages.StringField(3, required=True)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
     venue = messages.StringField(4, required=True)
     start_date = messages.StringField(5, required=True)
@@ -191,12 +193,14 @@ class EventMiniForm(messages.Message):
     isAlumni = messages.StringField(12, required=True)
     event_creator = messages.StringField(13, required=True)
     tags = messages.StringField(14)
+    date = messages.StringField(15)
+    time = messages.StringField(16)
 
 class EventForm(messages.Message):
     title = messages.StringField(1)
     description = messages.StringField(2)
     # photo = ndb.BlobProperty()
-    clubId = messages.StringField(3)  # Many events belong to one club
+    club_id = messages.StringField(3)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
     venue = messages.StringField(4)
     start_date = messages.StringField(5)
@@ -211,6 +215,8 @@ class EventForm(messages.Message):
     collegeId = messages.StringField(14)
     eventId = messages.StringField(15)
     tags = messages.StringField(16)
+    date = messages.StringField(17)
+    time = messages.StringField(18)
 # id=eventId
 
 class ModifyEvent(messages.Message):
@@ -336,3 +342,29 @@ class Colleges(messages.Message):
 
 class ProfileRetrievalMiniForm(messages.Message):
     email=messages.StringField(1,required=True)
+
+
+class Feed(messages.Message):
+    title = messages.StringField(1)
+    description = messages.StringField(2)
+    # photo = ndb.BlobProperty()
+    club_id = messages.StringField(3)  # Many events belong to one club
+    # eventId = messages.StringField(4,required=True)
+    venue = messages.StringField(4)
+    start_date = messages.StringField(5)
+    start_time = messages.StringField(6)
+    end_time = messages.StringField(7)
+    end_date = messages.StringField(8)
+    attendees = messages.StringField(9,repeated=True)
+    completed = messages.StringField(10)
+    views = messages.StringField(11)
+    isAlumni = messages.StringField(12)
+    event_creator = messages.StringField(13)
+    collegeId = messages.StringField(14)
+    pid = messages.StringField(15) #the post or event creator
+    tags = messages.StringField(16)
+    likers = messages.StringField(17,repeated=True)
+    timestamp = messages.StringField(18)
+
+class CollegeFeed(messages.Message):
+    items = messages.MessageField(Feed,1,repeated=True)

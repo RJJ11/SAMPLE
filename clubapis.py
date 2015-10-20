@@ -10,7 +10,7 @@ from google.appengine.ext import ndb
 from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
-from Models import Profile
+from Models import Profile,CollegeFeed
 from Models import CollegeDb
 from Models import CollegeDbMiniForm
 from Models import ClubMiniForm
@@ -20,7 +20,7 @@ from Models import FollowClubMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm
-from CollegesAPI import getColleges,createCollege
+from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
@@ -223,7 +223,7 @@ class ClubApi(remote.Service):
    @endpoints.method(EventMiniForm,message_types.VoidMessage,path='eventEntry', http_method='POST', name='eventEntry')
    def createEvent(self, request):
         print("Entered Event Entry Portion")
-        print request.clubId
+        print request.club_id
         clubRequest = eventEntry(request)
         print("Inserted into the events table")
         return message_types.VoidMessage()
@@ -248,6 +248,10 @@ class ClubApi(remote.Service):
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
             posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId).order(-Post.timestamp)
+
+        #pylist =[copyPostToForm(x) for x in posts]
+        #print "the list"
+        #print pylist
 
         return Posts(items=[copyPostToForm(x) for x in posts])
         #clubRequest = self.postEntry(request)
@@ -336,13 +340,13 @@ class ClubApi(remote.Service):
         elif(temp==None):
             print "No collegeID"
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.clubId==clubId).order(-Event.start_time)
+            events = Event.query(Event.club_id==clubId).order(-Event.start_time)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.collegeId==collegeId,Event.clubId==clubId).order(-Event.start_time)
+            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.start_time)
 
         return Events(items=[copyEventToForm(x) for x in events])
 
@@ -358,5 +362,60 @@ class ClubApi(remote.Service):
        print "Entered the Like Posts Section"
        x = attendEvent(request)
        return message_types.VoidMessage()
+
+   @endpoints.method(GetInformation,CollegeFeed,path='mainFeed', http_method='POST', name='collegeFeed')
+   def collegeFeed(self, request):
+       print "Entered the Like Posts Section"
+       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+       posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
+       events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
+       print events
+       #CollegeFeed(items=[copyEventToForm(x) for x in posts])
+       #CollegeFeed(items=[copyEventToForm(x) for x in events])
+       pylist = [copyToCollegeFeed(x) for x in events]
+       print pylist
+       pylist2 = [copyToCollegeFeed(x) for x in posts]
+       pylist+=pylist2
+       #pylist.append(copyToCollegeFeed(x) for x in events)
+       pylist.sort(key=lambda x: x.timestamp, reverse=True)
+       print pylist[1].timestamp
+       #print pylist
+       CollegeFeed(items=pylist)
+       #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
+       return CollegeFeed(items=pylist)
+
+   @endpoints.method(GetInformation,CollegeFeed,path='myFeed', http_method='POST', name='personalFeed')
+   def personalFeed(self, request):
+       pid = ndb.Key('Profile',int(request.pid))
+       profile = pid.get()
+       posts = []
+       events = []
+       pylist = []
+       pylist2 = []
+       for x in profile.follows:
+           print x
+           posts = (Post.query(Post.club_id==x))
+           events = (Event.query(Event.club_id==x))
+           list1 = [copyToCollegeFeed(y) for y in events]
+           list2 = [copyToCollegeFeed(z) for z in posts]
+           print "LIST-1"
+           print list1
+           pylist+=list1
+           pylist2+=list2
+       #for x in events:
+       #    print x
+
+
+       #pylist = [copyToCollegeFeed(x) for x in events]
+       #pylist2 = [copyToCollegeFeed(x) for x in posts]
+       pylist+=pylist2
+       #pylist.append(copyToCollegeFeed(x) for x in events)
+       pylist.sort(key=lambda x: x.timestamp, reverse=True)
+       print pylist[1].timestamp
+       #print pylist
+       CollegeFeed(items=pylist)
+       #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
+       return CollegeFeed(items=pylist)
+
 
 api = endpoints.api_server([ClubApi]) # register API	
