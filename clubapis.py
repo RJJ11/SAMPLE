@@ -215,6 +215,7 @@ class ClubApi(remote.Service):
 
         if(req.approval_status=="Y"):
          newClub = createClubAfterApproval(req)
+         newClub.put()
          print ("The new club is",newClub)
         else :
          print("Request hasn't been approved")

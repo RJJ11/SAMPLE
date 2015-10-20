@@ -35,7 +35,7 @@ class ProfileMiniForm(messages.Message):
     batch = messages.StringField(6)
     branch = messages.StringField(7)
     follows = messages.StringField(8, repeated=True)
-    clubsJoined = messages.StringField(9)
+    clubsJoined = messages.StringField(9,repeated=True)
     collegeId = messages.StringField(10,required=True)
     isAlumni = messages.StringField(12)
     phone=messages.StringField(13,required=True)

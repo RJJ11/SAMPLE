@@ -91,12 +91,14 @@ def approveClub(requestentity = None):
 
         if(sup_profile.email == college.sup_emailId):
             requestentity.approval_status = "Y"
+            requestentity.put()
             return "Y"
         else :
             requestentity.approval_status ="N"
+            requestentity.put()
             return "N"
     print("Modified Request Entity is",requestentity)
-    requestentity.put()
+    #requestentity.put()
 
 
 
