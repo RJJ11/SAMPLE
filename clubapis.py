@@ -16,7 +16,7 @@ from Models import CollegeDbMiniForm
 from Models import ClubMiniForm
 from Models import GetClubMiniForm
 from Models import JoinClubMiniForm
-from Models import FollowClubMiniForm
+from Models import FollowClubMiniForm,RequestMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm
@@ -24,7 +24,7 @@ from CollegesAPI import getColleges,createCollege
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
-from ClubAPI import createClub,createClubAfterApproval,getClub
+from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
@@ -105,6 +105,20 @@ class ClubApi(remote.Service):
 
         return message_types.VoidMessage()
 
+   @endpoints.method(FollowClubMiniForm,message_types.VoidMessage,path='unfollowclub', http_method='POST', name='unfClub')
+   def unfClub(self, request):
+        """Update & return user profile."""
+        ret = unfollowClub(request)
+
+        if(ret == True):
+          print("Cool")
+
+
+        else:
+          print("Operation not allowed")
+
+        return message_types.VoidMessage()
+
    @endpoints.method(ClubRetrievalMiniForm,ClubListResponse,path='getClubList', http_method='POST', name='getClubList')
    def getClubListApi(self,request):
         list_of_clubs = ClubListResponse()
@@ -149,21 +163,63 @@ class ClubApi(remote.Service):
    def createClubRequest(self, request):
 
         collegeId = ndb.Key('CollegeDb',int(request.college_id))
-        college_ret = CollegeDb.query(CollegeDb.key == collegeId).fetch(1)
+        print("Required College ID",collegeId)
 
-        print("College Ret",college_ret[0])
+        college_ret = collegeId.get()
+
+        print("College Ret",college_ret)
         if(college_ret):
-           club_ret = Club.query(Club.name == request.club_name).filter(Club.abbreviation == request.abbreviation).filter(Club.collegeId == college_ret[0].key).fetch(1)
+           club_ret = Club.query(Club.name == request.club_name).filter(Club.abbreviation == request.abbreviation).filter(Club.collegeId == college_ret.key).fetch(1)
            print("Club Ret",club_ret)
            if(len(club_ret) == 0):
               clubRequest = createClub(request)
               print("Finished the clubRequest")
 
-              newClub = createClubAfterApproval(clubRequest)
-              print ("The new club is",newClub)
-              #retClub = self.getClub(newClub)'''
+
         return message_types.VoidMessage()
 
+   @endpoints.method(RequestMiniForm,message_types.VoidMessage,path='approveclubreq', http_method='POST', name='approveClubReq')
+   def approveClub(self,request):
+        #Obtain the club request object
+
+        clubRequest = ndb.Key('Club_Creation',int(request.req_id))
+        req = clubRequest.get()
+
+        if(req and req.approval_status == "N"):
+           status = approveClub(req)
+           #status returns a "y" or "N"
+           if(status == "Y"):
+              print("Request Approval Granted")
+           else:
+              print("Request Approval Denied")
+              req.key.delete()
+        return message_types.VoidMessage()
+
+
+
+
+
+
+
+   @endpoints.method(RequestMiniForm,message_types.VoidMessage,path='clubcreate', http_method='POST', name='createClub')
+   def createClub(self,request):
+        #Obtain the club request object
+
+        clubRequest = ndb.Key('Club_Creation',int(request.req_id))
+        print("Club Request",clubRequest)
+
+        req = clubRequest.get()
+
+        print(req)
+
+
+        if(req.approval_status=="Y"):
+         newClub = createClubAfterApproval(req)
+         print ("The new club is",newClub)
+        else :
+         print("Request hasn't been approved")
+
+        return message_types.VoidMessage()
 
    @endpoints.method(CollegeDbMiniForm,message_types.VoidMessage,path='collegeDB', http_method='POST', name='createCollege')
    def createCollegeDb(self, request):
@@ -199,25 +255,16 @@ class ClubApi(remote.Service):
    def insertUnique(self,request):
 
         #This method is just a reference in order for you to reuse this code in order to insert unique entries in the DB
-        college = CollegeDb(name = 'NITK',student_sup='Anirudh',collegeId='NITK-123')
-        college_key = college.put()
-        query = CollegeDb.query()
-
+        college_key = ndb.Key('CollegeDb',int('5629499534213120'))
         profile =  Profile(name = 'RJJ',
                             email = 'rohitjjoseph@gmail.com',
                             phone = '7760532293',
-                            password = '13211',
-                            pid = '1234',
+
                             isAlumni='N',
                             collegeId= college_key)
 
-        profileret = Profile.query(Profile.pid == profile.pid).fetch(1)
-        print("A is ", profileret)
-        if profileret:
-          print("Not inserting")
-        else :
-          print("Inserting")
-          profile_key = profile.put()
+
+        profile_key = profile.put()
 
 
    @endpoints.method(EventMiniForm,message_types.VoidMessage,path='eventEntry', http_method='POST', name='eventEntry')
