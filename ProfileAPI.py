@@ -43,6 +43,10 @@ def _copyProfileToForm(prof):
                         clubs = x.get()
                         pylist.append(clubs.name)
                     setattr(pf, field.name, pylist)
+
+                if field.name=='pid':
+                    setattr(pf, field.name, str(prof.key.id()))
+
         pf.check_initialized()
         return pf
 

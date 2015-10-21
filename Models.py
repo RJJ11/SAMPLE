@@ -41,6 +41,7 @@ class ProfileMiniForm(messages.Message):
     phone=messages.StringField(13,required=True)
     club_names = messages.StringField(14,repeated=True)
     follows_names = messages.StringField(15,repeated=True)
+    pid = messages.StringField(16)
 
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
