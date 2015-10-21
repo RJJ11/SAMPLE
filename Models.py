@@ -39,6 +39,8 @@ class ProfileMiniForm(messages.Message):
     collegeId = messages.StringField(10,required=True)
     isAlumni = messages.StringField(12)
     phone=messages.StringField(13,required=True)
+    club_names = messages.StringField(14,repeated=True)
+    follows_names = messages.StringField(15,repeated=True)
 
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
@@ -150,6 +152,7 @@ class PostMiniForm(messages.Message):
     likers = messages.StringField(5)
     date = messages.StringField(6)
     time = messages.StringField(7)
+    photo = messages.StringField(8)
     # '''photo ='''
 
 

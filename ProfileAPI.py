@@ -6,7 +6,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import Profile,ProfileMiniForm,CollegeDb
+from Models import Profile,ProfileMiniForm,CollegeDb,Club
 
 def _copyProfileToForm(prof):
         pf = ProfileMiniForm()
@@ -17,8 +17,32 @@ def _copyProfileToForm(prof):
                     print "College Id"
                     print collegeId
                     setattr(pf,field.name,str(collegeId.id()))
+                elif field.name=='clubsJoined':
+                    pylist=[]
+                    for x in prof.clubsJoined:
+                        pylist.append(str(x.id()))
+                        setattr(pf, field.name, pylist)
+                elif field.name=='follows':
+                    pylist=[]
+                    for x in prof.follows:
+                        pylist.append(str(x.id()))
+                        setattr(pf, field.name, pylist)
                 else:
                     setattr(pf, field.name, getattr(prof, field.name))
+            else:
+                if field.name=='club_names':
+                    pylist=[]
+                    for x in prof.clubsJoined:
+                        clubs = x.get()
+                        pylist.append(clubs.name)
+                    setattr(pf, field.name, pylist)
+
+                if field.name=='follows_names':
+                    pylist=[]
+                    for x in prof.follows:
+                        clubs = x.get()
+                        pylist.append(clubs.name)
+                    setattr(pf, field.name, pylist)
         pf.check_initialized()
         return pf
 

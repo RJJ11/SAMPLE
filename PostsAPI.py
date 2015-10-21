@@ -116,7 +116,7 @@ def postEntry(requestentity=None,check=0):
 
         if(flag==1 and flag1==1):
             if requestentity:
-                for field in ('title','description','club_id','from_pid','likes','views','timestamp'):
+                for field in ('title','description','club_id','from_pid','likes','views','timestamp','photo'):
 
                     if hasattr(requestentity, field):
                         print(field,"is there")
