@@ -25,24 +25,6 @@ class Profile(ndb.Model):
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many people
     #id = pid
 
-
-class ProfileMiniForm(messages.Message):
-    """ProfileMiniForm -- What's shown on the UI"""
-    name = messages.StringField(1, required=True)
-    email = messages.StringField(2, required=True)
-    '''picture ='''
-    tags = messages.StringField(5, repeated=True)
-    batch = messages.StringField(6)
-    branch = messages.StringField(7)
-    follows = messages.StringField(8, repeated=True)
-    clubsJoined = messages.StringField(9,repeated=True)
-    collegeId = messages.StringField(10,required=True)
-    isAlumni = messages.StringField(12)
-    phone=messages.StringField(13,required=True)
-    club_names = messages.StringField(14,repeated=True)
-    follows_names = messages.StringField(15,repeated=True)
-    pid = messages.StringField(16)
-
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
     #clubId = ndb.StringProperty(required=True)
@@ -378,3 +360,20 @@ class CollegeFeed(messages.Message):
 class RequestMiniForm(messages.Message):
     req_id = messages.StringField(1, required="True")
 
+class ProfileMiniForm(messages.Message):
+    """ProfileMiniForm -- What's shown on the UI"""
+    name = messages.StringField(1, required=True)
+    email = messages.StringField(2, required=True)
+    '''picture ='''
+    tags = messages.StringField(5, repeated=True)
+    batch = messages.StringField(6)
+    branch = messages.StringField(7)
+    follows = messages.StringField(8, repeated=True)
+    clubsJoined = messages.StringField(9,repeated=True)
+    collegeId = messages.StringField(10,required=True)
+    isAlumni = messages.StringField(12)
+    phone=messages.StringField(13,required=True)
+    club_names = messages.MessageField(ClubMiniForm,14,repeated=True)
+    #club_names = messages.StringField(14,repeated=True)
+    follows_names = messages.StringField(15,repeated=True)
+    pid = messages.StringField(16)

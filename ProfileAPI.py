@@ -6,7 +6,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import Profile,ProfileMiniForm,CollegeDb,Club
+from Models import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm
 
 def _copyProfileToForm(prof):
         pf = ProfileMiniForm()
@@ -33,8 +33,16 @@ def _copyProfileToForm(prof):
                 if field.name=='club_names':
                     pylist=[]
                     for x in prof.clubsJoined:
-                        clubs = x.get()
-                        pylist.append(clubs.name)
+                        ret_club = x.get()
+                        #ret_club = obj.get()
+                        format_club = ClubMiniForm()
+                        format_club.name = ret_club.name
+                        format_club.abbreviation = ret_club.abbreviation
+                        format_club.admin = ret_club.admin.get().name
+                        format_club.collegeName = ret_club.collegeId.get().name
+                        format_club.description = ret_club.description
+                        format_club.club_id = str(ret_club.key.id())
+                        pylist.append(format_club)
                     setattr(pf, field.name, pylist)
 
                 if field.name=='follows_names':
