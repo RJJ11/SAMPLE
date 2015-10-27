@@ -7,7 +7,8 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm
+from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
+    MessageResponse
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile,CollegeFeed
@@ -238,13 +239,37 @@ class ClubApi(remote.Service):
         return message_types.VoidMessage()
 
 
-   @endpoints.method(PostMiniForm,message_types.VoidMessage,path='postEntry', http_method='POST', name='postEntry')
+   @endpoints.method(PostMiniForm,MessageResponse,path='postEntry', http_method='POST', name='postEntry')
    def createPost(self, request):
+        response = MessageResponse()
         print("Entered Post Entry Portion")
         flag=0
-        clubRequest = postEntry(request,flag)
+        try:
+            person_key = ndb.Key('Profile',int(request.from_pid))
+            profile = person_key.get()
+            club_key = ndb.Key('Club',int(request.club_id))
+            if club_key in profile.follows:
+                    print "Present"
+                    clubRequest = postEntry(request,flag)
+                    response.status = "1"
+                    response.text = "Inserted into Posts Table"
+
+
+            else:
+                print "Not present"
+                clubRequest = postRequest(request)
+                response.status = "2"
+                response.text = "Inserted into Posts Requests Table"
+
+        except:
+                print "Error"
+                response.status = "3"
+                response.text = "Couldn't insert into Posts Table"
+
+
+
         print("Inserted into the posts table")
-        return message_types.VoidMessage()
+        return response
 
    @endpoints.method(message_types.VoidMessage,Colleges,path='getColleges', http_method='GET', name='getColleges')
    def getAllColleges(self, request):
@@ -268,13 +293,34 @@ class ClubApi(remote.Service):
         profile_key = profile.put()
 
 
-   @endpoints.method(EventMiniForm,message_types.VoidMessage,path='eventEntry', http_method='POST', name='eventEntry')
+   @endpoints.method(EventMiniForm,MessageResponse,path='eventEntry', http_method='POST', name='eventEntry')
    def createEvent(self, request):
+        response = MessageResponse()
         print("Entered Event Entry Portion")
         print request.club_id
-        clubRequest = eventEntry(request)
-        print("Inserted into the events table")
-        return message_types.VoidMessage()
+        #clubRequest = eventEntry(request)
+        #print("Inserted into the events table")
+        try:
+            person_key = ndb.Key('Profile',int(request.event_creator))
+            profile = person_key.get()
+            club_key = ndb.Key('Club',int(request.club_id))
+            if club_key in profile.clubsJoined:
+                    print "Present"
+                    clubRequest = eventEntry(request)
+                    response.status = "1"
+                    response.text = "Inserted into Posts Table"
+
+            else:
+                print "Not Present"
+                response.status = "2"
+                response.text = "Could not insert"
+
+        except:
+                print "Error"
+                response.status = "3"
+                response.text = "Error"
+
+        return response
 
    @endpoints.method(GetAllPosts,Posts,path='getPosts', http_method='GET', name='getPosts')
    def getPosts(self, request):
