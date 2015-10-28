@@ -353,6 +353,7 @@ class Feed(messages.Message):
     tags = messages.StringField(16)
     likers = messages.StringField(17,repeated=True)
     timestamp = messages.StringField(18)
+    photo = messages.StringField(19)
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
