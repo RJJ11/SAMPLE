@@ -3,6 +3,7 @@ import endpoints
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
+from datetime import datetime,date,time
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
@@ -460,19 +461,48 @@ class ClubApi(remote.Service):
    @endpoints.method(GetInformation,CollegeFeed,path='mainFeed', http_method='POST', name='collegeFeed')
    def collegeFeed(self, request):
        print "Entered the Like Posts Section"
-       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
-       posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
-       events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
+       temp = request.clubId
+       flag =0
+       if request.date != None:
+        date = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
+        flag = 1
+       #print "TYPE-DATE", type(date)
+       if (temp==None):
+           collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+           posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
+           events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
+           print "TEMP IS NONE"
+       else:
+           clubId = ndb.Key('Club',int(request.clubId))
+           posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
+           events = Event.query(Event.club_id==clubId).order(-Event.timestamp)
+
        print events
        #CollegeFeed(items=[copyEventToForm(x) for x in posts])
        #CollegeFeed(items=[copyEventToForm(x) for x in events])
-       pylist = [copyToCollegeFeed(x) for x in events]
+       #pylist = [copyToCollegeFeed(x) for x in events]
+       pylist=[]
+       for x in events:
+           print "TImestamp",type(x.timestamp.strftime("%Y-%m-%d"))
+           if flag==1:
+            if x.timestamp.strftime("%Y-%m-%d") == str(date):
+                pylist.append(copyToCollegeFeed(x))
+           else:
+               pylist.append(copyToCollegeFeed(x))
        print pylist
-       pylist2 = [copyToCollegeFeed(x) for x in posts]
+       pylist2 = []
+       for x in posts:
+           print "TImestamp",type(x.timestamp.strftime("%Y-%m-%d"))
+           if flag==1:
+            if x.timestamp.strftime("%Y-%m-%d") == str(date):
+                pylist.append(copyToCollegeFeed(x))
+           else:
+               pylist.append(copyToCollegeFeed(x))
+       #pylist2 = [copyToCollegeFeed(x) for x in posts]
        pylist+=pylist2
        #pylist.append(copyToCollegeFeed(x) for x in events)
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
-       print pylist[1].timestamp
+       #print pylist[1].timestamp
        #print pylist
        CollegeFeed(items=pylist)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
@@ -512,4 +542,22 @@ class ClubApi(remote.Service):
        return CollegeFeed(items=pylist)
 
 
+   @endpoints.method(GetInformation,CollegeFeed,path='adminFeed', http_method='POST', name='adminFeed')
+   def adminFeed(self, request):
+       pid = ndb.Key('Profile',int(request.pid))
+       clubId = Club.query(Club.admin==pid)
+       pylist=[]
+       for x in clubId:
+           print x.key
+           posts = Post.query(Post.club_id==x.key).order(-Post.timestamp)
+           events = Event.query(Event.club_id==x.key).order(-Post.timestamp)
+           list1=[]
+           list2=[]
+           list1 = [copyToCollegeFeed(y) for y in events]
+           list2 = [copyToCollegeFeed(z) for z in posts]
+           list1+=list2
+           print "List-1",list1
+           pylist+=list1
+       pylist.sort(key=lambda x: x.timestamp, reverse=True)
+       return CollegeFeed(items=pylist)
 api = endpoints.api_server([ClubApi]) # register API	

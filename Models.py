@@ -108,6 +108,8 @@ class Post_Request(ndb.Model):
 class GetInformation(messages.Message):
     pid = messages.StringField(1)
     collegeId = messages.StringField(2)
+    clubId = messages.StringField(3)
+    date = messages.StringField(4)
 
 class GetPostRequestsForm(messages.Message):
     title = messages.StringField(1)

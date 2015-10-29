@@ -162,3 +162,57 @@ def copyToCollegeFeed(entity):
                 setattr(feed, field.name, str(entity.timestamp.strftime("%H:%M:%S")))
         """
     return feed
+
+def copyToCollegeFeed(entity):
+    feed = Feed()
+    for field in feed.all_fields():
+        if hasattr(entity, field.name):
+                if field.name == 'start_time':
+                    print field.name
+                    setattr(feed,"start_date", str(entity.start_time.strftime("%Y-%m-%d")))
+                    setattr(feed, field.name, str(entity.start_time.strftime("%H:%M:%S")))
+                elif field.name == 'end_time':
+                    print field.name
+                    setattr(feed, "end_date", str(entity.end_time.strftime("%Y-%m-%d")))
+                    setattr(feed, field.name, str(entity.end_time.strftime("%H:%M:%S")))
+                elif field.name == 'club_id':
+                    print field.name
+                    setattr(feed, field.name, entity.club_id.get().name)
+                elif field.name == 'collegeId':
+                    print field.name
+                    setattr(feed, field.name, entity.collegeId.get().name)
+
+                elif (field.name=='event_creator'):
+                    print field.name
+                    setattr(feed, field.name, entity.event_creator.get().name)
+                elif (field.name=='likers'):
+                    print field.name
+                    pylist=[]
+                    for key in entity.likers:
+                        pylist.append(key.get().name)
+                    setattr(feed, field.name, pylist)
+
+                elif (field.name=='attendees'):
+                    print field.name
+                    pylist=[]
+                    for key in entity.attendees:
+                        pylist.append(key.get().name)
+                    setattr(feed, field.name, pylist)
+
+                else:
+                    setattr(feed, field.name, str(getattr(entity, field.name)))
+
+        elif (field.name=='pid'):
+            print field.name
+            setattr(feed, field.name, str(entity.key.id()))
+
+        elif (field.name=='event_creator'):
+            print field.name
+            setattr(feed, field.name, entity.from_pid.get().name)
+        """
+        elif field.name == 'date':
+                setattr(feed, field.name, str(entity.timestamp.strftime("%Y-%m-%d")))
+        elif field.name == 'time':
+                setattr(feed, field.name, str(entity.timestamp.strftime("%H:%M:%S")))
+        """
+    return feed
