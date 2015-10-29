@@ -138,6 +138,9 @@ def postEntry(requestentity=None,check=0):
                             setattr(newPost,'collegeId',person_collegeId)
                             print "Put college id"
 
+                        elif field=="timestamp":
+                            setattr(newPost, field, val)
+
                         elif val:
                             print("Value is",val)
                             setattr(newPost, field, str(val))
@@ -210,6 +213,10 @@ def copyPostToForm(post):
                 setattr(pf, field.name, str(post.timestamp.strftime("%Y-%m-%d")))
             if field.name == 'time':
                 setattr(pf, field.name, str(post.timestamp.strftime("%H:%M:%S")))
+            if field.name == 'clubphoto':
+                print "Reached here-1"
+                #print str(post.club_id.get().picture)
+                setattr(pf, field.name, post.club_id.get().picture)
         return pf
 
 def likePost(request):

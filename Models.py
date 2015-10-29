@@ -27,6 +27,7 @@ class Profile(ndb.Model):
 
 class Club(ndb.Model):
     name = ndb.StringProperty(required=True)
+    picture = ndb.BlobProperty()
     #clubId = ndb.StringProperty(required=True)
     admin = ndb.KeyProperty(kind='Profile', required=True)
     description = ndb.StringProperty()
@@ -50,6 +51,7 @@ class ClubMiniForm(messages.Message):
     # photo = ndb.BlobProperty()
     collegeName = messages.StringField(7, required=True)
     club_id = messages.StringField(8,required=True)
+    picture = messages.StringField(9)
 
 class GetClubMiniForm(messages.Message):
     club_id = messages.StringField(1, required="True")
@@ -79,6 +81,7 @@ class PostForm(messages.Message):
     likers = messages.StringField(7)
     date = messages.StringField(8)
     time = messages.StringField(9)
+    clubphoto = messages.StringField(10)
 
 class EditPostForm(messages.Message):
     title = messages.StringField(1)
@@ -205,6 +208,7 @@ class EventForm(messages.Message):
     tags = messages.StringField(16)
     date = messages.StringField(17)
     time = messages.StringField(18)
+    clubphoto = messages.StringField(19)
 # id=eventId
 
 class ModifyEvent(messages.Message):
@@ -228,6 +232,7 @@ class Club_Creation(ndb.Model):
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many club creation requests
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to student council admin
    # club_id = ndb.StringProperty(required=True)
+    picture = ndb.BlobProperty()
     description = ndb.StringProperty(required=True)
     club_name = ndb.StringProperty(required=True)
     abbreviation = ndb.StringProperty(required=True)
@@ -246,6 +251,7 @@ class ClubRequestMiniForm(messages.Message):
     description = messages.StringField(3, required=True)
     from_pid = messages.StringField(4, required=True)
     college_id = messages.StringField(5, required=True)
+    picture = messages.StringField(6)
 
 
 class Join_Request(ndb.Model):
@@ -356,6 +362,7 @@ class Feed(messages.Message):
     likers = messages.StringField(17,repeated=True)
     timestamp = messages.StringField(18)
     photo = messages.StringField(19)
+    clubphoto = messages.StringField(20)
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)

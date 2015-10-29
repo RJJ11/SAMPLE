@@ -155,6 +155,13 @@ def copyToCollegeFeed(entity):
         elif (field.name=='event_creator'):
             print field.name
             setattr(feed, field.name, entity.from_pid.get().name)
+
+
+        if field.name == 'clubphoto':
+                print "Reached here-1"
+                #print str(post.club_id.get().picture)
+                setattr(feed, field.name, entity.club_id.get().picture)
+
         """
         elif field.name == 'date':
                 setattr(feed, field.name, str(entity.timestamp.strftime("%Y-%m-%d")))
@@ -163,6 +170,7 @@ def copyToCollegeFeed(entity):
         """
     return feed
 
+"""
 def copyToCollegeFeed(entity):
     feed = Feed()
     for field in feed.all_fields():
@@ -209,10 +217,17 @@ def copyToCollegeFeed(entity):
         elif (field.name=='event_creator'):
             print field.name
             setattr(feed, field.name, entity.from_pid.get().name)
+
+        if field.name == 'clubphoto':
+                print "Reached here-1"
+                #print str(post.club_id.get().picture)
+                setattr(feed, field.name, entity.club_id.get().picture)
         """
-        elif field.name == 'date':
-                setattr(feed, field.name, str(entity.timestamp.strftime("%Y-%m-%d")))
-        elif field.name == 'time':
-                setattr(feed, field.name, str(entity.timestamp.strftime("%H:%M:%S")))
-        """
-    return feed
+#        elif field.name == 'date':
+#                setattr(feed, field.name, str(entity.timestamp.strftime("%Y-%m-%d")))
+#        elif field.name == 'time':
+#                setattr(feed, field.name, str(entity.timestamp.strftime("%H:%M:%S")))
+#        """
+
+#    return feed
+#"""

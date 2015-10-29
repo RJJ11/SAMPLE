@@ -130,6 +130,10 @@ def copyEventToForm(event):
                 setattr(pf, field.name, str(event.timestamp.strftime("%Y-%m-%d")))
             if field.name == 'time':
                 setattr(pf, field.name, str(event.timestamp.strftime("%H:%M:%S")))
+            if field.name == 'clubphoto':
+                print "Reached here-1"
+                #print str(post.club_id.get().picture)
+                setattr(pf, field.name, event.club_id.get().picture)
         return pf
 
 def deleteEvent(request):
