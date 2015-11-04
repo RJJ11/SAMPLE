@@ -387,7 +387,7 @@ class ProfileMiniForm(messages.Message):
     #club_names = messages.StringField(14,repeated=True)
     follows_names = messages.StringField(15,repeated=True)
     pid = messages.StringField(16)
-
+    gcmId = messages.StringField(17)
 
 class MessageResponse(messages.Message):
     status = messages.StringField(1)
