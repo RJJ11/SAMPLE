@@ -23,6 +23,7 @@ class Profile(ndb.Model):
     company = ndb.StringProperty()
     location = ndb.StringProperty()
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many people
+    eventsAttending = ndb.KeyProperty(kind='Event')
     #id = pid
 
 class Club(ndb.Model):

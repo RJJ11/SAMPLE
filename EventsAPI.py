@@ -158,9 +158,12 @@ def attendEvent(request):
        event_id = ndb.Key('Event',int(request.eventId))
        from_pid = ndb.Key('Profile',int(request.from_pid))
        event = event_id.get()
+       person = from_pid.get()
        pylist = event.attendees
        if(from_pid not in pylist):
         event.attendees.append(from_pid)
+        person.eventsAttending.append(event_id)
+        person.put()
         event.put()
        else:
         print "Sorry Already Attending"
