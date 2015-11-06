@@ -10,7 +10,7 @@ class Profile(ndb.Model):
     name = ndb.StringProperty(required=True)
     email = ndb.StringProperty(required=True)
     phone = ndb.StringProperty(required=True)
-    picture = ndb.BlobProperty()
+    photo = ndb.BlobProperty()
     batch = ndb.StringProperty()
     branch = ndb.StringProperty()
     follows = ndb.KeyProperty(kind='Club', repeated=True)  # ndb.StringProperty(repeated=True)
@@ -375,6 +375,7 @@ class ProfileMiniForm(messages.Message):
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
     '''picture ='''
+    photo = messages.StringField(3)
     tags = messages.StringField(5, repeated=True)
     batch = messages.StringField(6)
     branch = messages.StringField(7)
