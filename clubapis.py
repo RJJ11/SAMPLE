@@ -13,7 +13,7 @@ from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPost
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile,CollegeFeed
-from Models import CollegeDb
+from Models import CollegeDb,Notifications,NotificationResponseForm
 from Models import CollegeDbMiniForm
 from Models import ClubMiniForm
 from Models import GetClubMiniForm
@@ -29,8 +29,11 @@ from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
+from gcm import GCM
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
+gcm = GCM("AIzaSyDD6A0ZyyO3ixsNic4krnflfCsM3XOub4k")  #server key for sending notification
+
 
 @endpoints.api(name='clubs', version='v1',
     allowed_client_ids=[ANROID_CLIENT_ID,WEB_CLIENT_ID,API_EXPLORER_CLIENT_ID,ANDROID_ID2,ANDROID_ID3],
@@ -192,37 +195,15 @@ class ClubApi(remote.Service):
            #status returns a "y" or "N"
            if(status == "Y"):
               print("Request Approval Granted")
+              newClub = createClubAfterApproval(req)
+              if(newClub):
+                  print("The club that has been created is",newClub)
+                  req.key.delete()
            else:
               print("Request Approval Denied")
               req.key.delete()
         return message_types.VoidMessage()
 
-
-
-
-
-
-
-   @endpoints.method(RequestMiniForm,message_types.VoidMessage,path='clubcreate', http_method='POST', name='createClub')
-   def createClub(self,request):
-        #Obtain the club request object
-
-        clubRequest = ndb.Key('Club_Creation',int(request.req_id))
-        print("Club Request",clubRequest)
-
-        req = clubRequest.get()
-
-        print(req)
-
-
-        if(req.approval_status=="Y"):
-         newClub = createClubAfterApproval(req)
-         newClub.put()
-         print ("The new club is",newClub)
-        else :
-         print("Request hasn't been approved")
-
-        return message_types.VoidMessage()
 
    @endpoints.method(CollegeDbMiniForm,message_types.VoidMessage,path='collegeDB', http_method='POST', name='createCollege')
    def createCollegeDb(self, request):
@@ -247,13 +228,32 @@ class ClubApi(remote.Service):
         flag=0
         try:
             person_key = ndb.Key('Profile',int(request.from_pid))
+
             profile = person_key.get()
+            print(profile)
             club_key = ndb.Key('Club',int(request.club_id))
             if club_key in profile.follows:
                     print "Present"
-                    clubRequest = postEntry(request,flag)
+                    newPost = postEntry(request,flag)
+
+                    print("NEW POST",newPost)
                     response.status = "1"
                     response.text = "Inserted into Posts Table"
+                    #Create Notification Feed
+                    group = newPost.club_id.get()
+                    groupName = group.name
+                    newNotif = Notifications(
+                     groupName = groupName,
+                     groupId = newPost.club_id,
+                     groupImage = group.photo,
+                     postName = newPost.title,
+                     postId = newPost.key,
+                     timestamp = newPost.timestamp,
+                     type = "Post"
+                    )
+
+                    print("Notification to be inserted",newNotif)
+                    newNotifKey = newNotif.put()
 
 
             else:
@@ -270,6 +270,9 @@ class ClubApi(remote.Service):
 
 
         print("Inserted into the posts table")
+
+
+
         return response
 
    @endpoints.method(message_types.VoidMessage,Colleges,path='getColleges', http_method='GET', name='getColleges')
@@ -278,20 +281,7 @@ class ClubApi(remote.Service):
         colleges = CollegeDb.query()
         return Colleges(collegeList=[getColleges(x) for x in colleges])
 
-   @endpoints.method(message_types.VoidMessage,message_types.VoidMessage,path='insertUnique', http_method='POST', name='insertUnique')
-   def insertUnique(self,request):
 
-        #This method is just a reference in order for you to reuse this code in order to insert unique entries in the DB
-        college_key = ndb.Key('CollegeDb',int('5629499534213120'))
-        profile =  Profile(name = 'RJJ',
-                            email = 'rohitjjoseph@gmail.com',
-                            phone = '7760532293',
-
-                            isAlumni='N',
-                            collegeId= college_key)
-
-
-        profile_key = profile.put()
 
 
    @endpoints.method(EventMiniForm,MessageResponse,path='eventEntry', http_method='POST', name='eventEntry')
@@ -299,17 +289,38 @@ class ClubApi(remote.Service):
         response = MessageResponse()
         print("Entered Event Entry Portion")
         print request.club_id
-        #clubRequest = eventEntry(request)
-        #print("Inserted into the events table")
         try:
             person_key = ndb.Key('Profile',int(request.event_creator))
             profile = person_key.get()
             club_key = ndb.Key('Club',int(request.club_id))
             if club_key in profile.clubsJoined:
                     print "Present"
-                    clubRequest = eventEntry(request)
+                    newEvent = eventEntry(request)
+                    print ("NEW EVENT",newEvent)
                     response.status = "1"
                     response.text = "Inserted into Posts Table"
+                    group = newEvent.club_id.get()
+                    groupName = group.name
+
+                    print(groupName)
+                    print(newEvent.club_id)
+                    print(group.photo)
+                    print(newEvent.title)
+                    print(newEvent.key)
+                    print(newEvent.timestamp)
+
+                    newNotif = Notifications(
+                     groupName = groupName,
+                     groupId = newEvent.club_id,
+                     groupImage = group.photo,
+                     eventName = newEvent.title,
+                     eventId = newEvent.key,
+                     timestamp = newEvent.timestamp,
+                     type = "Event"
+                    )
+
+                    print("Notification to be inserted",newNotif)
+                    newNotifKey = newNotif.put()
 
             else:
                 print "Not Present"

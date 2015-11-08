@@ -6,6 +6,7 @@ threadsafe: yes
 
 handlers:       # static then dynamic
 
+
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
@@ -41,4 +42,7 @@ libraries:
 
 # pycrypto library used for OAuth2 (req'd for authenticated APIs)
 - name: pycrypto
+  version: latest
+
+- name: ssl
   version: latest

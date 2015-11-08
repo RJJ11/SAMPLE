@@ -34,16 +34,6 @@ def eventEntry(requestentity=None):
 
 
                     elif field == "event_creator":
-                        """profile =  Profile(
-                               name = 'SiddharthRec',
-                               email = 'sid.tiger183@gmail.com',
-                               phone = '7760531994',
-                               password = '1803mutd',
-                               pid = '5678',
-                               isAlumni='N',
-                               collegeId=college_key
-                               )
-                        profile_key = profile.put()"""
                         profile_key=ndb.Key('Profile',int(getattr(requestentity,field)))
                         person = profile_key.get()
                         print "Person's email-id ", person.email
@@ -108,6 +98,7 @@ def eventEntry(requestentity=None):
             flag=1
 
         if(flag==1):
+
             event_request.put()
 
         return event_request
