@@ -537,12 +537,49 @@ class ClubApi(remote.Service):
        events = []
        pylist = []
        pylist2 = []
+       pageLimit = 2
+       skipCount=0
+       upperBound=pageLimit
+       print request.pageNumber
+
+       try:
+        skipCount = (int(request.pageNumber)-1)*pageLimit
+        upperBound = int(request.pageNumber)*pageLimit
+
+       except:
+          print "Didnt give pageNumber-Default to 1"
+
+
+
+       list1=[]
+       list2=[]
        for x in profile.follows:
            print x
+           print "LOOP-1"
            posts = (Post.query(Post.club_id==x))
            events = (Event.query(Event.club_id==x))
-           list1 = [copyToCollegeFeed(y) for y in events]
-           list2 = [copyToCollegeFeed(z) for z in posts]
+           list1=[]
+           list2=[]
+           #list1 = [copyToCollegeFeed(y) for y in events]
+           #list2 = [copyToCollegeFeed(z) for z in posts]
+           iteration=0
+           for y in posts:
+               #if(iteration>=skipCount and iteration<upperBound):
+               list1.append(copyToCollegeFeed(y))
+
+               #iteration+=1
+               #if(iteration==upperBound):
+               #    break
+
+           iteration=0
+
+           for z in events:
+               #if(iteration>=skipCount and iteration<upperBound):
+                list1.append(copyToCollegeFeed(y))
+                #iteration+=1
+               #if(iteration==upperBound):
+               #    break
+
            print "LIST-1"
            print list1
            pylist+=list1
@@ -556,11 +593,23 @@ class ClubApi(remote.Service):
        pylist+=pylist2
        #pylist.append(copyToCollegeFeed(x) for x in events)
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
-       print pylist[1].timestamp
+       finalList = []
+       for i in xrange(skipCount,upperBound):
+           if(i>=len(pylist)):
+            break
+           finalList.append(pylist[i])
+
+       cf = CollegeFeed()
+       cf.items = finalList
+       cf.completed=str(0)
+       if(upperBound==len(pylist)):
+                cf.completed=str(1)
+       #print pylist[1].timestamp
        #print pylist
-       CollegeFeed(items=pylist)
+
+       CollegeFeed(items=finalList)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
-       return CollegeFeed(items=pylist)
+       return cf
 
 
    @endpoints.method(GetInformation,CollegeFeed,path='adminFeed', http_method='POST', name='adminFeed')

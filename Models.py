@@ -138,6 +138,7 @@ class GetInformation(messages.Message):
     collegeId = messages.StringField(2)
     clubId = messages.StringField(3)
     date = messages.StringField(4)
+    pageNumber = messages.StringField(5)
 
 class GetPostRequestsForm(messages.Message):
     title = messages.StringField(1)
@@ -391,6 +392,7 @@ class Feed(messages.Message):
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
+    completed = messages.StringField(2)
 
 class RequestMiniForm(messages.Message):
     req_id = messages.StringField(1, required="True")

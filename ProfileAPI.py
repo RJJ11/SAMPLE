@@ -106,6 +106,7 @@ def changeGcm(request):
     email = request.email
 
     profile = Profile.query(Profile.email==email)
+    print  type(profile)
 
     for y in profile:
         print y.gcmId
