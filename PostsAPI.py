@@ -166,7 +166,7 @@ def postEntry(requestentity=None,check=0):
 
 
 
-        return
+        return newPost
 
 def deletePost(request):
         post_id = ndb.Key('Post',int(request.postId))

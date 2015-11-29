@@ -4,6 +4,30 @@ import endpoints
 from protorpc import messages
 from google.appengine.ext import ndb
 
+class Notifications(ndb.Model):
+    groupName = ndb.StringProperty(required=True)
+    groupId = ndb.KeyProperty(kind='Club', required=True)
+    groupImage = ndb.BlobProperty()
+    eventName = ndb.StringProperty()
+    eventId = ndb.KeyProperty(kind ='Event')
+    postName = ndb.StringProperty()
+    postId = ndb.KeyProperty(kind ='Post')
+    timestamp = ndb.DateTimeProperty()
+    type = ndb.StringProperty(required='True')
+
+class NotificationResponseForm(messages.Message):
+    groupName = messages.StringField(1)
+    groupId = messages.StringField(2)
+    groupImage = messages.StringField(3)
+    eventName = messages.StringField(4)
+    eventId = messages.StringField(5)
+    postName = messages.StringField(6)
+    postId = messages.StringField(7)
+    timestamp = messages.StringField(8)
+    type = messages.StringField(9)
+
+
+
 
 class Profile(ndb.Model):
     """Profile -- User profile object"""

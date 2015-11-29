@@ -2,9 +2,16 @@ application: campus-connect-2015
 version: 1
 runtime: python27
 api_version: 1
-threadsafe: yes
+threadsafe: false
+
+builtins:
+- remote_api: on
+
+inbound_services:
+- warmup
 
 handlers:       # static then dynamic
+
 
 - url: /favicon\.ico
   static_files: favicon.ico
@@ -33,6 +40,9 @@ handlers:       # static then dynamic
 - url: /_ah/spi/.*
   script: clubapis.api
   secure: always
+- url: /crontasks
+  script: cronmodule.py  
+
 
 libraries:
 
@@ -41,4 +51,7 @@ libraries:
 
 # pycrypto library used for OAuth2 (req'd for authenticated APIs)
 - name: pycrypto
+  version: latest
+
+- name: ssl
   version: latest
