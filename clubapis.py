@@ -21,13 +21,13 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm
+from Models import ClubRetrievalMiniForm,UpdateGCM
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
-from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
+from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 	
@@ -581,4 +581,11 @@ class ClubApi(remote.Service):
            pylist+=list1
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        return CollegeFeed(items=pylist)
-api = endpoints.api_server([ClubApi]) # register API	
+
+   @endpoints.method(UpdateGCM,message_types.VoidMessage,path='updateGCM', http_method='POST', name='updateGcmId')
+   def updateGcmId(self, request):
+        changeGcm(request)
+
+        return message_types.VoidMessage()
+
+api = endpoints.api_server([ClubApi])   # register API
