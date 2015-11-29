@@ -1,6 +1,7 @@
 __author__ = 'rohit'
 import endpoints
-from datetime import datetime,date,time
+import logging
+import datetime
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -160,3 +161,27 @@ def attendEvent(request):
         print "Sorry Already Attending"
 
        return message_types.VoidMessage
+
+def getEventsBasedonTimeLeft():
+    logging.basicConfig(level=logging.DEBUG)
+    LOG = logging.getLogger(__name__)
+    #LOG.info(currentTime)
+    
+    #Steps to follow 
+    #s2 = '2016-11-28 21:39:57.910671'
+    #date_object = datetime.strptime(s2, '%Y-%m-%d %H:%M:%f')
+    #c = date_object - currentTime
+    #LOG.info(c)
+    #FMT = '%YYYY-11-%H:%M:%S'
+    #tdelta = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
+
+    event_query = Event.query().fetch()
+    currentTime = datetime.datetime.now()
+    
+    #if (y-x) < datetime.timedelta(0,30):
+    #       LOG.info("less than 30 seconds")
+   
+    for event in event_query:
+         LOG.info(event.title)
+        
+    

@@ -29,10 +29,17 @@ from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
-from gcm import GCM
+from gae_python_gcm.gcm import GCMMessage, GCMConnection
+	
+data = {'message': 'You have x new friends',"title":"SAmple Title"}
+gcm_message = GCMMessage('fQlRjqXa5xA:APA91bGj1OozNgShIDgNsm441kVi1u-36YHp9A1V1udyReNnzHYc5lrS_Vxbgx34_kKwc49QOaKFvJJZynAIvq9xr1lVdspp_tWysXCK6WlfsFTyMy-LyVu0laJDdNyQ5_ojskLp8anl', data)
+gcm_conn = GCMConnection()
+gcm_conn.notify_device(gcm_message)
+
+
+
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
-gcm = GCM("AIzaSyDD6A0ZyyO3ixsNic4krnflfCsM3XOub4k")  #server key for sending notification
 
 
 @endpoints.api(name='clubs', version='v1',
@@ -254,6 +261,9 @@ class ClubApi(remote.Service):
 
                     print("Notification to be inserted",newNotif)
                     newNotifKey = newNotif.put()
+
+                   
+
 
 
             else:
