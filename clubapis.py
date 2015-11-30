@@ -484,6 +484,18 @@ class ClubApi(remote.Service):
        print "Entered the Like Posts Section"
        temp = request.clubId
        flag =0
+       pageLimit = 5
+       skipCount=0
+       upperBound=pageLimit
+       print request.pageNumber
+
+       try:
+        skipCount = (int(request.pageNumber)-1)*pageLimit
+        upperBound = int(request.pageNumber)*pageLimit
+
+       except:
+          print "Didnt give pageNumber-Default to 1"
+
        if request.date != None:
         date = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
         flag = 1
@@ -525,9 +537,28 @@ class ClubApi(remote.Service):
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        #print pylist[1].timestamp
        #print pylist
-       CollegeFeed(items=pylist)
+       #CollegeFeed(items=pylist)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
-       return CollegeFeed(items=pylist)
+       #return CollegeFeed(items=pylist)
+
+       finalList = []
+       for i in xrange(skipCount,upperBound):
+           if(i>=len(pylist)):
+            break
+           finalList.append(pylist[i])
+
+       cf = CollegeFeed()
+       cf.items = finalList
+       cf.completed=str(0)
+       if(upperBound==len(pylist)):
+                cf.completed=str(1)
+       #print pylist[1].timestamp
+       #print pylist
+
+       CollegeFeed(items=finalList)
+       #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
+       return cf
+
 
    @endpoints.method(GetInformation,CollegeFeed,path='myFeed', http_method='POST', name='personalFeed')
    def personalFeed(self, request):
@@ -537,7 +568,7 @@ class ClubApi(remote.Service):
        events = []
        pylist = []
        pylist2 = []
-       pageLimit = 2
+       pageLimit = 5
        skipCount=0
        upperBound=pageLimit
        print request.pageNumber

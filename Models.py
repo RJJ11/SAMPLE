@@ -196,6 +196,7 @@ class Event(ndb.Model):
 class EventMiniForm(messages.Message):
     title = messages.StringField(1, required=True)
     description = messages.StringField(2)
+    photo = messages.StringField(17)
     # photo = ndb.BlobProperty()
     club_id = messages.StringField(3, required=True)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
