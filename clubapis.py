@@ -31,10 +31,10 @@ from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 	
-data = {'message': 'You have x new friends',"title":"SAmple Title"}
-gcm_message = GCMMessage('fQlRjqXa5xA:APA91bGj1OozNgShIDgNsm441kVi1u-36YHp9A1V1udyReNnzHYc5lrS_Vxbgx34_kKwc49QOaKFvJJZynAIvq9xr1lVdspp_tWysXCK6WlfsFTyMy-LyVu0laJDdNyQ5_ojskLp8anl', data)
-gcm_conn = GCMConnection()
-gcm_conn.notify_device(gcm_message)
+#data = {'message': 'You have x new friends',"title":"SAmple Title"}
+#gcm_message = GCMMessage('cna1WitkPBA:APA91bEXtuAIt70pstZYmWSaJ6iwY4S1bPMppEUYWnuceIY6rakzeshkwRQuhInZZntRLx31OlhFmkJ90kwiWMzSRj9pUwQf48uLeNkx_KxY1ZNJe8XRjOLzxefy4XkkQDblJ0g_tezC', data)
+#gcm_conn = GCMConnection()
+#gcm_conn.notify_device(gcm_message)
 
 
 
@@ -261,7 +261,11 @@ class ClubApi(remote.Service):
 
                     print("Notification to be inserted",newNotif)
                     newNotifKey = newNotif.put()
-
+                    data = {'message': groupName,"title": newPost.title}
+                    print (data)
+                    gcm_message = GCMMessage('eEOQ87ujiQE:APA91bFUXNdb1WNLMIt4JJR7YNi_mzumsspNPJjz0r6s6pdVFSOoYvXBHXXtvtEfbTqMXTPPNFDzsG86hoJ9tNyJ6_kUrxRnkmJai2wxptd7v_cI4Z15JrauSD7DPbpv3LJwdZ9GzAWn', data)
+                    gcm_conn = GCMConnection()
+                    gcm_conn.notify_device(gcm_message)
                    
 
 
@@ -337,8 +341,9 @@ class ClubApi(remote.Service):
                 response.status = "2"
                 response.text = "Could not insert"
 
-        except:
+        except Exception,e:
                 print "Error"
+                print str(e)
                 response.status = "3"
                 response.text = "Error"
 
