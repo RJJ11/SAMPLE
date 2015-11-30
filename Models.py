@@ -138,6 +138,7 @@ class GetInformation(messages.Message):
     collegeId = messages.StringField(2)
     clubId = messages.StringField(3)
     date = messages.StringField(4)
+    pageNumber = messages.StringField(5)
 
 class GetPostRequestsForm(messages.Message):
     title = messages.StringField(1)
@@ -195,6 +196,7 @@ class Event(ndb.Model):
 class EventMiniForm(messages.Message):
     title = messages.StringField(1, required=True)
     description = messages.StringField(2)
+    photo = messages.StringField(17)
     # photo = ndb.BlobProperty()
     club_id = messages.StringField(3, required=True)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
@@ -391,6 +393,7 @@ class Feed(messages.Message):
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
+    completed = messages.StringField(2)
 
 class RequestMiniForm(messages.Message):
     req_id = messages.StringField(1, required="True")
@@ -418,3 +421,11 @@ class ProfileMiniForm(messages.Message):
 class MessageResponse(messages.Message):
     status = messages.StringField(1)
     text = messages.StringField(2)
+
+class UpdateGCM(messages.Message):
+    gcmId = messages.StringField(1)
+    email = messages.StringField(2)
+
+class ProfileResponse(messages.Message):
+    success = messages.StringField(1)
+    result = messages.MessageField(ProfileMiniForm,2)

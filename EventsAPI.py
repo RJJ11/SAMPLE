@@ -22,7 +22,7 @@ def eventEntry(requestentity=None):
         flag = 0
         if requestentity:
             print "Begun"
-            for field in ('title','description','club_id','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId','timestamp'):
+            for field in ('title','description','club_id','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId','timestamp','photo'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)

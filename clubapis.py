@@ -9,7 +9,7 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
 from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
-    MessageResponse
+    MessageResponse, ProfileResponse
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile,CollegeFeed
@@ -21,13 +21,13 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm
+from Models import ClubRetrievalMiniForm,UpdateGCM
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
-from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail
+from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 	
@@ -398,12 +398,29 @@ class ClubApi(remote.Service):
        return commentForm(request)
        return message_types.VoidMessage()
 
-   @endpoints.method(ProfileRetrievalMiniForm, ProfileMiniForm,
+   @endpoints.method(ProfileRetrievalMiniForm, ProfileResponse,
             path='profile', http_method='GET', name='getProfile')
    def getProfile(self, request):
         """Return user profile."""
         email=getattr(request,"email")
-        return _doProfile(email)
+        result = Profile.query(Profile.email==email)
+        present =0
+        for y in result:
+            if y.email == email:
+                present = 1
+        if present ==1:
+            success="True"
+            a = _doProfile(email)
+            return ProfileResponse(success=success,result=a)
+        else:
+            success="False"
+            a = ProfileMiniForm(name = '',
+                           email = '',
+                           phone = '',
+                           isAlumni='',
+                           collegeId =''
+                           )
+            return ProfileResponse(success=success,result=a)
 
 
    @endpoints.method(ProfileMiniForm,ProfileMiniForm,
@@ -489,6 +506,18 @@ class ClubApi(remote.Service):
        print "Entered the Like Posts Section"
        temp = request.clubId
        flag =0
+       pageLimit = 5
+       skipCount=0
+       upperBound=pageLimit
+       print request.pageNumber
+
+       try:
+        skipCount = (int(request.pageNumber)-1)*pageLimit
+        upperBound = int(request.pageNumber)*pageLimit
+
+       except:
+          print "Didnt give pageNumber-Default to 1"
+
        if request.date != None:
         date = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
         flag = 1
@@ -530,9 +559,28 @@ class ClubApi(remote.Service):
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        #print pylist[1].timestamp
        #print pylist
-       CollegeFeed(items=pylist)
+       #CollegeFeed(items=pylist)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
-       return CollegeFeed(items=pylist)
+       #return CollegeFeed(items=pylist)
+
+       finalList = []
+       for i in xrange(skipCount,upperBound):
+           if(i>=len(pylist)):
+            break
+           finalList.append(pylist[i])
+
+       cf = CollegeFeed()
+       cf.items = finalList
+       cf.completed=str(0)
+       if(upperBound==len(pylist)):
+                cf.completed=str(1)
+       #print pylist[1].timestamp
+       #print pylist
+
+       CollegeFeed(items=finalList)
+       #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
+       return cf
+
 
    @endpoints.method(GetInformation,CollegeFeed,path='myFeed', http_method='POST', name='personalFeed')
    def personalFeed(self, request):
@@ -542,12 +590,49 @@ class ClubApi(remote.Service):
        events = []
        pylist = []
        pylist2 = []
+       pageLimit = 5
+       skipCount=0
+       upperBound=pageLimit
+       print request.pageNumber
+
+       try:
+        skipCount = (int(request.pageNumber)-1)*pageLimit
+        upperBound = int(request.pageNumber)*pageLimit
+
+       except:
+          print "Didnt give pageNumber-Default to 1"
+
+
+
+       list1=[]
+       list2=[]
        for x in profile.follows:
            print x
+           print "LOOP-1"
            posts = (Post.query(Post.club_id==x))
            events = (Event.query(Event.club_id==x))
-           list1 = [copyToCollegeFeed(y) for y in events]
-           list2 = [copyToCollegeFeed(z) for z in posts]
+           list1=[]
+           list2=[]
+           #list1 = [copyToCollegeFeed(y) for y in events]
+           #list2 = [copyToCollegeFeed(z) for z in posts]
+           iteration=0
+           for y in posts:
+               #if(iteration>=skipCount and iteration<upperBound):
+               list1.append(copyToCollegeFeed(y))
+
+               #iteration+=1
+               #if(iteration==upperBound):
+               #    break
+
+           iteration=0
+
+           for z in events:
+               #if(iteration>=skipCount and iteration<upperBound):
+                list1.append(copyToCollegeFeed(y))
+                #iteration+=1
+               #if(iteration==upperBound):
+               #    break
+
            print "LIST-1"
            print list1
            pylist+=list1
@@ -561,11 +646,23 @@ class ClubApi(remote.Service):
        pylist+=pylist2
        #pylist.append(copyToCollegeFeed(x) for x in events)
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
-       print pylist[1].timestamp
+       finalList = []
+       for i in xrange(skipCount,upperBound):
+           if(i>=len(pylist)):
+            break
+           finalList.append(pylist[i])
+
+       cf = CollegeFeed()
+       cf.items = finalList
+       cf.completed=str(0)
+       if(upperBound==len(pylist)):
+                cf.completed=str(1)
+       #print pylist[1].timestamp
        #print pylist
-       CollegeFeed(items=pylist)
+
+       CollegeFeed(items=finalList)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
-       return CollegeFeed(items=pylist)
+       return cf
 
 
    @endpoints.method(GetInformation,CollegeFeed,path='adminFeed', http_method='POST', name='adminFeed')
@@ -586,4 +683,11 @@ class ClubApi(remote.Service):
            pylist+=list1
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        return CollegeFeed(items=pylist)
-api = endpoints.api_server([ClubApi]) # register API	
+
+   @endpoints.method(UpdateGCM,message_types.VoidMessage,path='updateGCM', http_method='POST', name='updateGcmId')
+   def updateGcmId(self, request):
+        changeGcm(request)
+
+        return message_types.VoidMessage()
+
+api = endpoints.api_server([ClubApi])   # register API
