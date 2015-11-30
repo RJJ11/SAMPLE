@@ -398,8 +398,20 @@ class ClubApi(remote.Service):
    def getProfile(self, request):
         """Return user profile."""
         email=getattr(request,"email")
-        return _doProfile(email)
-
+        result = Profile.query(Profile.email==email)
+        present =0
+        for y in result:
+            if y.email == email:
+                present = 1
+        if present ==1:
+            return _doProfile(email)
+        else:
+            return ProfileMiniForm(name = '',
+                           email = '',
+                           phone = '',
+                           isAlumni='',
+                           collegeId =''
+                           )
 
    @endpoints.method(ProfileMiniForm,ProfileMiniForm,
             path='profile', http_method='POST', name='saveProfile')
