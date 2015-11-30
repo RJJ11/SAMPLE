@@ -425,3 +425,7 @@ class MessageResponse(messages.Message):
 class UpdateGCM(messages.Message):
     gcmId = messages.StringField(1)
     email = messages.StringField(2)
+
+class ProfileResponse(messages.Message):
+    success = messages.StringField(1)
+    result = messages.MessageField(ProfileMiniForm,2)

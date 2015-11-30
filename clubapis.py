@@ -9,7 +9,7 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
 from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
-    MessageResponse
+    MessageResponse, ProfileResponse
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile,CollegeFeed
@@ -393,7 +393,7 @@ class ClubApi(remote.Service):
        return commentForm(request)
        return message_types.VoidMessage()
 
-   @endpoints.method(ProfileRetrievalMiniForm, ProfileMiniForm,
+   @endpoints.method(ProfileRetrievalMiniForm, ProfileResponse,
             path='profile', http_method='GET', name='getProfile')
    def getProfile(self, request):
         """Return user profile."""
@@ -404,14 +404,19 @@ class ClubApi(remote.Service):
             if y.email == email:
                 present = 1
         if present ==1:
-            return _doProfile(email)
+            success="True"
+            a = _doProfile(email)
+            return ProfileResponse(success=success,result=a)
         else:
-            return ProfileMiniForm(name = '',
+            success="False"
+            a = ProfileMiniForm(name = '',
                            email = '',
                            phone = '',
                            isAlumni='',
                            collegeId =''
                            )
+            return ProfileResponse(success=success,result=a)
+
 
    @endpoints.method(ProfileMiniForm,ProfileMiniForm,
             path='profile', http_method='POST', name='saveProfile')
