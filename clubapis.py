@@ -21,7 +21,7 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm,UpdateGCM
+from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
@@ -59,34 +59,55 @@ class ClubApi(remote.Service):
 
         return retClub
 
-   @endpoints.method(JoinClubMiniForm,message_types.VoidMessage,path='joinClub', http_method='POST', name='joinClub')
+   @endpoints.method(JoinClubMiniForm,message_types.VoidMessage,path='joinClub', http_method='POST', name='joinClubReq')
    def joinClubApi(self,request):
+            
+            if request:
+             clubKey = ndb.Key('Club',int(request.club_id))
+             club = clubKey.get()
+
+             profileKey = ndb.Key('Profile',int(request.from_pid))
+             profile = profileKey.get()
+             
+             if (club and profile and profileKey not in club.members):
+                joinCreationObj = Join_Creation()
+                joinCreationObj.from_pid = profileKey
+                joinCreationObj.to_pid = club.admin
+                joinCreationObj.club_id = clubKey
+                
+
+                print("join obj",joinCreationObj)
+                joinCreationObjKey = joinCreationObj.put()
+             
+           
+            return message_types.VoidMessage()
 
 
+   @endpoints.method(RequestMiniForm,message_types.VoidMessage,path='joinClubApproval', http_method='POST', name='joinClubApproval')
+   def joinClubApprovalApi(self,request):
         if request:
+          
+          joinCreation = ndb.Key('Join_Creation',int(request.req_id)).get()
+          club = joinCreation.club_id.get()
+          profileKey = joinCreation.from_pid
+          profile = profileKey.get()
+          print("Retrieved Profile ",profile)
 
-            clubKey = ndb.Key('Club',int(request.club_id))
-            club = clubKey.get()
+          if(request.action == "N"):
+                 joinCreation.key.delete()
+          elif (club and profile and (profileKey not in  club.members)):
+                 print("entered here")
+                 currentClub = club
+                 currentClub.members.append(profile.key)
+                 currentClub.follows.append(profile.key)
+                 currentClub.put()
 
-            profileKey = ndb.Key('Profile',int(request.from_pid))
-            profile = profileKey.get()
-            print("Retrieved Profile ",profile)
-
-
-            if (club and profile and (profileKey not in  club.members)):
-                #add profile to club
-                print("entered here")
-                currentClub = club
-                currentClub.members.append(profile.key)
-                currentClub.follows.append(profile.key)
-                currentClub.put()
-
-                currentProfile = profile
-                currentProfile.clubsJoined.append(currentClub.key)
-                currentProfile.follows.append(currentClub.key)
-                currentProfile.put()
-
-
+                 currentProfile = profile
+                 currentProfile.clubsJoined.append(currentClub.key)
+                 currentProfile.follows.append(currentClub.key)
+                 currentProfile.put()
+                 joinCreation.key.delete()
+          
 
         return message_types.VoidMessage()
 
@@ -197,11 +218,19 @@ class ClubApi(remote.Service):
         #Obtain the club request object
 
         clubRequest = ndb.Key('Club_Creation',int(request.req_id))
+        action = request.action 
+        
+        print ("Action is",action)
+        
         req = clubRequest.get()
-
-        if(req and req.approval_status == "N"):
+        
+        if (action == 'N'):
+          print ("Disapproving request and removing entry")
+          print("Request Approval Denied")
+          req.key.delete()
+        
+        elif (req and req.approval_status == "N"):
            status = approveClub(req)
-           #status returns a "y" or "N"
            if(status == "Y"):
               print("Request Approval Granted")
               newClub = createClubAfterApproval(req)
