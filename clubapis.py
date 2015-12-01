@@ -21,7 +21,7 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm,UpdateGCM
+from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
@@ -31,10 +31,10 @@ from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,change
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 	
-data = {'message': 'You have x new friends',"title":"SAmple Title"}
-gcm_message = GCMMessage('fQlRjqXa5xA:APA91bGj1OozNgShIDgNsm441kVi1u-36YHp9A1V1udyReNnzHYc5lrS_Vxbgx34_kKwc49QOaKFvJJZynAIvq9xr1lVdspp_tWysXCK6WlfsFTyMy-LyVu0laJDdNyQ5_ojskLp8anl', data)
-gcm_conn = GCMConnection()
-gcm_conn.notify_device(gcm_message)
+#data = {'message': 'You have x new friends',"title":"SAmple Title"}
+#gcm_message = GCMMessage('cna1WitkPBA:APA91bEXtuAIt70pstZYmWSaJ6iwY4S1bPMppEUYWnuceIY6rakzeshkwRQuhInZZntRLx31OlhFmkJ90kwiWMzSRj9pUwQf48uLeNkx_KxY1ZNJe8XRjOLzxefy4XkkQDblJ0g_tezC', data)
+#gcm_conn = GCMConnection()
+#gcm_conn.notify_device(gcm_message)
 
 
 
@@ -59,34 +59,55 @@ class ClubApi(remote.Service):
 
         return retClub
 
-   @endpoints.method(JoinClubMiniForm,message_types.VoidMessage,path='joinClub', http_method='POST', name='joinClub')
+   @endpoints.method(JoinClubMiniForm,message_types.VoidMessage,path='joinClub', http_method='POST', name='joinClubReq')
    def joinClubApi(self,request):
+            
+            if request:
+             clubKey = ndb.Key('Club',int(request.club_id))
+             club = clubKey.get()
+
+             profileKey = ndb.Key('Profile',int(request.from_pid))
+             profile = profileKey.get()
+             
+             if (club and profile and profileKey not in club.members):
+                joinCreationObj = Join_Creation()
+                joinCreationObj.from_pid = profileKey
+                joinCreationObj.to_pid = club.admin
+                joinCreationObj.club_id = clubKey
+                
+
+                print("join obj",joinCreationObj)
+                joinCreationObjKey = joinCreationObj.put()
+             
+           
+            return message_types.VoidMessage()
 
 
+   @endpoints.method(RequestMiniForm,message_types.VoidMessage,path='joinClubApproval', http_method='POST', name='joinClubApproval')
+   def joinClubApprovalApi(self,request):
         if request:
+          
+          joinCreation = ndb.Key('Join_Creation',int(request.req_id)).get()
+          club = joinCreation.club_id.get()
+          profileKey = joinCreation.from_pid
+          profile = profileKey.get()
+          print("Retrieved Profile ",profile)
 
-            clubKey = ndb.Key('Club',int(request.club_id))
-            club = clubKey.get()
+          if(request.action == "N"):
+                 joinCreation.key.delete()
+          elif (club and profile and (profileKey not in  club.members)):
+                 print("entered here")
+                 currentClub = club
+                 currentClub.members.append(profile.key)
+                 currentClub.follows.append(profile.key)
+                 currentClub.put()
 
-            profileKey = ndb.Key('Profile',int(request.from_pid))
-            profile = profileKey.get()
-            print("Retrieved Profile ",profile)
-
-
-            if (club and profile) :
-                #add profile to club
-                print("entered here")
-                currentClub = club
-                currentClub.members.append(profile.key)
-                currentClub.follows.append(profile.key)
-                currentClub.put()
-
-                currentProfile = profile
-                currentProfile.clubsJoined.append(currentClub.key)
-                currentProfile.follows.append(currentClub.key)
-                currentProfile.put()
-
-
+                 currentProfile = profile
+                 currentProfile.clubsJoined.append(currentClub.key)
+                 currentProfile.follows.append(currentClub.key)
+                 currentProfile.put()
+                 joinCreation.key.delete()
+          
 
         return message_types.VoidMessage()
 
@@ -103,7 +124,7 @@ class ClubApi(remote.Service):
             profileKey = ndb.Key('Profile',int(request.from_pid))
             profile = profileKey.get()
 
-            if (club and profile) :
+            if (club and profile and (profileKey not in  club.follows)):
                 #add profile to club
                 currentClub = club
                 currentClub.follows.append(profile.key)
@@ -112,6 +133,8 @@ class ClubApi(remote.Service):
                 currentProfile = profile
                 currentProfile.follows.append(currentClub.key)
                 currentProfile.put()
+            else:
+                print ("He's already following the club")     
 
 
 
@@ -195,11 +218,19 @@ class ClubApi(remote.Service):
         #Obtain the club request object
 
         clubRequest = ndb.Key('Club_Creation',int(request.req_id))
+        action = request.action 
+        
+        print ("Action is",action)
+        
         req = clubRequest.get()
-
-        if(req and req.approval_status == "N"):
+        
+        if (action == 'N'):
+          print ("Disapproving request and removing entry")
+          print("Request Approval Denied")
+          req.key.delete()
+        
+        elif (req and req.approval_status == "N"):
            status = approveClub(req)
-           #status returns a "y" or "N"
            if(status == "Y"):
               print("Request Approval Granted")
               newClub = createClubAfterApproval(req)
@@ -261,7 +292,11 @@ class ClubApi(remote.Service):
 
                     print("Notification to be inserted",newNotif)
                     newNotifKey = newNotif.put()
-
+                    data = {'message': groupName,"title": newPost.title}
+                    print (data)
+                    gcm_message = GCMMessage('eEOQ87ujiQE:APA91bFUXNdb1WNLMIt4JJR7YNi_mzumsspNPJjz0r6s6pdVFSOoYvXBHXXtvtEfbTqMXTPPNFDzsG86hoJ9tNyJ6_kUrxRnkmJai2wxptd7v_cI4Z15JrauSD7DPbpv3LJwdZ9GzAWn', data)
+                    gcm_conn = GCMConnection()
+                    gcm_conn.notify_device(gcm_message)
                    
 
 
@@ -337,8 +372,9 @@ class ClubApi(remote.Service):
                 response.status = "2"
                 response.text = "Could not insert"
 
-        except:
+        except Exception,e:
                 print "Error"
+                print str(e)
                 response.status = "3"
                 response.text = "Error"
 

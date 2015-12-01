@@ -1,14 +1,15 @@
 __author__ = 'rohit'
 import endpoints
 import logging
-import datetime
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import Event,CollegeDb,Profile,Club,EventForm,ModifyEvent
+import datetime as dt
+from datetime import datetime,date,time
+from Models import Event,CollegeDb,Profile,Club,EventForm,ModifyEvent,Notifications
 
 def eventEntry(requestentity=None):
 
@@ -165,23 +166,60 @@ def attendEvent(request):
 def getEventsBasedonTimeLeft():
     logging.basicConfig(level=logging.DEBUG)
     LOG = logging.getLogger(__name__)
-    #LOG.info(currentTime)
-    
-    #Steps to follow 
-    #s2 = '2016-11-28 21:39:57.910671'
-    #date_object = datetime.strptime(s2, '%Y-%m-%d %H:%M:%f')
-    #c = date_object - currentTime
-    #LOG.info(c)
-    #FMT = '%YYYY-11-%H:%M:%S'
-    #tdelta = datetime.strptime(s2, FMT) - datetime.strptime(s1, FMT)
-
+    current  = dt.datetime.now().replace(microsecond = 0)
+    currentDate = current.date()
+    currentTime  = current.time()
+    LOG.info("Current time")
+    LOG.info(currentTime)
+    eventlist = []   
     event_query = Event.query().fetch()
-    currentTime = datetime.datetime.now()
-    
-    #if (y-x) < datetime.timedelta(0,30):
-    #       LOG.info("less than 30 seconds")
-   
     for event in event_query:
-         LOG.info(event.title)
+        start_date =  event.start_time.date()
+        diff = start_date - currentDate
+        LOG.info("Considering this event")
+        LOG.info(event.title)
         
+        if(diff == dt.timedelta(hours=0) and diff == dt.timedelta(minutes=0) and diff == dt.timedelta(seconds = 0)):
+             LOG.info("this event is happening today")
+             LOG.info(event.title) 
+             start_time = event.start_time.time()
+             FMT = '%H:%M:%S'
+             tdelta = datetime.strptime(str(start_time), FMT) - datetime.strptime(str(currentTime), FMT)
+             LOG.info(tdelta) 
+
+             b = dt.timedelta(days = 0)
+             c = dt.timedelta(hours = 2)
+             
+             if tdelta >= b: 
+                LOG.info("made through first part")
+                
+                if(tdelta<=c):
+                    LOG.info(event.title)
+                    eventlist.append(event.key)
+                    LOG.info("has reached here")
+                    LOG.info("Creating notification")
+                    group = event.club_id.get()
+                    groupName = group.name
+                    print(groupName)
+                    print(event.club_id)
+                    print(group.photo)
+                    print(event.timestamp)
+                    newNotif = Notifications(
+                     groupName = groupName,
+                     groupId = event.club_id,
+                     groupImage = group.photo,
+                     eventName = event.title,
+                     eventId = event.key,
+                     timestamp = event.timestamp,
+                     type = "Reminder"
+                    )
+                    print("Notification to be inserted",newNotif)
+                    newNotifKey = newNotif.put()
+ 
+
+                else:
+                 LOG.info("This event is still some time away from notification") 
+             else:
+                LOG.info("This event is over")   
     
+    LOG.info(eventlist)

@@ -268,7 +268,12 @@ class Club_Creation(ndb.Model):
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many club creation requests
     approval_status = ndb.StringProperty()
     #id = club_creation_id
-
+class Join_Creation(ndb.Model):
+    from_pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many club creation requests
+    to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to student council admin
+    
+    club_id = ndb.KeyProperty(kind='Club', required=True)
+    
 
 class ClubRequestMiniForm(messages.Message):
     """ClubRequestMiniForm -- What's shown on the UI for an club request"""
@@ -397,6 +402,7 @@ class CollegeFeed(messages.Message):
 
 class RequestMiniForm(messages.Message):
     req_id = messages.StringField(1, required="True")
+    action = messages.StringField(2, required="True")
 
 class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- What's shown on the UI"""
