@@ -73,7 +73,7 @@ class ClubApi(remote.Service):
             print("Retrieved Profile ",profile)
 
 
-            if (club and profile) :
+            if (club and profile and (profileKey not in  club.members)):
                 #add profile to club
                 print("entered here")
                 currentClub = club
@@ -103,7 +103,7 @@ class ClubApi(remote.Service):
             profileKey = ndb.Key('Profile',int(request.from_pid))
             profile = profileKey.get()
 
-            if (club and profile) :
+            if (club and profile and (profileKey not in  club.follows)):
                 #add profile to club
                 currentClub = club
                 currentClub.follows.append(profile.key)
@@ -112,6 +112,8 @@ class ClubApi(remote.Service):
                 currentProfile = profile
                 currentProfile.follows.append(currentClub.key)
                 currentProfile.put()
+            else:
+                print ("He's already following the club")     
 
 
 
