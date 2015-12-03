@@ -30,9 +30,9 @@ from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,appr
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
-	
-#data = {'message': 'You have x new friends',"title":"SAmple Title"}
-#gcm_message = GCMMessage('cna1WitkPBA:APA91bEXtuAIt70pstZYmWSaJ6iwY4S1bPMppEUYWnuceIY6rakzeshkwRQuhInZZntRLx31OlhFmkJ90kwiWMzSRj9pUwQf48uLeNkx_KxY1ZNJe8XRjOLzxefy4XkkQDblJ0g_tezC', data)
+
+#data = {'message': '5 mins later',"title":"Hi RKD"}
+#gcm_message = GCMMessage('cDXc7bMlwPQ:APA91bGAXV7203E6GUPkrbSOzQBv1_Xc4ztClQ6XcEcr80jw9jKBdZmLZ1U04_dTiH37AOydvv07_fBGiZXrszGkIxN5ZQgjsdqu35orSSOVq02XxDLVcBaqRMvxQTr-ucYQzbVoj5kE', data)
 #gcm_conn = GCMConnection()
 #gcm_conn.notify_device(gcm_message)
 
@@ -73,11 +73,27 @@ class ClubApi(remote.Service):
                 joinCreationObj = Join_Creation()
                 joinCreationObj.from_pid = profileKey
                 joinCreationObj.to_pid = club.admin
+                to_pidProfile = joinCreationObj.to_pid.get()
                 joinCreationObj.club_id = clubKey
-                
-
                 print("join obj",joinCreationObj)
                 joinCreationObjKey = joinCreationObj.put()
+
+                newNotif = Notifications(
+                     groupName = club.name,
+                     groupId = club.key,
+                     to_pid = joinCreationObj.to_pid,
+                     type = "Join Request"
+                    )
+
+                print("Notification to be inserted in join approval",newNotif)
+                newNotifKey = newNotif.put()
+                 
+                data = {'message': profile.name + " wishes to join","title":  club.name}
+                print (data)
+                gcmId = to_pidProfile.gcmId
+                gcm_message = GCMMessage(gcmId, data)
+                gcm_conn = GCMConnection()
+                gcm_conn.notify_device(gcm_message)
              
            
             return message_types.VoidMessage()
@@ -94,18 +110,61 @@ class ClubApi(remote.Service):
           print("Retrieved Profile ",profile)
 
           if(request.action == "N"):
+                 
+                 #send notif message to the guy who has req,saying that it has been rejected
+                 newNotif = Notifications(
+                     groupName = club.name,
+                     groupId = club.key,
+                     to_pid = joinCreation.from_pid,
+                     type = "Approval Rejection"
+                     
+                    )
+
+                 print("Notification to be inserted in join approval",newNotif)
+                 newNotifKey = newNotif.put()
+                 data = {'message': "Approval Denied","title": club.name}
+                 print (data)
+                 gcmId = profile.gcmId
+                 gcm_message = GCMMessage(gcmId, data)
+                 gcm_conn = GCMConnection()
+                 gcm_conn.notify_device(gcm_message)
                  joinCreation.key.delete()
+
+
           elif (club and profile and (profileKey not in  club.members)):
                  print("entered here")
                  currentClub = club
                  currentClub.members.append(profile.key)
-                 currentClub.follows.append(profile.key)
-                 currentClub.put()
-
+                 
                  currentProfile = profile
                  currentProfile.clubsJoined.append(currentClub.key)
-                 currentProfile.follows.append(currentClub.key)
+                 
+                 if (currentProfile.key not in currentClub.follows):
+                   print ("I've entered this because these guys are totally new")
+                   currentProfile.follows.append(currentClub.key)
+                   currentClub.follows.append(profile.key)
+                 
+                 currentClub.put()
                  currentProfile.put()
+
+                 #Create Notification here where the to_pid = guy who has made the join req
+                 #Send push notification to the gcm id of this dude.
+                 newNotif = Notifications(
+                     groupName = club.name,
+                     groupId = club.key,
+                     to_pid = joinCreation.from_pid,
+                     type = "Approved Join Request"
+                     
+                    )
+
+                 print("Notification to be inserted in join approval",newNotif)
+                 newNotifKey = newNotif.put()
+                 data = {'message': "You are now a member","title": currentClub.name}
+                 print (data)
+                 gcmId = currentProfile.gcmId
+                 gcm_message = GCMMessage(gcmId, data)
+                 gcm_conn = GCMConnection()
+                 gcm_conn.notify_device(gcm_message)
                  joinCreation.key.delete()
           
 
@@ -208,6 +267,21 @@ class ClubApi(remote.Service):
            print("Club Ret",club_ret)
            if(len(club_ret) == 0):
               clubRequest = createClub(request)
+              currentProfile = clubRequest.to_pid.get()
+              newNotif = Notifications(
+                     groupName = clubRequest.club_name,
+                     to_pid = clubRequest.to_pid,
+                     type = "Club Creation Request"
+                    )
+
+              print("Notification to be inserted in club creation request",newNotif)
+              newNotifKey = newNotif.put()
+              data = {'message': clubRequest.club_name,"title": "Creation Request"}
+              print (data)
+              gcmId = currentProfile.gcmId
+              gcm_message = GCMMessage(gcmId, data)
+              gcm_conn = GCMConnection()
+              gcm_conn.notify_device(gcm_message)
               print("Finished the clubRequest")
 
 
@@ -223,23 +297,72 @@ class ClubApi(remote.Service):
         print ("Action is",action)
         
         req = clubRequest.get()
+        currentProfile = req.from_pid.get()
+
+        print("From Pid profile is",currentProfile)
         
         if (action == 'N'):
-          print ("Disapproving request and removing entry")
-          print("Request Approval Denied")
-          req.key.delete()
+            print ("Disapproving request and removing entry")
+            print("Request Approval Denied")
+            newNotif = Notifications(
+                     groupName = req.club_name,
+                     to_pid = req.from_pid,
+                     type = "Rejected Club Creation Request"
+                    )
+
+            print("Notification to be inserted in club approval rejection",newNotif)
+            newNotifKey = newNotif.put()
+            data = {'message': req.club_name,"title": "Creation Request Denied"}
+            print (data)
+            gcmId = currentProfile.gcmId
+            gcm_message = GCMMessage(gcmId, data)
+            gcm_conn = GCMConnection()
+            gcm_conn.notify_device(gcm_message)
+            req.key.delete()
         
         elif (req and req.approval_status == "N"):
            status = approveClub(req)
            if(status == "Y"):
               print("Request Approval Granted")
               newClub = createClubAfterApproval(req)
+              currentProfile = newClub.admin.get()
               if(newClub):
-                  print("The club that has been created is",newClub)
-                  req.key.delete()
+              	  newNotif = Notifications(
+                     groupName = newClub.name,
+                     groupId = newClub.key,
+                     to_pid = newClub.admin,
+                     type = "Approved Club Creation Request"
+                    )
+
+              print("Notification to be inserted in club approval ",newNotif)
+              newNotifKey = newNotif.put()
+              data = {'message': newClub.name,"title": "Creation Request Approved"}
+              print (data)
+              gcmId = currentProfile.gcmId
+              gcm_message = GCMMessage(gcmId, data)
+              gcm_conn = GCMConnection()
+              gcm_conn.notify_device(gcm_message)
+              
+              print("The club that has been created is",newClub)
+              req.key.delete()
            else:
               print("Request Approval Denied")
+              newNotif = Notifications(
+                     groupName = req.club_name,
+                     to_pid = req.from_pid,
+                     type = "Rejected Club Creation Request"
+                    )
+
+              print("Notification to be inserted in club approval rejection",newNotif)
+              newNotifKey = newNotif.put()
+              data = {'message': req.club_name,"title": "Creation Request Denied"}
+              print (data)
+              gcmId = currentProfile.gcmId
+              gcm_message = GCMMessage(gcmId, data)
+              gcm_conn = GCMConnection()
+              gcm_conn.notify_device(gcm_message)
               req.key.delete()
+            
         return message_types.VoidMessage()
 
 
@@ -255,6 +378,22 @@ class ClubApi(remote.Service):
    def createPostRequest(self, request):
         print("Entered Post Request Portion")
         clubRequest = postRequest(request)
+        currentProfile = clubRequest.to_pid.get()
+        newNotif = Notifications(
+                     groupName = clubRequest.club_id.get().name,
+                     groupId = clubRequest.club_id,
+                     to_pid = clubRequest.to_pid,
+                     type = "Post Creation Request"
+                    )
+
+        print("Notification to be inserted in Post Creation Request",newNotif)
+        newNotifKey = newNotif.put()
+        data = {'message': clubRequest.title,"title": "Post Creation Request"}
+        print (data)
+        gcmId = currentProfile.gcmId
+        gcm_message = GCMMessage(gcmId, data)
+        gcm_conn = GCMConnection()
+        gcm_conn.notify_device(gcm_message)
         print("Inserted into the post request table")
         return message_types.VoidMessage()
 
@@ -294,7 +433,23 @@ class ClubApi(remote.Service):
                     newNotifKey = newNotif.put()
                     data = {'message': groupName,"title": newPost.title}
                     print (data)
-                    gcm_message = GCMMessage('eEOQ87ujiQE:APA91bFUXNdb1WNLMIt4JJR7YNi_mzumsspNPJjz0r6s6pdVFSOoYvXBHXXtvtEfbTqMXTPPNFDzsG86hoJ9tNyJ6_kUrxRnkmJai2wxptd7v_cI4Z15JrauSD7DPbpv3LJwdZ9GzAWn', data)
+                    
+                    #get the followers of the club pids. Get GCM Id's from those and send
+                    print ("GROUP FOLLOWS LIST ", group.follows)
+
+                    postlist = []
+                    if (group.follows):
+                    	for pid in group.follows:
+                           person = pid.get()
+                           print ("PID is",person)
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             print ("GCM ID is",gcmId)
+                             postlist.append(gcmId) 
+                    
+                    
+                    print ("post list is",postlist)
+                    gcm_message = GCMMessage(postlist, data)
                     gcm_conn = GCMConnection()
                     gcm_conn.notify_device(gcm_message)
                    
@@ -366,6 +521,31 @@ class ClubApi(remote.Service):
 
                     print("Notification to be inserted",newNotif)
                     newNotifKey = newNotif.put()
+
+
+                    data = {'message': groupName,"title": newEvent.title}
+                    print (data)
+                    
+                    #get the followers of the club pids. Get GCM Id's from those and send
+                    print ("GROUP FOLLOWS LIST ", group.follows)
+
+                    eventlist = []
+                    if (group.follows):
+                    	for pid in group.follows:
+                           person = pid.get()
+                           print ("PID is",person)
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             print ("GCM ID is",gcmId)
+                             eventlist.append(gcmId) 
+                    
+                    
+                    print ("Event list is",eventlist)
+                    gcm_message = GCMMessage(eventlist, data)
+                    gcm_conn = GCMConnection()
+                    gcm_conn.notify_device(gcm_message)
+                   
+                    print("Should have worked")
 
             else:
                 print "Not Present"

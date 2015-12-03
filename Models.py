@@ -6,10 +6,11 @@ from google.appengine.ext import ndb
 
 class Notifications(ndb.Model):
     groupName = ndb.StringProperty(required=True)
-    groupId = ndb.KeyProperty(kind='Club', required=True)
+    groupId = ndb.KeyProperty(kind='Club')
     groupImage = ndb.BlobProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
+    to_pid = ndb.KeyProperty(kind = 'Profile')
     postName = ndb.StringProperty()
     postId = ndb.KeyProperty(kind ='Post')
     timestamp = ndb.DateTimeProperty()
@@ -47,7 +48,7 @@ class Profile(ndb.Model):
     company = ndb.StringProperty()
     location = ndb.StringProperty()
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many people
-    eventsAttending = ndb.KeyProperty(kind='Event')
+    eventsAttending = ndb.KeyProperty(kind='Event',repeated=True)
     #id = pid
 
 class Club(ndb.Model):
