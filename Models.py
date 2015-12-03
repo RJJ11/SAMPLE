@@ -372,6 +372,7 @@ class Colleges(messages.Message):
 
 class ProfileRetrievalMiniForm(messages.Message):
     email=messages.StringField(1,required=True)
+    gcmId=messages.StringField(2)
 
 class Feed(messages.Message):
     title = messages.StringField(1)

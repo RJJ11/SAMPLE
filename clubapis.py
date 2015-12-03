@@ -895,10 +895,33 @@ class ClubApi(remote.Service):
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        return CollegeFeed(items=pylist)
 
-   @endpoints.method(UpdateGCM,message_types.VoidMessage,path='updateGCM', http_method='POST', name='updateGcmId')
-   def updateGcmId(self, request):
-        changeGcm(request)
+   @endpoints.method(ProfileRetrievalMiniForm, ProfileResponse,path='profileGCM', http_method='POST', name='profileGCM')
+   def profileGCM(self, request):
+        email=getattr(request,"email")
+        gcm=getattr(request,"gcmId")
+        result = Profile.query(Profile.email==email)
+        present =0
+        for y in result:
+            if y.email == email:
+                present = 1
+                for y in profile:
+                    print y.gcmId
+                    y.gcmId = request.gcmId
+                    y.put()
 
-        return message_types.VoidMessage()
+        if present ==1:
+            success="True"
+            a = _doProfile(email)
+            return ProfileResponse(success=success,result=a)
+        else:
+            success="False"
+            a = ProfileMiniForm(name = '',
+                           email = '',
+                           phone = '',
+                           isAlumni='',
+                           collegeId =''
+                           )
+            return ProfileResponse(success=success,result=a)
+
 
 api = endpoints.api_server([ClubApi])   # register API
