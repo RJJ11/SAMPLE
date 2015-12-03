@@ -10,7 +10,7 @@ from google.appengine.ext import ndb
 import datetime as dt
 from datetime import datetime,date,time
 from Models import Event,CollegeDb,Profile,Club,EventForm,ModifyEvent,Notifications
-
+from gae_python_gcm.gcm import GCMMessage, GCMConnection
 def eventEntry(requestentity=None):
 
         event_request = Event()
@@ -153,13 +153,26 @@ def attendEvent(request):
        event = event_id.get()
        person = from_pid.get()
        pylist = event.attendees
+
+
        if(from_pid not in pylist):
-        event.attendees.append(from_pid)
-        person.eventsAttending.append(event_id)
-        person.put()
-        event.put()
+             
+              event.attendees.append(from_pid)
+              if person.eventsAttending != None:
+                 print "ENTERED HERE"
+                 person.eventsAttending.append(event_id)
+                 person.put()
+                 event.put()
+
+              else:
+                 print "Entered the second part"
+                 person.eventsAttending = event_id
+                 person.put()
+                 event.put()
        else:
-        print "Sorry Already Attending"
+            print "Sorry Already Attending"
+
+       print ("Event Attendees List",person.eventsAttending)     
 
        return message_types.VoidMessage
 
@@ -200,10 +213,6 @@ def getEventsBasedonTimeLeft():
                     LOG.info("Creating notification")
                     group = event.club_id.get()
                     groupName = group.name
-                    print(groupName)
-                    print(event.club_id)
-                    print(group.photo)
-                    print(event.timestamp)
                     newNotif = Notifications(
                      groupName = groupName,
                      groupId = event.club_id,
@@ -213,9 +222,34 @@ def getEventsBasedonTimeLeft():
                      timestamp = event.timestamp,
                      type = "Reminder"
                     )
-                    print("Notification to be inserted",newNotif)
                     newNotifKey = newNotif.put()
- 
+                    
+                    data = {'message': groupName + "About to start soon","title": event.title}
+                    LOG.info(data)
+                    
+                    #get the followers of the club pids. Get GCM Id's from those and send
+                    LOG.info("Event attendees list")
+                    LOG.info(event.attendees)
+
+                    attendeeslist = []
+                    if (event.attendees):
+                        for pid in event.attendees:
+                           person = pid.get()
+                           LOG.info("PID is")
+                           LOG.info(person)
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             #print ("GCM ID is",gcmId)
+                             attendeeslist.append(gcmId) 
+                    
+                    
+                    LOG.info("Attendees GCM list is")
+                    LOG.info(attendeeslist)
+                    gcm_message = GCMMessage(attendeeslist, data)
+                    gcm_conn = GCMConnection()
+                    gcm_conn.notify_device(gcm_message)
+                   
+                    LOG.info("Chill")
 
                 else:
                  LOG.info("This event is still some time away from notification") 
