@@ -898,16 +898,15 @@ class ClubApi(remote.Service):
    @endpoints.method(ProfileRetrievalMiniForm, ProfileResponse,path='profileGCM', http_method='POST', name='profileGCM')
    def profileGCM(self, request):
         email=getattr(request,"email")
-        gcm=getattr(request,"gcmId")
+        gcmId=getattr(request,"gcmId")
         result = Profile.query(Profile.email==email)
         present =0
         for y in result:
             if y.email == email:
                 present = 1
-                for y in profile:
-                    print y.gcmId
-                    y.gcmId = request.gcmId
-                    y.put()
+                print y.gcmId
+                y.gcmId = gcmId
+                y.put()
 
         if present ==1:
             success="True"
