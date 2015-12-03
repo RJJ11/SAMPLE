@@ -49,6 +49,7 @@ class Profile(ndb.Model):
     location = ndb.StringProperty()
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many people
     eventsAttending = ndb.KeyProperty(kind='Event',repeated=True)
+    photoUrl = ndb.StringProperty()
     #id = pid
 
 class Club(ndb.Model):
@@ -425,6 +426,7 @@ class ProfileMiniForm(messages.Message):
     follows_names = messages.StringField(15,repeated=True)
     pid = messages.StringField(16)
     gcmId = messages.StringField(17)
+    photoUrl = messages.StringField(18)
 
 class MessageResponse(messages.Message):
     status = messages.StringField(1)
