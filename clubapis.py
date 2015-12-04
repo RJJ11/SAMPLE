@@ -230,20 +230,28 @@ class ClubApi(remote.Service):
                 for obj in college.group_list :
                    ret_club = obj.get()
 
+                   print ret_club
                    format_club = ClubMiniForm()
 
                    format_club.name = ret_club.name
-
+                   print ("Name",format_club.name)
                    format_club.abbreviation = ret_club.abbreviation
-
-                   format_club.admin = ret_club.admin.get().name
-
+                   print ("abbreviation",format_club.abbreviation)
                    format_club.collegeName = ret_club.collegeId.get().name
-
+                   print ("CName",format_club.collegeName)
+                   
                    format_club.description = ret_club.description
-
+                   print ("description",format_club.description) 
                    format_club.club_id = str(ret_club.key.id())
+                   print ("Club Id",format_club.club_id)
 
+
+                   profileKey = ndb.Key('Profile',int(ret_club.admin.id()))
+                   #profile = profileKey.get() This line has the error. Please fix
+                   #print(profileKey)
+            
+
+                   
 
                    list_of_clubs.list.append(format_club)
 
@@ -874,6 +882,8 @@ class ClubApi(remote.Service):
        CollegeFeed(items=finalList)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
        return cf
+
+    
 
 
    @endpoints.method(GetInformation,CollegeFeed,path='adminFeed', http_method='POST', name='adminFeed')
