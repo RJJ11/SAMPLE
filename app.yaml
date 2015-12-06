@@ -32,17 +32,21 @@ handlers:       # static then dynamic
 - url: /partials
   static_dir: static/partials
 
-- url: /
-  static_files: templates/index.html
-  upload: templates/index\.html
-  secure: always
+
 
 - url: /_ah/spi/.*
   script: clubapis.api
   secure: always
 - url: /crontasks
-  script: cronmodule.py  
+  script: cronmodule.py 
+   
+- url: /get_upload_url
+  script: main.app
+  login: required
 
+- url: /upload_photo
+  script: main.app
+  login: required
 
 libraries:
 
@@ -55,3 +59,6 @@ libraries:
 
 - name: ssl
   version: latest
+
+- name: webapp2
+  version: "2.5.2"
