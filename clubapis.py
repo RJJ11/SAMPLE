@@ -13,12 +13,12 @@ from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPost
 from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models import Profile,CollegeFeed
-from Models import CollegeDb,Notifications,NotificationResponseForm
+from Models import CollegeDb,Notifications,NotificationResponseForm,NotificationList
 from Models import CollegeDbMiniForm
 from Models import ClubMiniForm
 from Models import GetClubMiniForm
 from Models import JoinClubMiniForm
-from Models import FollowClubMiniForm,RequestMiniForm
+from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation
@@ -229,30 +229,13 @@ class ClubApi(remote.Service):
 
                 for obj in college.group_list :
                    ret_club = obj.get()
-
-                   print ret_club
                    format_club = ClubMiniForm()
-
                    format_club.name = ret_club.name
-                   print ("Name",format_club.name)
                    format_club.abbreviation = ret_club.abbreviation
-                   print ("abbreviation",format_club.abbreviation)
                    format_club.collegeName = ret_club.collegeId.get().name
-                   print ("CName",format_club.collegeName)
-                   
+                   format_club.name = ret_club.admin.get().name
                    format_club.description = ret_club.description
-                   print ("description",format_club.description) 
                    format_club.club_id = str(ret_club.key.id())
-                   print ("Club Id",format_club.club_id)
-
-
-                   profileKey = ndb.Key('Profile',int(ret_club.admin.id()))
-                   #profile = profileKey.get() This line has the error. Please fix
-                   #print(profileKey)
-            
-
-                   
-
                    list_of_clubs.list.append(format_club)
 
 
@@ -427,24 +410,8 @@ class ClubApi(remote.Service):
                     #Create Notification Feed
                     group = newPost.club_id.get()
                     groupName = group.name
-                    newNotif = Notifications(
-                     groupName = groupName,
-                     groupId = newPost.club_id,
-                     groupImage = group.photo,
-                     postName = newPost.title,
-                     postId = newPost.key,
-                     timestamp = newPost.timestamp,
-                     type = "Post"
-                    )
-
-                    print("Notification to be inserted",newNotif)
-                    newNotifKey = newNotif.put()
                     data = {'message': groupName,"title": newPost.title}
-                    print (data)
                     
-                    #get the followers of the club pids. Get GCM Id's from those and send
-                    print ("GROUP FOLLOWS LIST ", group.follows)
-
                     postlist = []
                     if (group.follows):
                     	for pid in group.follows:
@@ -453,7 +420,22 @@ class ClubApi(remote.Service):
                            gcmId = person.gcmId
                            if (gcmId):
                              print ("GCM ID is",gcmId)
-                             postlist.append(gcmId) 
+                             postlist.append(gcmId)
+
+                           newNotif = Notifications(
+                                      groupName = groupName,
+                                      groupId = newPost.club_id,
+                                      groupImage = group.photo,
+                                      postName = newPost.title,
+                                      postId = newPost.key,
+                                      timestamp = newPost.timestamp,
+                                      type = "Post",
+                                      to_pid = person.key
+                                      )
+
+                           print("Notification to be inserted",newNotif)
+                           newNotifKey = newNotif.put()
+                       
                     
                     
                     print ("post list is",postlist)
@@ -496,43 +478,23 @@ class ClubApi(remote.Service):
    def createEvent(self, request):
         response = MessageResponse()
         print("Entered Event Entry Portion")
-        print request.club_id
+        
         try:
             person_key = ndb.Key('Profile',int(request.event_creator))
+            print(person_key)
             profile = person_key.get()
+            
             club_key = ndb.Key('Club',int(request.club_id))
             if club_key in profile.clubsJoined:
-                    print "Present"
                     newEvent = eventEntry(request)
-                    print ("NEW EVENT",newEvent)
                     response.status = "1"
                     response.text = "Inserted into Posts Table"
                     group = newEvent.club_id.get()
                     groupName = group.name
 
-                    print(groupName)
-                    print(newEvent.club_id)
-                    print(group.photo)
-                    print(newEvent.title)
-                    print(newEvent.key)
-                    print(newEvent.timestamp)
-
-                    newNotif = Notifications(
-                     groupName = groupName,
-                     groupId = newEvent.club_id,
-                     groupImage = group.photo,
-                     eventName = newEvent.title,
-                     eventId = newEvent.key,
-                     timestamp = newEvent.timestamp,
-                     type = "Event"
-                    )
-
-                    print("Notification to be inserted",newNotif)
-                    newNotifKey = newNotif.put()
-
+                    
 
                     data = {'message': groupName,"title": newEvent.title}
-                    print (data)
                     
                     #get the followers of the club pids. Get GCM Id's from those and send
                     print ("GROUP FOLLOWS LIST ", group.follows)
@@ -541,12 +503,25 @@ class ClubApi(remote.Service):
                     if (group.follows):
                     	for pid in group.follows:
                            person = pid.get()
-                           print ("PID is",person)
                            gcmId = person.gcmId
                            if (gcmId):
                              print ("GCM ID is",gcmId)
-                             eventlist.append(gcmId) 
-                    
+                             eventlist.append(gcmId)
+                           newNotif = Notifications(
+                                        groupName = groupName,
+                                        groupId = newEvent.club_id,
+                                        groupImage = group.photo,
+                                        eventName = newEvent.title,
+                                        eventId = newEvent.key,
+                                        timestamp = newEvent.timestamp,
+                                        type = "Event",
+                                        to_pid = person.key
+                                        )
+
+                           print("Notification to be inserted",newNotif)
+                           newNotifKey = newNotif.put() 
+                      
+                             
                     
                     print ("Event list is",eventlist)
                     gcm_message = GCMMessage(eventlist, data)
@@ -791,7 +766,7 @@ class ClubApi(remote.Service):
        cf = CollegeFeed()
        cf.items = finalList
        cf.completed=str(0)
-       if(upperBound==len(pylist)):
+       if(upperBound>=len(pylist)):
                 cf.completed=str(1)
        #print pylist[1].timestamp
        #print pylist
@@ -847,7 +822,7 @@ class ClubApi(remote.Service):
 
            for z in events:
                #if(iteration>=skipCount and iteration<upperBound):
-                list1.append(copyToCollegeFeed(y))
+                list1.append(copyToCollegeFeed(z))
                 #iteration+=1
                #if(iteration==upperBound):
                #    break
@@ -874,7 +849,7 @@ class ClubApi(remote.Service):
        cf = CollegeFeed()
        cf.items = finalList
        cf.completed=str(0)
-       if(upperBound==len(pylist)):
+       if(upperBound>=len(pylist)):
                 cf.completed=str(1)
        #print pylist[1].timestamp
        #print pylist
@@ -931,6 +906,58 @@ class ClubApi(remote.Service):
                            collegeId =''
                            )
             return ProfileResponse(success=success,result=a)
+
+   @endpoints.method(NotificationMiniForm,NotificationList,path='myNotifications', http_method='POST', name='myNotificationFeed')
+   def myNotificationFeed(self, request):
+       pid = ndb.Key('Profile',int(request.pid))
+       notificationslist = Notifications.query(Notifications.to_pid == pid).fetch()
+       
+       listresponse = NotificationList()
+
+       for obj in notificationslist:
+             newListObj = NotificationResponseForm()
+             
+             if(obj.groupName != None):
+                newListObj.groupName = obj.groupName
+             else:
+                newListObj.groupName = None
+             
+
+             if(obj.groupId != None):
+                newListObj.groupId = str(obj.groupId.id())
+             else:
+                newListObj.groupId = None
+                          
+             if(obj.eventName != None):
+                newListObj.eventName = obj.eventName
+             else:
+                newListObj.eventName = None
+             
+
+             if(obj.eventId != None):
+                newListObj.eventId = str(obj.eventId.id())
+             else:
+                newListObj.eventId = None
+             
+
+             if(obj.postName != None):
+                newListObj.postName = obj.postName
+             else :
+                newListObj.postName = None
+             
+
+             if(obj.postId != None):
+                newListObj.postId = str(obj.postId.id())
+             else :
+                newListObj.postId = None
+             
+             newListObj.type = obj.type
+             listresponse.list.append(newListObj) 
+               
+       
+       
+
+       return listresponse
 
 
 api = endpoints.api_server([ClubApi])   # register API

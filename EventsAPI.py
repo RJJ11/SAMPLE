@@ -213,16 +213,7 @@ def getEventsBasedonTimeLeft():
                     LOG.info("Creating notification")
                     group = event.club_id.get()
                     groupName = group.name
-                    newNotif = Notifications(
-                     groupName = groupName,
-                     groupId = event.club_id,
-                     groupImage = group.photo,
-                     eventName = event.title,
-                     eventId = event.key,
-                     timestamp = event.timestamp,
-                     type = "Reminder"
-                    )
-                    newNotifKey = newNotif.put()
+                    
                     
                     data = {'message': groupName + "About to start soon","title": event.title}
                     LOG.info(data)
@@ -240,7 +231,18 @@ def getEventsBasedonTimeLeft():
                            gcmId = person.gcmId
                            if (gcmId):
                              #print ("GCM ID is",gcmId)
-                             attendeeslist.append(gcmId) 
+                             attendeeslist.append(gcmId)
+                           newNotif = Notifications(
+                                      groupName = groupName,
+                                      groupId = event.club_id,
+                                      groupImage = group.photo,
+                                      eventName = event.title,
+                                      eventId = event.key,
+                                      timestamp = event.timestamp,
+                                      type = "Reminder",
+                                      to_pid = pid
+                                      )
+                           newNotifKey = newNotif.put()   
                     
                     
                     LOG.info("Attendees GCM list is")

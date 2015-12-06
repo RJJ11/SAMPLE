@@ -26,7 +26,8 @@ class NotificationResponseForm(messages.Message):
     postId = messages.StringField(7)
     timestamp = messages.StringField(8)
     type = messages.StringField(9)
-
+class NotificationList(messages.Message):
+    list = messages.MessageField(NotificationResponseForm, 1, repeated=True)
 
 
 
@@ -439,3 +440,6 @@ class UpdateGCM(messages.Message):
 class ProfileResponse(messages.Message):
     success = messages.StringField(1)
     result = messages.MessageField(ProfileMiniForm,2)
+
+class NotificationMiniForm(messages.Message):
+    pid = messages.StringField(1)
