@@ -1,5 +1,6 @@
 from datetime import datetime
 import endpoints
+import datetime as dt
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -18,7 +19,7 @@ from Models import CollegeDbMiniForm
 from Models import ClubMiniForm
 from Models import GetClubMiniForm
 from Models import JoinClubMiniForm
-from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm
+from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation
@@ -27,7 +28,7 @@ from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commen
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
 from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
-from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm
+from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 
@@ -116,7 +117,8 @@ class ClubApi(remote.Service):
                      groupName = club.name,
                      groupId = club.key,
                      to_pid = joinCreation.from_pid,
-                     type = "Approval Rejection"
+                     type = "Approval Rejection",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
                      
                     )
 
@@ -153,8 +155,8 @@ class ClubApi(remote.Service):
                      groupName = club.name,
                      groupId = club.key,
                      to_pid = joinCreation.from_pid,
-                     type = "Approved Join Request"
-                     
+                     type = "Approved Join Request",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
                  print("Notification to be inserted in join approval",newNotif)
@@ -262,7 +264,8 @@ class ClubApi(remote.Service):
               newNotif = Notifications(
                      groupName = clubRequest.club_name,
                      to_pid = clubRequest.to_pid,
-                     type = "Club Creation Request"
+                     type = "Club Creation Request",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
               print("Notification to be inserted in club creation request",newNotif)
@@ -298,7 +301,8 @@ class ClubApi(remote.Service):
             newNotif = Notifications(
                      groupName = req.club_name,
                      to_pid = req.from_pid,
-                     type = "Rejected Club Creation Request"
+                     type = "Rejected Club Creation Request",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
             print("Notification to be inserted in club approval rejection",newNotif)
@@ -322,7 +326,8 @@ class ClubApi(remote.Service):
                      groupName = newClub.name,
                      groupId = newClub.key,
                      to_pid = newClub.admin,
-                     type = "Approved Club Creation Request"
+                     type = "Approved Club Creation Request",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
               print("Notification to be inserted in club approval ",newNotif)
@@ -341,7 +346,8 @@ class ClubApi(remote.Service):
               newNotif = Notifications(
                      groupName = req.club_name,
                      to_pid = req.from_pid,
-                     type = "Rejected Club Creation Request"
+                     type = "Rejected Club Creation Request",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
               print("Notification to be inserted in club approval rejection",newNotif)
@@ -374,7 +380,9 @@ class ClubApi(remote.Service):
                      groupName = clubRequest.club_id.get().name,
                      groupId = clubRequest.club_id,
                      to_pid = clubRequest.to_pid,
-                     type = "Post Creation Request"
+                     type = "Post Creation Request",
+                     timestamp  = dt.datetime.now().replace(microsecond = 0)
+                    
                     )
 
         print("Notification to be inserted in Post Creation Request",newNotif)
@@ -924,7 +932,7 @@ class ClubApi(remote.Service):
    @endpoints.method(NotificationMiniForm,NotificationList,path='myNotifications', http_method='POST', name='myNotificationFeed')
    def myNotificationFeed(self, request):
        pid = ndb.Key('Profile',int(request.pid))
-       notificationslist = Notifications.query(Notifications.to_pid == pid).fetch()
+       notificationslist = Notifications.query(Notifications.to_pid == pid).order(-Notifications.timestamp).fetch()
        
        listresponse = NotificationList()
 
@@ -964,6 +972,7 @@ class ClubApi(remote.Service):
                 newListObj.postId = str(obj.postId.id())
              else :
                 newListObj.postId = None
+             newListObj.timestamp = str(obj.timestamp)   
              
              newListObj.type = obj.type
              listresponse.list.append(newListObj) 
@@ -972,6 +981,17 @@ class ClubApi(remote.Service):
        
 
        return listresponse
+
+   @endpoints.method(PersonalInfoRequest,PersonalInfoResponse,path='personalInfo', http_method='POST', name='personalInfo')
+   def personalInfo(self,request):
+       list1 = request.pid
+       pylist=[]
+       for x in list1:
+           pid = ndb.Key('Profile',int(x))
+           person = pid.get()
+           pylist.append(PersonalInfoForm(person))
+
+       return PersonalInfoResponse(items = pylist)
 
 
 api = endpoints.api_server([ClubApi])   # register API

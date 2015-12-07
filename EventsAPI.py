@@ -238,7 +238,7 @@ def getEventsBasedonTimeLeft():
                                       groupImage = group.photo,
                                       eventName = event.title,
                                       eventId = event.key,
-                                      timestamp = event.timestamp,
+                                      timestamp = dt.datetime.now().replace(microsecond = 0),
                                       type = "Reminder",
                                       to_pid = pid
                                       )

@@ -444,3 +444,16 @@ class ProfileResponse(messages.Message):
 
 class NotificationMiniForm(messages.Message):
     pid = messages.StringField(1)
+
+class PersonalInfoRequest(messages.Message):
+    pid = messages.StringField(1,repeated=True)
+
+class PersonalResponse(messages.Message):
+    name = messages.StringField(1)
+    batch = messages.StringField(2)
+    branch = messages.StringField(3)
+    photo = messages.StringField(4)
+
+class PersonalInfoResponse(messages.Message):
+    items = messages.MessageField(PersonalResponse,1,repeated=True)
+
