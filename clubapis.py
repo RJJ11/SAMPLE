@@ -664,7 +664,8 @@ class ClubApi(remote.Service):
         print("Entered Get Events Portion")
         temp = request.collegeId
         temp2 = request.clubId
-        print "temp2" + str(temp2)
+        date = request.date
+        
         if(temp2==None):
             print "No CLubId"
             collegeId = ndb.Key('CollegeDb',int(temp))
@@ -680,7 +681,20 @@ class ClubApi(remote.Service):
             clubId = ndb.Key('Club',int(temp2))
             events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.start_time)
 
-        return Events(items=[copyEventToForm(x) for x in events])
+        #All events have been obtained, check if date field is provided and take only those that have start date = req.date
+
+        finalList = []
+        if(date != None):
+           for x in events:
+              start_date = str(x.start_time.date())
+              if(start_date == date):	
+                 finalList.append(x)
+           print("Returning all events from Final List")
+           return Events(items=[copyEventToForm(x) for x in finalList])
+        
+        else:
+           print("Returning all events from Events List")
+           return Events(items=[copyEventToForm(x) for x in events])
 
    @endpoints.method(ModifyEvent,message_types.VoidMessage,
             path='deleteEvent', http_method='DELETE', name='delEvent')
