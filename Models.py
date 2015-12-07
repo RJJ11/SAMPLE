@@ -124,6 +124,7 @@ class Posts(messages.Message):
 class GetAllPosts(messages.Message):
     collegeId = messages.StringField(1)
     clubId = messages.StringField(2)
+    date = messages.StringField(3)
 
 
 class Post_Request(ndb.Model):
