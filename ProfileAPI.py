@@ -6,7 +6,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm,UpdateGCM
+from Models import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm,UpdateGCM,PersonalResponse
 
 def _copyProfileToForm(prof):
         pf = ProfileMiniForm()
@@ -118,3 +118,10 @@ def changeGcm(request):
 
 
 
+def PersonalInfoForm(request):
+    a = PersonalResponse()
+
+    for x in ('name','branch','batch','photo'):
+        setattr(a,x,getattr(request,x))
+
+    return a
