@@ -22,7 +22,7 @@ def eventEntry(requestentity=None):
         flag = 0
         if requestentity:
             print "Begun"
-            for field in ('title','description','club_id','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId','timestamp','photo'):
+            for field in ('title','description','club_id','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId','timestamp','photo','photoUrl'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
@@ -123,10 +123,10 @@ def copyEventToForm(event):
                 setattr(pf, field.name, str(event.timestamp.strftime("%Y-%m-%d")))
             if field.name == 'time':
                 setattr(pf, field.name, str(event.timestamp.strftime("%H:%M:%S")))
-            if field.name == 'clubphoto':
+            if field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
-                setattr(pf, field.name, event.club_id.get().picture)
+                setattr(pf, field.name, event.club_id.get().photoUrl)
         return pf
 
 def deleteEvent(request):
@@ -227,7 +227,7 @@ def getEventsBasedonTimeLeft():
                        newNotif = Notifications(
                                       groupName = groupName,
                                       groupId = event.club_id,
-                                      groupImage = group.photo,
+                                      groupImage = group.photoUrl,
                                       eventName = event.title,
                                       eventId = event.key,
                                       timestamp = dt.datetime.now().replace(microsecond = 0),

@@ -26,7 +26,7 @@ def createClub(request=None):
 
         if request and college :
 
-            for field in ('abbreviation','club_name','from_pid','to_pid','isAlumni','collegeId','description','approval_status','picture'):
+            for field in ('abbreviation','club_name','from_pid','to_pid','isAlumni','collegeId','description','approval_status','photoUrl'):
 
 
                 if field == "abbreviation":
@@ -77,9 +77,9 @@ def createClub(request=None):
                      setattr(clubRequest, field, college_key)
                 elif field == "approval_status":
                      setattr(clubRequest, field, "N")
-                elif field == "picture":
-                     if(request.picture):
-                         setattr(clubRequest, field, str(request.picture))
+                elif field == "photoUrl":
+                     if(request.photoUrl):
+                         setattr(clubRequest, field, str(request.photoUrl))
 
             clubRequest.put()
 
@@ -119,7 +119,7 @@ def createClubAfterApproval(requestentity=None):
             newClub.description = requestentity.description
             newClub.members.append(requestentity.from_pid)
             newClub.follows.append(requestentity.from_pid)
-            newClub.picture = requestentity.picture
+            newClub.photoUrl = requestentity.photoUrl
             clubkey = newClub.put()
 
             profile = requestentity.from_pid.get()
@@ -170,7 +170,7 @@ def getClub(request=None):
              retClub.name = club.name
              retClub.collegeName = college[0].name
              retClub.description = club.description
-             retClub.picture = club.picture
+             retClub.photoUrl = club.photoUrl
         return retClub
 
 def unfollowClub(request):

@@ -121,7 +121,7 @@ def changeGcm(request):
 def PersonalInfoForm(request):
     a = PersonalResponse()
 
-    for x in ('name','branch','batch','photo'):
+    for x in ('name','branch','batch','photoUrl'):
         setattr(a,x,getattr(request,x))
 
     return a

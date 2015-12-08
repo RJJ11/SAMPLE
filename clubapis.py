@@ -425,7 +425,7 @@ class ClubApi(remote.Service):
                     	newNotif = Notifications(
                                       groupName = groupName,
                                       groupId = newPost.club_id,
-                                      groupImage = group.photo,
+                                      groupImage = group.photoUrl,
                                       postName = newPost.title,
                                       postId = newPost.key,
                                       timestamp = newPost.timestamp,
@@ -515,7 +515,7 @@ class ClubApi(remote.Service):
                         newNotif = Notifications(
                                         groupName = groupName,
                                         groupId = newEvent.club_id,
-                                        groupImage = group.photo,
+                                        groupImage = group.photoUrl,
                                         eventName = newEvent.title,
                                         eventId = newEvent.key,
                                         timestamp = newEvent.timestamp,
@@ -941,50 +941,52 @@ class ClubApi(remote.Service):
    @endpoints.method(NotificationMiniForm,NotificationList,path='myNotifications', http_method='POST', name='myNotificationFeed')
    def myNotificationFeed(self, request):
        pid = ndb.Key('Profile',int(request.pid))
-       notificationslist = Notifications.query(Notifications.to_pid == pid).order(-Notifications.timestamp).fetch()
+       notificationslist = Notifications.query().order(-Notifications.timestamp).fetch()
        
        listresponse = NotificationList()
 
        for obj in notificationslist:
              newListObj = NotificationResponseForm()
              
-             if(obj.groupName != None):
-                newListObj.groupName = obj.groupName
-             else:
-                newListObj.groupName = None
+             if( pid in obj.to_pid):
+
+                if(obj.groupName != None):
+                  newListObj.groupName = obj.groupName
+                else:
+                  newListObj.groupName = None
              
 
-             if(obj.groupId != None):
-                newListObj.groupId = str(obj.groupId.id())
-             else:
-                newListObj.groupId = None
+                if(obj.groupId != None):
+                  newListObj.groupId = str(obj.groupId.id())
+                else:
+                  newListObj.groupId = None
                           
-             if(obj.eventName != None):
-                newListObj.eventName = obj.eventName
-             else:
-                newListObj.eventName = None
+                if(obj.eventName != None):
+                  newListObj.eventName = obj.eventName
+                else:
+                  newListObj.eventName = None
              
 
-             if(obj.eventId != None):
-                newListObj.eventId = str(obj.eventId.id())
-             else:
-                newListObj.eventId = None
+                if(obj.eventId != None):
+                  newListObj.eventId = str(obj.eventId.id())
+                else:
+                  newListObj.eventId = None
              
 
-             if(obj.postName != None):
-                newListObj.postName = obj.postName
-             else :
-                newListObj.postName = None
+                if(obj.postName != None):
+                  newListObj.postName = obj.postName
+                else :
+                  newListObj.postName = None
              
 
-             if(obj.postId != None):
-                newListObj.postId = str(obj.postId.id())
-             else :
-                newListObj.postId = None
-             newListObj.timestamp = str(obj.timestamp)   
+                if(obj.postId != None):
+                  newListObj.postId = str(obj.postId.id())
+                else :
+                  newListObj.postId = None
+                newListObj.timestamp = str(obj.timestamp)   
              
-             newListObj.type = obj.type
-             listresponse.list.append(newListObj) 
+                newListObj.type = obj.type
+                listresponse.list.append(newListObj) 
                
        
        
