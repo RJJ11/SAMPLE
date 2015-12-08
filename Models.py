@@ -10,7 +10,7 @@ class Notifications(ndb.Model):
     groupImage = ndb.BlobProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
-    to_pid = ndb.KeyProperty(kind = 'Profile')
+    to_pid = ndb.KeyProperty(kind = 'Profile', repeated='True')
     postName = ndb.StringProperty()
     postId = ndb.KeyProperty(kind ='Post')
     timestamp = ndb.DateTimeProperty()
@@ -64,6 +64,7 @@ class Club(ndb.Model):
                               repeated=True)  # Only includes the set of people apart from members. By default a member of a club follows it.
     abbreviation = ndb.StringProperty()
     photo = ndb.BlobProperty()
+    photoUrl = ndb.StringProperty()
     isAlumni = ndb.StringProperty(required=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)
 
@@ -79,7 +80,7 @@ class ClubMiniForm(messages.Message):
     # photo = ndb.BlobProperty()
     collegeName = messages.StringField(7, required=True)
     club_id = messages.StringField(8,required=True)
-    picture = messages.StringField(9)
+    photoUrl = messages.StringField(9)
 
 class GetClubMiniForm(messages.Message):
     club_id = messages.StringField(1, required="True")
@@ -97,24 +98,25 @@ class Post(ndb.Model):
     likers = ndb.KeyProperty(kind='Profile', repeated=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many posts
     timestamp = ndb.DateTimeProperty()
+    photoUrl = ndb.StringProperty()
 
 class PostForm(messages.Message):
     title = messages.StringField(1)
     description = messages.StringField(2)
     from_pid = messages.StringField(3)  # ancestor relationship here?
-    photo = messages.StringField(4)
+    photoUrl = messages.StringField(4)
     # club_id = ndb.KeyProperty(kind='Club',required=True)#Many posts belong to one club
     likes = messages.StringField(5)
     views = messages.StringField(6)
     likers = messages.StringField(7)
     date = messages.StringField(8)
     time = messages.StringField(9)
-    clubphoto = messages.StringField(10)
+    clubphotoUrl = messages.StringField(10)
 
 class EditPostForm(messages.Message):
     title = messages.StringField(1)
     description = messages.StringField(2)
-    photo = messages.StringField(3)
+    photoUrl = messages.StringField(3)
     postId = messages.StringField(4,required=True)
 
 class Posts(messages.Message):
@@ -136,6 +138,8 @@ class Post_Request(ndb.Model):
     status = ndb.StringProperty(required=True)
     timestamp = ndb.DateTimeProperty()
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many post requests
+    photoUrl = ndb.StringProperty()
+
 
 class GetInformation(messages.Message):
     pid = messages.StringField(1)
@@ -170,7 +174,7 @@ class PostMiniForm(messages.Message):
     likers = messages.StringField(5)
     date = messages.StringField(6)
     time = messages.StringField(7)
-    photo = messages.StringField(8)
+    photoUrl = messages.StringField(8)
     # '''photo ='''
 
 
@@ -183,6 +187,7 @@ class Event(ndb.Model):
     title = ndb.StringProperty(required=True)
     description = ndb.StringProperty()
     photo = ndb.BlobProperty()
+    photoUrl = ndb.StringProperty()
     club_id = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
     venue = ndb.StringProperty(required=True)
     start_time = ndb.DateTimeProperty(required=True)#make this required
@@ -200,7 +205,7 @@ class Event(ndb.Model):
 class EventMiniForm(messages.Message):
     title = messages.StringField(1, required=True)
     description = messages.StringField(2)
-    photo = messages.StringField(17)
+    photoUrl = messages.StringField(17)
     # photo = ndb.BlobProperty()
     club_id = messages.StringField(3, required=True)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
@@ -221,7 +226,7 @@ class EventMiniForm(messages.Message):
 class EventForm(messages.Message):
     title = messages.StringField(1)
     description = messages.StringField(2)
-    # photo = ndb.BlobProperty()
+    
     club_id = messages.StringField(3)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
     venue = messages.StringField(4)
@@ -239,7 +244,7 @@ class EventForm(messages.Message):
     tags = messages.StringField(16)
     date = messages.StringField(17)
     time = messages.StringField(18)
-    clubphoto = messages.StringField(19)
+    clubphotoUrl = messages.StringField(19)
 # id=eventId
 
 class ModifyEvent(messages.Message):
@@ -263,7 +268,7 @@ class Club_Creation(ndb.Model):
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many club creation requests
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to student council admin
    # club_id = ndb.StringProperty(required=True)
-    picture = ndb.BlobProperty()
+    photoUrl = ndb.StringProperty()
     description = ndb.StringProperty(required=True)
     club_name = ndb.StringProperty(required=True)
     abbreviation = ndb.StringProperty(required=True)
@@ -287,7 +292,7 @@ class ClubRequestMiniForm(messages.Message):
     description = messages.StringField(3, required=True)
     from_pid = messages.StringField(4, required=True)
     college_id = messages.StringField(5, required=True)
-    picture = messages.StringField(6)
+    photoUrl = messages.StringField(6)
 
 
 class Join_Request(ndb.Model):
@@ -398,7 +403,7 @@ class Feed(messages.Message):
     tags = messages.StringField(16)
     likers = messages.StringField(17,repeated=True)
     timestamp = messages.StringField(18)
-    photo = messages.StringField(19)
+    photoUrl = messages.StringField(19)
     clubphoto = messages.StringField(20)
 
 class CollegeFeed(messages.Message):
@@ -414,7 +419,7 @@ class ProfileMiniForm(messages.Message):
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
     '''picture ='''
-    photo = messages.StringField(3)
+    photoUrl = messages.StringField(3)
     tags = messages.StringField(5, repeated=True)
     batch = messages.StringField(6)
     branch = messages.StringField(7)
@@ -452,7 +457,7 @@ class PersonalResponse(messages.Message):
     name = messages.StringField(1)
     batch = messages.StringField(2)
     branch = messages.StringField(3)
-    photo = messages.StringField(4)
+    photoUrl = messages.StringField(4)
 
 class PersonalInfoResponse(messages.Message):
     items = messages.MessageField(PersonalResponse,1,repeated=True)
