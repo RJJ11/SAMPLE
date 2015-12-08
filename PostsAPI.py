@@ -26,7 +26,7 @@ def postRequest(requestentity=None):
                     #setattr(clubRequest, field, profile_key)
 
         if requestentity:
-            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid','likers','timestamp'):
+            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid','likers','timestamp','photoUrl'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
