@@ -7,7 +7,7 @@ from google.appengine.ext import ndb
 class Notifications(ndb.Model):
     groupName = ndb.StringProperty(required=True)
     groupId = ndb.KeyProperty(kind='Club')
-    groupImage = ndb.BlobProperty()
+    groupImage = ndb.StringProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
     to_pid = ndb.KeyProperty(kind = 'Profile', repeated='True')

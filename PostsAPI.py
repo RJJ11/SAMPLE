@@ -116,7 +116,7 @@ def postEntry(requestentity=None,check=0):
 
         if(flag==1 and flag1==1):
             if requestentity:
-                for field in ('title','description','club_id','from_pid','likes','views','timestamp','photo'):
+                for field in ('title','description','club_id','from_pid','likes','views','timestamp','photo','photoUrl'):
 
                     if hasattr(requestentity, field):
                         print(field,"is there")
@@ -213,10 +213,10 @@ def copyPostToForm(post):
                 setattr(pf, field.name, str(post.timestamp.strftime("%Y-%m-%d")))
             if field.name == 'time':
                 setattr(pf, field.name, str(post.timestamp.strftime("%H:%M:%S")))
-            if field.name == 'clubphoto':
+            if field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
-                setattr(pf, field.name, post.club_id.get().picture)
+                setattr(pf, field.name, post.club_id.get().photoUrl)
         return pf
 
 def likePost(request):
