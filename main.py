@@ -14,6 +14,7 @@
 
 # [START all]
 import webapp2
+import endpoints
 
 from google.appengine.api.images import get_serving_url
 from google.appengine.api import users
@@ -21,8 +22,10 @@ from google.appengine.ext import blobstore
 from google.appengine.ext import ndb
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.ext.webapp.util import run_wsgi_app
+from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
+API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
-
+ALLOWED_APP_IDS = (ANROID_CLIENT_ID,WEB_CLIENT_ID,API_EXPLORER_CLIENT_ID,ANDROID_ID2,ANDROID_ID3)
 
 class PhotoUploadFormHandler(webapp2.RequestHandler):
     def get(self):

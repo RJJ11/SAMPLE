@@ -42,11 +42,9 @@ handlers:       # static then dynamic
    
 - url: /get_upload_url
   script: main.app
-  login: required
 
 - url: /upload_photo
   script: main.app
-  login: required
 
 libraries:
 
