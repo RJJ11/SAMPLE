@@ -82,7 +82,7 @@ class ClubApi(remote.Service):
                 newNotif = Notifications(
                      groupName = club.name,
                      groupId = club.key,
-                     to_pid = [joinCreationObj.to_pid],
+                     to_pid = joinCreationObj.to_pid,
                      type = "Join Request"
                     )
 
@@ -116,7 +116,7 @@ class ClubApi(remote.Service):
                  newNotif = Notifications(
                      groupName = club.name,
                      groupId = club.key,
-                     to_pid = [joinCreation.from_pid],
+                     to_pid = joinCreation.from_pid,
                      type = "Approval Rejection",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                      
@@ -154,7 +154,7 @@ class ClubApi(remote.Service):
                  newNotif = Notifications(
                      groupName = club.name,
                      groupId = club.key,
-                     to_pid = [joinCreation.from_pid],
+                     to_pid = joinCreation.from_pid,
                      type = "Approved Join Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
@@ -263,7 +263,7 @@ class ClubApi(remote.Service):
               currentProfile = clubRequest.to_pid.get()
               newNotif = Notifications(
                      groupName = clubRequest.club_name,
-                     to_pid = [clubRequest.to_pid],
+                     to_pid = clubRequest.to_pid,
                      type = "Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
@@ -300,7 +300,7 @@ class ClubApi(remote.Service):
             print("Request Approval Denied")
             newNotif = Notifications(
                      groupName = req.club_name,
-                     to_pid = [req.from_pid],
+                     to_pid = req.from_pid,
                      type = "Rejected Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
@@ -325,7 +325,7 @@ class ClubApi(remote.Service):
               	  newNotif = Notifications(
                      groupName = newClub.name,
                      groupId = newClub.key,
-                     to_pid = [newClub.admin],
+                     to_pid = newClub.admin,
                      type = "Approved Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
@@ -345,7 +345,7 @@ class ClubApi(remote.Service):
               print("Request Approval Denied")
               newNotif = Notifications(
                      groupName = req.club_name,
-                     to_pid = [req.from_pid],
+                     to_pid = req.from_pid,
                      type = "Rejected Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
@@ -379,7 +379,7 @@ class ClubApi(remote.Service):
         newNotif = Notifications(
                      groupName = clubRequest.club_id.get().name,
                      groupId = clubRequest.club_id,
-                     to_pid = [clubRequest.to_pid],
+                     to_pid = clubRequest.to_pid,
                      type = "Post Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     
@@ -422,22 +422,6 @@ class ClubApi(remote.Service):
                     
                     postlist = []
                     if (group.follows):
-                    	newNotif = Notifications(
-                                      groupName = groupName,
-                                      groupId = newPost.club_id,
-                                      groupImage = group.photoUrl,
-                                      postName = newPost.title,
-                                      postId = newPost.key,
-                                      timestamp = newPost.timestamp,
-                                      type = "Post",
-                                      to_pid = group.follows
-                                      )
-
-                        print("Notification to be inserted",newNotif)
-                        newNotifKey = newNotif.put()
-                       
-
-
                     	for pid in group.follows:
                            person = pid.get()
                            print ("PID is",person)
@@ -445,6 +429,19 @@ class ClubApi(remote.Service):
                            if (gcmId):
                              print ("GCM ID is",gcmId)
                              postlist.append(gcmId)
+                           newNotif = Notifications(
+                                      groupName = groupName,
+                                      groupId = newPost.club_id,
+                                      groupImage = group.photoUrl,
+                                      postName = newPost.title,
+                                      postId = newPost.key,
+                                      timestamp = newPost.timestamp,
+                                      type = "Post",
+                                      to_pid = pid
+                                      )
+
+                           print("Notification to be inserted",newNotif)
+                           newNotifKey = newNotif.put()  
 
                            
                     
@@ -512,7 +509,13 @@ class ClubApi(remote.Service):
 
                     eventlist = []
                     if (group.follows):
-                        newNotif = Notifications(
+                        for pid in group.follows:
+                           person = pid.get()
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             print ("GCM ID is",gcmId)
+                             eventlist.append(gcmId)
+                           newNotif = Notifications(
                                         groupName = groupName,
                                         groupId = newEvent.club_id,
                                         groupImage = group.photoUrl,
@@ -520,22 +523,11 @@ class ClubApi(remote.Service):
                                         eventId = newEvent.key,
                                         timestamp = newEvent.timestamp,
                                         type = "Event",
-                                        to_pid = group.follows
+                                        to_pid = pid
                                         )
+                           print("Notification to be inserted",newNotif)
+                           newNotifKey = newNotif.put()
 
-                        print("Notification to be inserted",newNotif)
-                        newNotifKey = newNotif.put()                    	
-
-
-
-
-
-                    	for pid in group.follows:
-                           person = pid.get()
-                           gcmId = person.gcmId
-                           if (gcmId):
-                             print ("GCM ID is",gcmId)
-                             eventlist.append(gcmId)
                             
                       
                              
@@ -941,52 +933,52 @@ class ClubApi(remote.Service):
    @endpoints.method(NotificationMiniForm,NotificationList,path='myNotifications', http_method='POST', name='myNotificationFeed')
    def myNotificationFeed(self, request):
        pid = ndb.Key('Profile',int(request.pid))
-       notificationslist = Notifications.query().order(-Notifications.timestamp).fetch()
+       notificationslist = Notifications.query(Notifications.to_pid == pid).order(-Notifications.timestamp).fetch()
        
        listresponse = NotificationList()
 
        for obj in notificationslist:
              newListObj = NotificationResponseForm()
              
-             if( pid in obj.to_pid):
+             #if( pid in obj.to_pid):
 
-                if(obj.groupName != None):
+             if(obj.groupName != None):
                   newListObj.groupName = obj.groupName
-                else:
+             else:
                   newListObj.groupName = None
              
 
-                if(obj.groupId != None):
+             if(obj.groupId != None):
                   newListObj.groupId = str(obj.groupId.id())
-                else:
+             else:
                   newListObj.groupId = None
                           
-                if(obj.eventName != None):
+             if(obj.eventName != None):
                   newListObj.eventName = obj.eventName
-                else:
+             else:
                   newListObj.eventName = None
              
 
-                if(obj.eventId != None):
+             if(obj.eventId != None):
                   newListObj.eventId = str(obj.eventId.id())
-                else:
+             else:
                   newListObj.eventId = None
              
 
-                if(obj.postName != None):
+             if(obj.postName != None):
                   newListObj.postName = obj.postName
-                else :
+             else :
                   newListObj.postName = None
              
 
-                if(obj.postId != None):
+             if(obj.postId != None):
                   newListObj.postId = str(obj.postId.id())
-                else :
+             else :
                   newListObj.postId = None
-                newListObj.timestamp = str(obj.timestamp)   
+             newListObj.timestamp = str(obj.timestamp)   
              
-                newListObj.type = obj.type
-                listresponse.list.append(newListObj) 
+             newListObj.type = obj.type
+             listresponse.list.append(newListObj) 
                
        
        
