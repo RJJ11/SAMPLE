@@ -10,7 +10,7 @@ class Notifications(ndb.Model):
     groupImage = ndb.StringProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
-    to_pid = ndb.KeyProperty(kind = 'Profile', repeated='True')
+    to_pid = ndb.KeyProperty(kind = 'Profile')
     postName = ndb.StringProperty()
     postId = ndb.KeyProperty(kind ='Post')
     timestamp = ndb.DateTimeProperty()

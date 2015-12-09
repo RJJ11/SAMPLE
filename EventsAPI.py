@@ -224,16 +224,7 @@ def getEventsBasedonTimeLeft():
 
                     attendeeslist = []
                     if (event.attendees):
-                       newNotif = Notifications(
-                                      groupName = groupName,
-                                      groupId = event.club_id,
-                                      groupImage = group.photoUrl,
-                                      eventName = event.title,
-                                      eventId = event.key,
-                                      timestamp = dt.datetime.now().replace(microsecond = 0),
-                                      type = "Reminder",
-                                      to_pid = event.attendees)                                     
-                       newNotifKey = newNotif.put()   
+                                                            
                        for pid in event.attendees:
                            person = pid.get()
                            LOG.info("PID is")
@@ -244,7 +235,16 @@ def getEventsBasedonTimeLeft():
 
                            if (gcmId):
                              attendeeslist.append(gcmId)
-                           
+                           newNotif = Notifications(
+                                      groupName = groupName,
+                                      groupId = event.club_id,
+                                      groupImage = group.photoUrl,
+                                      eventName = event.title,
+                                      eventId = event.key,
+                                      timestamp = dt.datetime.now().replace(microsecond = 0),
+                                      type = "Reminder",
+                                      to_pid = pid)  
+                           newNotifKey = newNotif.put()
                     
                     LOG.info("Attendees GCM list is")
                     LOG.info(attendeeslist)
