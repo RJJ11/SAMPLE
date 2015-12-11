@@ -172,10 +172,10 @@ def getClub(request=None):
              retClub.description = club.description
              retClub.photoUrl = club.photoUrl
 
-             for x in club.members:
-                 retClub.members.append(str(x.id()))
+             #for x in club.members:
+                 #retClub.members.append(str(x.id()))
 
-             print retClub.members    
+             #print retClub.members    
         return retClub
 
 def unfollowClub(request):
