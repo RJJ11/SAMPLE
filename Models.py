@@ -81,6 +81,8 @@ class ClubMiniForm(messages.Message):
     collegeName = messages.StringField(7, required=True)
     club_id = messages.StringField(8,required=True)
     photoUrl = messages.StringField(9)
+    membercount = messages.StringField(10)
+    followercount = messages.StringField(11)
     #members = messages.StringField(10,repeated=True)
 
 class GetClubMiniForm(messages.Message):
@@ -246,7 +248,7 @@ class EventForm(messages.Message):
     date = messages.StringField(17)
     time = messages.StringField(18)
     clubphotoUrl = messages.StringField(19)
-    #club_name = messages.StringField(20)
+    club_name = messages.StringField(20)
 # id=eventId
 
 class ModifyEvent(messages.Message):

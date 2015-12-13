@@ -127,8 +127,8 @@ def copyEventToForm(event):
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
                 setattr(pf, field.name, event.club_id.get().photoUrl)
-            #if field.name == 'club_name':
-                #setattr(pf, field.name, event.club_id.get().name)
+            if field.name == 'club_name':
+                setattr(pf, field.name, event.club_id.get().name)
                   
         return pf
 

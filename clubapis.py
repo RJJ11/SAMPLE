@@ -60,6 +60,20 @@ class ClubApi(remote.Service):
 
         return retClub
 
+   @endpoints.method(GetClubMiniForm,PersonalInfoResponse,path='getClubMembers', http_method='POST', name='getClubMembers')
+   def getClubMembersApi(self,request):
+        #print("Request entity is",request)
+        clubKey = ndb.Key('Club',int(request.club_id))
+        club = clubKey.get()
+        #print("Received Club is",club)  
+        list1 = club.members
+        pylist=[]
+        for x in list1:
+           person = x.get()
+           pylist.append(PersonalInfoForm(person))
+
+        return PersonalInfoResponse(items = pylist)
+
    @endpoints.method(JoinClubMiniForm,message_types.VoidMessage,path='joinClub', http_method='POST', name='joinClubReq')
    def joinClubApi(self,request):
             
@@ -82,6 +96,7 @@ class ClubApi(remote.Service):
                 newNotif = Notifications(
                      groupName = club.name,
                      groupId = club.key,
+                     groupImage = club.photoUrl,
                      to_pid = joinCreationObj.to_pid,
                      type = "Join Request"
                     )
@@ -116,6 +131,7 @@ class ClubApi(remote.Service):
                  newNotif = Notifications(
                      groupName = club.name,
                      groupId = club.key,
+                     groupImage = club.photoUrl,
                      to_pid = joinCreation.from_pid,
                      type = "Approval Rejection",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -154,6 +170,7 @@ class ClubApi(remote.Service):
                  newNotif = Notifications(
                      groupName = club.name,
                      groupId = club.key,
+                     groupImage = club.photoUrl,
                      to_pid = joinCreation.from_pid,
                      type = "Approved Join Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -263,6 +280,7 @@ class ClubApi(remote.Service):
               currentProfile = clubRequest.to_pid.get()
               newNotif = Notifications(
                      groupName = clubRequest.club_name,
+                     groupImage = clubRequest.photoUrl,
                      to_pid = clubRequest.to_pid,
                      type = "Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -300,6 +318,7 @@ class ClubApi(remote.Service):
             print("Request Approval Denied")
             newNotif = Notifications(
                      groupName = req.club_name,
+                     groupImage = req.photoUrl,
                      to_pid = req.from_pid,
                      type = "Rejected Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -325,6 +344,7 @@ class ClubApi(remote.Service):
               	  newNotif = Notifications(
                      groupName = newClub.name,
                      groupId = newClub.key,
+                     groupImage = newClub.photoUrl,
                      to_pid = newClub.admin,
                      type = "Approved Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -345,6 +365,7 @@ class ClubApi(remote.Service):
               print("Request Approval Denied")
               newNotif = Notifications(
                      groupName = req.club_name,
+                     groupImage = req.photoUrl,
                      to_pid = req.from_pid,
                      type = "Rejected Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -379,6 +400,7 @@ class ClubApi(remote.Service):
         newNotif = Notifications(
                      groupName = clubRequest.club_id.get().name,
                      groupId = clubRequest.club_id,
+                     groupImage = clubRequest.photoUrl,
                      to_pid = clubRequest.to_pid,
                      type = "Post Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -953,6 +975,11 @@ class ClubApi(remote.Service):
              else:
                   newListObj.groupId = None
                           
+             if(obj.groupImage != None):
+                  newListObj.groupImage = obj.groupImage
+             else:
+                  newListObj.groupImage = None
+
              if(obj.eventName != None):
                   newListObj.eventName = obj.eventName
              else:
