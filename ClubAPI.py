@@ -171,7 +171,9 @@ def getClub(request=None):
              retClub.collegeName = college[0].name
              retClub.description = club.description
              retClub.photoUrl = club.photoUrl
-
+             retClub.membercount = str(len(club.members))
+             retClub.followercount = str(len(club.follows))
+              
              #for x in club.members:
                  #retClub.members.append(str(x.id()))
 
