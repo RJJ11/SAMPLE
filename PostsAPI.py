@@ -218,7 +218,9 @@ def copyPostToForm(post):
                 #print str(post.club_id.get().picture)
                 setattr(pf, field.name, post.club_id.get().photoUrl)
             if field.name == 'photoUrl':
-                setattr(pf, field.name, post.photoUrl)    
+                setattr(pf, field.name, post.photoUrl)
+            if field.name == 'club_name':
+                setattr(pf, field.name, post.club_id.get().name)        
 
         return pf
 

@@ -115,6 +115,7 @@ class PostForm(messages.Message):
     date = messages.StringField(8)
     time = messages.StringField(9)
     clubphotoUrl = messages.StringField(10)
+    club_name = messages.StringField(11)
 
 class EditPostForm(messages.Message):
     title = messages.StringField(1)
