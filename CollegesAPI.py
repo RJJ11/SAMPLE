@@ -157,10 +157,10 @@ def copyToCollegeFeed(entity):
             setattr(feed, field.name, entity.from_pid.get().name)
 
 
-        if field.name == 'clubphoto':
+        if field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
-                setattr(feed, field.name, entity.club_id.get().picture)
+                setattr(feed, field.name, entity.club_id.get().photoUrl)
 
         """
         elif field.name == 'date':

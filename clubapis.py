@@ -94,9 +94,9 @@ class ClubApi(remote.Service):
                 joinCreationObjKey = joinCreationObj.put()
 
                 newNotif = Notifications(
-                     groupName = club.name,
-                     groupId = club.key,
-                     groupImage = club.photoUrl,
+                     clubName = club.name,
+                     clubId = club.key,
+                     clubphotoUrl = club.photoUrl,
                      to_pid = joinCreationObj.to_pid,
                      type = "Join Request"
                     )
@@ -129,9 +129,9 @@ class ClubApi(remote.Service):
                  
                  #send notif message to the guy who has req,saying that it has been rejected
                  newNotif = Notifications(
-                     groupName = club.name,
-                     groupId = club.key,
-                     groupImage = club.photoUrl,
+                     clubName = club.name,
+                     clubId = club.key,
+                     clubphotoUrl = club.photoUrl,
                      to_pid = joinCreation.from_pid,
                      type = "Approval Rejection",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -168,9 +168,9 @@ class ClubApi(remote.Service):
                  #Create Notification here where the to_pid = guy who has made the join req
                  #Send push notification to the gcm id of this dude.
                  newNotif = Notifications(
-                     groupName = club.name,
-                     groupId = club.key,
-                     groupImage = club.photoUrl,
+                     clubName = club.name,
+                     clubId = club.key,
+                     clubphotoUrl = club.photoUrl,
                      to_pid = joinCreation.from_pid,
                      type = "Approved Join Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -279,8 +279,8 @@ class ClubApi(remote.Service):
               clubRequest = createClub(request)
               currentProfile = clubRequest.to_pid.get()
               newNotif = Notifications(
-                     groupName = clubRequest.club_name,
-                     groupImage = clubRequest.photoUrl,
+                     clubName = clubRequest.club_name,
+                     clubphotoUrl = clubRequest.photoUrl,
                      to_pid = clubRequest.to_pid,
                      type = "Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -317,8 +317,8 @@ class ClubApi(remote.Service):
             print ("Disapproving request and removing entry")
             print("Request Approval Denied")
             newNotif = Notifications(
-                     groupName = req.club_name,
-                     groupImage = req.photoUrl,
+                     clubName = req.club_name,
+                     clubphotoUrl = req.photoUrl,
                      to_pid = req.from_pid,
                      type = "Rejected Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -342,9 +342,9 @@ class ClubApi(remote.Service):
               currentProfile = newClub.admin.get()
               if(newClub):
               	  newNotif = Notifications(
-                     groupName = newClub.name,
-                     groupId = newClub.key,
-                     groupImage = newClub.photoUrl,
+                     clubName = newClub.name,
+                     clubId = newClub.key,
+                     clubphotoUrl = newClub.photoUrl,
                      to_pid = newClub.admin,
                      type = "Approved Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -364,8 +364,8 @@ class ClubApi(remote.Service):
            else:
               print("Request Approval Denied")
               newNotif = Notifications(
-                     groupName = req.club_name,
-                     groupImage = req.photoUrl,
+                     clubName = req.club_name,
+                     clubphotoUrl = req.photoUrl,
                      to_pid = req.from_pid,
                      type = "Rejected Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -398,9 +398,9 @@ class ClubApi(remote.Service):
         clubRequest = postRequest(request)
         currentProfile = clubRequest.to_pid.get()
         newNotif = Notifications(
-                     groupName = clubRequest.club_id.get().name,
-                     groupId = clubRequest.club_id,
-                     groupImage = clubRequest.photoUrl,
+                     clubName = clubRequest.club_id.get().name,
+                     clubId = clubRequest.club_id,
+                     clubphotoUrl = clubRequest.photoUrl,
                      to_pid = clubRequest.to_pid,
                      type = "Post Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
@@ -452,9 +452,9 @@ class ClubApi(remote.Service):
                              print ("GCM ID is",gcmId)
                              postlist.append(gcmId)
                            newNotif = Notifications(
-                                      groupName = groupName,
-                                      groupId = newPost.club_id,
-                                      groupImage = group.photoUrl,
+                                      clubName = groupName,
+                                      clubId = newPost.club_id,
+                                      clubphotoUrl = group.photoUrl,
                                       postName = newPost.title,
                                       postId = newPost.key,
                                       timestamp = newPost.timestamp,
@@ -538,9 +538,9 @@ class ClubApi(remote.Service):
                              print ("GCM ID is",gcmId)
                              eventlist.append(gcmId)
                            newNotif = Notifications(
-                                        groupName = groupName,
-                                        groupId = newEvent.club_id,
-                                        groupImage = group.photoUrl,
+                                        clubName = groupName,
+                                        clubId = newEvent.club_id,
+                                        clubphotoUrl = group.photoUrl,
                                         eventName = newEvent.title,
                                         eventId = newEvent.key,
                                         timestamp = newEvent.timestamp,
@@ -579,6 +579,7 @@ class ClubApi(remote.Service):
         print("Entered Get Posts Portion")
         temp = request.collegeId
         temp2 = request.clubId
+        print "temp" + str(temp)
         print "temp2" + str(temp2)
         if(temp2==None):
             print "None"
@@ -964,21 +965,21 @@ class ClubApi(remote.Service):
              
              #if( pid in obj.to_pid):
 
-             if(obj.groupName != None):
-                  newListObj.groupName = obj.groupName
+             if(obj.clubName != None):
+                  newListObj.clubName = obj.clubName
              else:
-                  newListObj.groupName = None
+                  newListObj.clubName = None
              
 
-             if(obj.groupId != None):
-                  newListObj.groupId = str(obj.groupId.id())
+             if(obj.clubId != None):
+                  newListObj.clubId = str(obj.clubId.id())
              else:
-                  newListObj.groupId = None
+                  newListObj.clubId = None
                           
-             if(obj.groupImage != None):
-                  newListObj.groupImage = obj.groupImage
+             if(obj.clubphotoUrl != None):
+                  newListObj.clubphotoUrl = obj.clubphotoUrl
              else:
-                  newListObj.groupImage = None
+                  newListObj.clubphotoUrl = None
 
              if(obj.eventName != None):
                   newListObj.eventName = obj.eventName

@@ -129,6 +129,11 @@ def copyEventToForm(event):
                 setattr(pf, field.name, event.club_id.get().photoUrl)
             if field.name == 'club_name':
                 setattr(pf, field.name, event.club_id.get().name)
+            if field.name == 'photoUrl':
+                print "Reached here-1"
+                #print str(post.club_id.get().picture)
+                setattr(pf, field.name, event.photoUrl)
+                
                   
         return pf
 
@@ -239,9 +244,9 @@ def getEventsBasedonTimeLeft():
                            if (gcmId):
                              attendeeslist.append(gcmId)
                            newNotif = Notifications(
-                                      groupName = groupName,
-                                      groupId = event.club_id,
-                                      groupImage = group.photoUrl,
+                                      clubName = groupName,
+                                      clubId = event.club_id,
+                                      clubphotoUrl = group.photoUrl,
                                       eventName = event.title,
                                       eventId = event.key,
                                       timestamp = dt.datetime.now().replace(microsecond = 0),

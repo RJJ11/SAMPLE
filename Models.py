@@ -5,9 +5,9 @@ from protorpc import messages
 from google.appengine.ext import ndb
 
 class Notifications(ndb.Model):
-    groupName = ndb.StringProperty(required=True)
-    groupId = ndb.KeyProperty(kind='Club')
-    groupImage = ndb.StringProperty()
+    clubName = ndb.StringProperty(required=True)
+    clubId = ndb.KeyProperty(kind='Club')
+    clubphotoUrl = ndb.StringProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
     to_pid = ndb.KeyProperty(kind = 'Profile')
@@ -17,9 +17,9 @@ class Notifications(ndb.Model):
     type = ndb.StringProperty(required='True')
 
 class NotificationResponseForm(messages.Message):
-    groupName = messages.StringField(1)
-    groupId = messages.StringField(2)
-    groupImage = messages.StringField(3)
+    clubName = messages.StringField(1)
+    clubId = messages.StringField(2)
+    clubphotoUrl = messages.StringField(3)
     eventName = messages.StringField(4)
     eventId = messages.StringField(5)
     postName = messages.StringField(6)
@@ -249,6 +249,8 @@ class EventForm(messages.Message):
     time = messages.StringField(18)
     clubphotoUrl = messages.StringField(19)
     club_name = messages.StringField(20)
+    photoUrl = messages.StringField(21)
+    
 # id=eventId
 
 class ModifyEvent(messages.Message):
@@ -408,7 +410,7 @@ class Feed(messages.Message):
     likers = messages.StringField(17,repeated=True)
     timestamp = messages.StringField(18)
     photoUrl = messages.StringField(19)
-    clubphoto = messages.StringField(20)
+    clubphotoUrl = messages.StringField(20)
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)

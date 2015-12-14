@@ -217,6 +217,9 @@ def copyPostToForm(post):
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
                 setattr(pf, field.name, post.club_id.get().photoUrl)
+            if field.name == 'photoUrl':
+                setattr(pf, field.name, post.photoUrl)    
+
         return pf
 
 def likePost(request):
