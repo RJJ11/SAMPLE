@@ -110,21 +110,27 @@ def copyEventToForm(event):
         for field in pf.all_fields():
             if hasattr(event, field.name):
                 if field.name == 'start_time':
-                    setattr(pf,"start_date", str(event.start_time.strftime("%Y-%m-%d")))
-                    setattr(pf, field.name, str(event.start_time.strftime("%H:%M:%S")))
+                    #setattr(pf,"start_date", str(event.start_time.strftime("%Y-%m-%d")))
+                    setattr(pf, field.name, str(event.start_time))
                 elif field.name == 'end_time':
-                    setattr(pf, "end_date", str(event.end_time.strftime("%Y-%m-%d")))
-                    setattr(pf, field.name, str(event.end_time.strftime("%H:%M:%S")))
+                    #setattr(pf, "end_date", str(event.end_time.strftime("%Y-%m-%d")))
+                    setattr(pf, field.name, str(event.end_time))
                 else:
                     setattr(pf, field.name, str(getattr(event, field.name)))
             if field.name == 'eventId':
                 setattr(pf, field.name, str(event.key.id()))
-            if field.name == 'date':
-                setattr(pf, field.name, str(event.timestamp.strftime("%Y-%m-%d")))
-            if field.name == 'time':
-                setattr(pf, field.name, str(event.timestamp.strftime("%H:%M:%S")))
+            #if field.name == 'date':
+            #    setattr(pf, field.name, str(event.timestamp.strftime("%Y-%m-%d")))
+            #if field.name == 'time':
+            #    setattr(pf, field.name, str(event.timestamp.strftime("%H:%M:%S")))
+            if field.name == 'timestamp':
+                setattr(pf, field.name, str(event.timestamp))
+                        
+
+
             if field.name == 'clubphotoUrl':
                 print "Reached here-1"
+                print event.title
                 #print str(post.club_id.get().picture)
                 setattr(pf, field.name, event.club_id.get().photoUrl)
             if field.name == 'club_name':
@@ -134,7 +140,7 @@ def copyEventToForm(event):
                 #print str(post.club_id.get().picture)
                 setattr(pf, field.name, event.photoUrl)
                 
-                  
+        print pf          
         return pf
 
 def deleteEvent(request):

@@ -46,6 +46,9 @@ handlers:       # static then dynamic
 - url: /upload_photo
   script: main.app
 
+- url: /pc_upload_photo
+  script: pc_photo.app
+
 libraries:
 
 - name: endpoints
