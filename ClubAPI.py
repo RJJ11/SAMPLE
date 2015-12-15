@@ -173,10 +173,18 @@ def getClub(request=None):
              retClub.photoUrl = club.photoUrl
              retClub.membercount = str(len(club.members))
              retClub.followercount = str(len(club.follows))
-              
-             #for x in club.members:
-                 #retClub.members.append(str(x.id()))
 
+             if(request.pid != None):
+                retClub.isMember = "N"
+                retClub.isFollower = "N"
+                profileKey = ndb.Key('Profile',int(request.pid))
+                print ("retrieved profile key is ", profileKey)
+
+                if (profileKey in club.follows):
+                    retClub.isFollower = "Y"
+                if (profileKey in club.members):
+                    retClub.isMember = "Y"
+             
              #print retClub.members    
         return retClub
 

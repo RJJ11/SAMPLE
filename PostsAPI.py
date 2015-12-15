@@ -209,10 +209,15 @@ def copyPostToForm(post):
                 setattr(pf, field.name, str(getattr(post, field.name)))
             if field.name == 'postId':
                 setattr(pf, field.name, str(post.key.id()))
-            if field.name == 'date':
-                setattr(pf, field.name, str(post.timestamp.strftime("%Y-%m-%d")))
-            if field.name == 'time':
-                setattr(pf, field.name, str(post.timestamp.strftime("%H:%M:%S")))
+            #if field.name == 'date':
+            #    setattr(pf, field.name, str(post.timestamp.strftime("%Y-%m-%d")))
+            #if field.name == 'time':
+            #    setattr(pf, field.name, str(post.timestamp.strftime("%H:%M:%S")))
+            if field.name == 'timestamp':
+                setattr(pf, field.name, str(post.timestamp))
+            
+
+
             if field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
@@ -221,7 +226,8 @@ def copyPostToForm(post):
                 setattr(pf, field.name, post.photoUrl)
             if field.name == 'club_name':
                 setattr(pf, field.name, post.club_id.get().name)        
-
+            if field.name == 'club_id':
+                setattr(pf, field.name, str(post.club_id.id())) 
         return pf
 
 def likePost(request):

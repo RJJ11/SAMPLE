@@ -114,16 +114,18 @@ def copyToCollegeFeed(entity):
     for field in feed.all_fields():
         if hasattr(entity, field.name):
                 if field.name == 'start_time':
+                    print("im here")
                     print field.name
-                    setattr(feed,"start_date", str(entity.start_time.strftime("%Y-%m-%d")))
-                    setattr(feed, field.name, str(entity.start_time.strftime("%H:%M:%S")))
+                    setattr(feed, field.name, str(entity.start_time))
                 elif field.name == 'end_time':
                     print field.name
-                    setattr(feed, "end_date", str(entity.end_time.strftime("%Y-%m-%d")))
-                    setattr(feed, field.name, str(entity.end_time.strftime("%H:%M:%S")))
-                elif field.name == 'club_id':
-                    print field.name
+                    setattr(feed, field.name, str(entity.end_time))
+                elif field.name == 'club_name':
+                    print "field name" + field.name
                     setattr(feed, field.name, entity.club_id.get().name)
+                elif field.name == 'club_id':
+                    setattr(feed, field.name, str(entity.club_id.id()))
+
                 elif field.name == 'collegeId':
                     print field.name
                     setattr(feed, field.name, entity.collegeId.get().name)
@@ -148,7 +150,7 @@ def copyToCollegeFeed(entity):
                 else:
                     setattr(feed, field.name, str(getattr(entity, field.name)))
 
-        elif (field.name=='pid'):
+        elif (field.name=='id'):
             print field.name
             setattr(feed, field.name, str(entity.key.id()))
 
@@ -157,10 +159,16 @@ def copyToCollegeFeed(entity):
             setattr(feed, field.name, entity.from_pid.get().name)
 
 
-        if field.name == 'clubphotoUrl':
+        elif field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
                 setattr(feed, field.name, entity.club_id.get().photoUrl)
+        elif field.name == 'club_name':
+                print "field name" + field.name
+                setattr(feed, field.name, entity.club_id.get().name)
+        elif field.name == 'club_id':
+                setattr(feed, field.name, str(entity.club_id.id()))
+        
 
         """
         elif field.name == 'date':

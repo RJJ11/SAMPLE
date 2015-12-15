@@ -83,10 +83,13 @@ class ClubMiniForm(messages.Message):
     photoUrl = messages.StringField(9)
     membercount = messages.StringField(10)
     followercount = messages.StringField(11)
+    isMember = messages.StringField(12)
+    isFollower = messages.StringField(13)
     #members = messages.StringField(10,repeated=True)
 
 class GetClubMiniForm(messages.Message):
     club_id = messages.StringField(1, required="True")
+    pid = messages.StringField(2)
 
 
 class Post(ndb.Model):
@@ -112,10 +115,12 @@ class PostForm(messages.Message):
     likes = messages.StringField(5)
     views = messages.StringField(6)
     likers = messages.StringField(7)
-    date = messages.StringField(8)
-    time = messages.StringField(9)
-    clubphotoUrl = messages.StringField(10)
-    club_name = messages.StringField(11)
+    #date = messages.StringField(8)
+    #time = messages.StringField(9)
+    timestamp = messages.StringField(8)
+    clubphotoUrl = messages.StringField(9)
+    club_name = messages.StringField(10)
+    club_id = messages.StringField(11)
 
 class EditPostForm(messages.Message):
     title = messages.StringField(1)
@@ -234,10 +239,10 @@ class EventForm(messages.Message):
     club_id = messages.StringField(3)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
     venue = messages.StringField(4)
-    start_date = messages.StringField(5)
+    #start_date = messages.StringField(5)
     start_time = messages.StringField(6)
     end_time = messages.StringField(7)
-    end_date = messages.StringField(8)
+    #end_date = messages.StringField(8)
     attendees = messages.StringField(9)
     completed = messages.StringField(10)
     views = messages.StringField(11)
@@ -246,11 +251,13 @@ class EventForm(messages.Message):
     collegeId = messages.StringField(14)
     eventId = messages.StringField(15)
     tags = messages.StringField(16)
-    date = messages.StringField(17)
-    time = messages.StringField(18)
-    clubphotoUrl = messages.StringField(19)
-    club_name = messages.StringField(20)
-    photoUrl = messages.StringField(21)
+    #date = messages.StringField(17)
+    #time = messages.StringField(18)
+    timestamp = messages.StringField(17)
+    
+    clubphotoUrl = messages.StringField(18)
+    club_name = messages.StringField(19)
+    photoUrl = messages.StringField(20)
     
 # id=eventId
 
@@ -393,25 +400,31 @@ class Feed(messages.Message):
     title = messages.StringField(1)
     description = messages.StringField(2)
     # photo = ndb.BlobProperty()
-    club_id = messages.StringField(3)  # Many events belong to one club
+    club_name = messages.StringField(3)  # Many events belong to one club
     # eventId = messages.StringField(4,required=True)
-    venue = messages.StringField(4)
-    start_date = messages.StringField(5)
+    club_id = messages.StringField(4)
+    venue = messages.StringField(5)
+    #start_date = messages.StringField(5)
+    #start_time = messages.StringField(6)
+    #end_time = messages.StringField(7)
+    #nd_date = messages.StringField(8)
     start_time = messages.StringField(6)
     end_time = messages.StringField(7)
-    end_date = messages.StringField(8)
-    attendees = messages.StringField(9,repeated=True)
-    completed = messages.StringField(10)
-    views = messages.StringField(11)
-    isAlumni = messages.StringField(12)
-    event_creator = messages.StringField(13)
-    collegeId = messages.StringField(14)
-    pid = messages.StringField(15) #the post or event creator
-    tags = messages.StringField(16)
-    likers = messages.StringField(17,repeated=True)
-    timestamp = messages.StringField(18)
-    photoUrl = messages.StringField(19)
-    clubphotoUrl = messages.StringField(20)
+
+
+    attendees = messages.StringField(8,repeated=True)
+    completed = messages.StringField(9)
+    views = messages.StringField(10)
+    isAlumni = messages.StringField(11)
+    event_creator = messages.StringField(12)
+    collegeId = messages.StringField(13)
+    id = messages.StringField(14) #the post or event creator
+    tags = messages.StringField(15)
+    likers = messages.StringField(16,repeated=True)
+    timestamp = messages.StringField(17)
+    photoUrl = messages.StringField(18)
+    clubphotoUrl = messages.StringField(19)
+    likes = messages.StringField(20)
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
@@ -441,6 +454,8 @@ class ProfileMiniForm(messages.Message):
     pid = messages.StringField(16)
     gcmId = messages.StringField(17)
     photoUrl = messages.StringField(18)
+    company = messages.StringField(19)
+    location = messages.StringField(20)
 
 class MessageResponse(messages.Message):
     status = messages.StringField(1)

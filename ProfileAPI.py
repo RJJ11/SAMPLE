@@ -76,25 +76,38 @@ def _getProfileFromEmail(email):
 
 def _doProfile(email,save_request=None):
         """Get user Profile and return to user, possibly updating it first."""
+        print ("Here Bitch")
+
         prof = _getProfileFromEmail(email)
         flag=0
+        print ("Save Request",save_request)
+        
+
         if save_request:
+            print ("Entered here")
             pf = ProfileMiniForm()
             for field in pf.all_fields():
                 #collegeLocation=getattr(save_request,'collegeLocation')
                 #print collegeLocation,"is location"
+                if field.name=='follows_names' or field.name=='follows' or field.name=='clubsJoined' or field.name=='club_names' or field.name=='tags':
+                    continue
+
                 if hasattr(save_request, field.name):
                     val = getattr(save_request, field.name)
+
+                
 
                     if field.name is 'collegeId':
                         #college=CollegeDb.query(CollegeDb.name==val,CollegeDb.location==collegeLocation).fetch()
                         collegeId = ndb.Key('CollegeDb',int(val))
+                        print ("coll",collegeId)
                         pylist = [x.key for x in CollegeDb.query()]
+                        print pylist
                         if(collegeId in pylist):
                             flag = 1
                             setattr(prof,'collegeId',collegeId)
                         else:
-                            flag =0
+                            flag = 0
                     else:
                         setattr(prof,field.name,val)
             if flag==1:
