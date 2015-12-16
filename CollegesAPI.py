@@ -114,12 +114,13 @@ def copyToCollegeFeed(entity):
     for field in feed.all_fields():
         if hasattr(entity, field.name):
                 if field.name == 'start_time':
-                    print("im here")
                     print field.name
-                    setattr(feed, field.name, str(entity.start_time))
+                    setattr(feed,"start_date", str(entity.start_time.strftime("%Y-%m-%d")))
+                    setattr(feed, field.name, str(entity.start_time.strftime("%H:%M:%S")))
                 elif field.name == 'end_time':
                     print field.name
-                    setattr(feed, field.name, str(entity.end_time))
+                    setattr(feed, "end_date", str(entity.end_time.strftime("%Y-%m-%d")))
+                    setattr(feed, field.name, str(entity.end_time.strftime("%H:%M:%S")))
                 elif field.name == 'club_name':
                     print "field name" + field.name
                     setattr(feed, field.name, entity.club_id.get().name)
@@ -143,6 +144,7 @@ def copyToCollegeFeed(entity):
                 elif (field.name=='attendees'):
                     print field.name
                     pylist=[]
+                    print entity.title
                     for key in entity.attendees:
                         pylist.append(key.get().name)
                     setattr(feed, field.name, pylist)

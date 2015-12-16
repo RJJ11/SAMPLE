@@ -27,6 +27,8 @@ def _copyProfileToForm(prof):
                     for x in prof.follows:
                         pylist.append(str(x.id()))
                         setattr(pf, field.name, pylist)
+                elif field.name=='pid':
+                    setattr(pf, field.name, str(prof.key.id()))
                 else:
                     setattr(pf, field.name, getattr(prof, field.name))
             else:
