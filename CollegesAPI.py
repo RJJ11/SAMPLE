@@ -170,7 +170,8 @@ def copyToCollegeFeed(entity):
                 setattr(feed, field.name, entity.club_id.get().name)
         elif field.name == 'club_id':
                 setattr(feed, field.name, str(entity.club_id.id()))
-        
+        elif field.name == 'clubabbreviation':
+                setattr(feed, field.name, entity.club_id.get().abbreviation)
 
         """
         elif field.name == 'date':

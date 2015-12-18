@@ -584,17 +584,17 @@ class ClubApi(remote.Service):
         if(temp2==None):
             print "None"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
+            posts = Post.query(Post.collegeId==collegeId).order(Post.timestamp)
         elif(temp==None):
             print "None"
             clubId = ndb.Key('Club',int(temp2))
-            posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
+            posts = Post.query(Post.club_id==clubId).order(Post.timestamp)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId).order(-Post.timestamp)
+            posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId).order(Post.timestamp)
 
         #pylist =[copyPostToForm(x) for x in posts]
         #print "the list"
@@ -697,26 +697,40 @@ class ClubApi(remote.Service):
         temp = request.collegeId
         temp2 = request.clubId
         date = request.date
+        future_date = request.future_date
         
+
+        print ("Future date is",future_date)
         if(temp2==None):
             print "No CLubId"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            events = Event.query(Event.collegeId==collegeId).order(-Event.start_time)
+            events = Event.query(Event.collegeId==collegeId).order(Event.start_time)
         elif(temp==None):
             print "No collegeID"
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.club_id==clubId).order(-Event.start_time)
+            events = Event.query(Event.club_id==clubId).order(Event.start_time)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.start_time)
+            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(Event.start_time)
 
         #All events have been obtained, check if date field is provided and take only those that have start date = req.date
 
         finalList = []
-        if(date != None):
+        if(future_date!=None):
+           print ("Future Date part")
+           for x in events:
+              start_date = str(x.start_time.date())
+              print("Retrieve start date",start_date)
+              if(start_date >= future_date):
+                 print ("Start Date is",start_date)
+                 print ("Event to be added",x.title)
+                 finalList.append(x)
+           print("Returning all events from Final List")
+           return Events(items=[copyEventToForm(x) for x in finalList])
+        elif(date != None):
            for x in events:
               start_date = str(x.start_time.date())
               if(start_date == date):	
