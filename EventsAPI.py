@@ -229,7 +229,7 @@ def getEventsBasedonTimeLeft():
                     groupName = group.name
                     
                     
-                    data = {'message': groupName + "About to start soon","title": event.title}
+                    data = {'message': event.title + "About to start soon","title": groupName }
                     LOG.info(data)
                     
                     #get the followers of the club pids. Get GCM Id's from those and send

@@ -58,7 +58,7 @@ class Club(ndb.Model):
     picture = ndb.BlobProperty()
     #clubId = ndb.StringProperty(required=True)
     admin = ndb.KeyProperty(kind='Profile', required=True)
-    description = ndb.StringProperty()
+    description = ndb.TextProperty()
     members = ndb.KeyProperty(kind='Profile', repeated=True)
     follows = ndb.KeyProperty(kind='Profile',
                               repeated=True)  # Only includes the set of people apart from members. By default a member of a club follows it.
@@ -94,7 +94,7 @@ class GetClubMiniForm(messages.Message):
 
 class Post(ndb.Model):
     title = ndb.StringProperty(required=True)
-    description = ndb.StringProperty()
+    description = ndb.TextProperty()
     from_pid = ndb.KeyProperty(kind="Profile",required=True)  # ancestor relationship here?
     photo = ndb.BlobProperty()
     club_id = ndb.KeyProperty(kind='Club', required=True)  # Many posts belong to one club
@@ -136,11 +136,12 @@ class GetAllPosts(messages.Message):
     collegeId = messages.StringField(1)
     clubId = messages.StringField(2)
     date = messages.StringField(3)
+    future_date = messages.StringField(4)
 
 
 class Post_Request(ndb.Model):
     title = ndb.StringProperty(required=True)
-    description = ndb.StringProperty(required=True)
+    description = ndb.TextProperty(required=True)
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # This is the post creator
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to one profile
     club_id = ndb.KeyProperty(kind='Club', required=True)
@@ -194,7 +195,7 @@ class LikePost(messages.Message):
 
 class Event(ndb.Model):
     title = ndb.StringProperty(required=True)
-    description = ndb.StringProperty()
+    description = ndb.TextProperty()
     photo = ndb.BlobProperty()
     photoUrl = ndb.StringProperty()
     club_id = ndb.KeyProperty(kind='Club', required=True)  # Many events belong to one club
@@ -283,7 +284,7 @@ class Club_Creation(ndb.Model):
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to student council admin
    # club_id = ndb.StringProperty(required=True)
     photoUrl = ndb.StringProperty()
-    description = ndb.StringProperty(required=True)
+    description = ndb.TextProperty(required=True)
     club_name = ndb.StringProperty(required=True)
     abbreviation = ndb.StringProperty(required=True)
     isAlumni = ndb.StringProperty(required=True)
@@ -421,6 +422,7 @@ class Feed(messages.Message):
     photoUrl = messages.StringField(20)
     clubphotoUrl = messages.StringField(21)
     likes = messages.StringField(22)
+    clubabbreviation = messages.StringField(23)
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
