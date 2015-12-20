@@ -584,23 +584,23 @@ class ClubApi(remote.Service):
         if(temp2==None):
             print "None"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            posts = Post.query(Post.collegeId==collegeId).order(Post.timestamp)
+            posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
         elif(temp==None):
             print "None"
             clubId = ndb.Key('Club',int(temp2))
-            posts = Post.query(Post.club_id==clubId).order(Post.timestamp)
+            posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId).order(Post.timestamp)
+            posts = Post.query(Post.collegeId==collegeId,Post.club_id==clubId).order(-Post.timestamp)
 
         #pylist =[copyPostToForm(x) for x in posts]
         #print "the list"
         #print pylist
 
-        return Posts(items=[copyPostToForm(x) for x in posts])
+        return Posts(items=list(reversed([copyPostToForm(x) for x in posts])))
         #clubRequest = self.postEntry(request)
         #print("Inserted into the events table")
 
@@ -704,17 +704,17 @@ class ClubApi(remote.Service):
         if(temp2==None):
             print "No CLubId"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            events = Event.query(Event.collegeId==collegeId).order(Event.start_time)
+            events = Event.query(Event.collegeId==collegeId).order(-Event.start_time)
         elif(temp==None):
             print "No collegeID"
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.club_id==clubId).order(Event.start_time)
+            events = Event.query(Event.club_id==clubId).order(-Event.start_time)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(Event.start_time)
+            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.start_time)
 
         #All events have been obtained, check if date field is provided and take only those that have start date = req.date
 
@@ -729,18 +729,17 @@ class ClubApi(remote.Service):
                  print ("Event to be added",x.title)
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=[copyEventToForm(x) for x in finalList])
+           return Events(items=list(reversed([copyEventToForm(x) for x in finalList])))
         elif(date != None):
            for x in events:
               start_date = str(x.start_time.date())
               if(start_date == date):	
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=[copyEventToForm(x) for x in finalList])
-        
+           return Events(items=list(reversed([copyEventToForm(x) for x in finalList])))
         else:
            print("Returning all events from Events List")
-           return Events(items=[copyEventToForm(x) for x in events])
+           return Events(items=list(reversed([copyEventToForm(x) for x in events])))
 
    @endpoints.method(ModifyEvent,message_types.VoidMessage,
             path='deleteEvent', http_method='DELETE', name='delEvent')
