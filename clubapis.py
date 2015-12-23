@@ -22,12 +22,12 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation
+from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
-from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub
+from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
@@ -90,6 +90,7 @@ class ClubApi(remote.Service):
                 joinCreationObj.to_pid = club.admin
                 to_pidProfile = joinCreationObj.to_pid.get()
                 joinCreationObj.club_id = clubKey
+                joinCreationObj.timestamp = dt.datetime.now().replace(microsecond = 0)
                 print("join obj",joinCreationObj)
                 joinCreationObjKey = joinCreationObj.put()
 
@@ -98,7 +99,8 @@ class ClubApi(remote.Service):
                      clubId = club.key,
                      clubphotoUrl = club.photoUrl,
                      to_pid = joinCreationObj.to_pid,
-                     type = "Join Request"
+                     type = "Join Request",
+                     timestamp = joinCreationObj.timestamp
                     )
 
                 print("Notification to be inserted in join approval",newNotif)
@@ -920,8 +922,8 @@ class ClubApi(remote.Service):
     
 
 
-   @endpoints.method(GetInformation,CollegeFeed,path='adminFeed', http_method='POST', name='adminFeed')
-   def adminFeed(self, request):
+   @endpoints.method(GetInformation,CollegeFeed,path='dontTouch', http_method='POST', name='dontTouch')
+   def dontTouch(self, request):
        pid = ndb.Key('Profile',int(request.pid))
        clubId = Club.query(Club.admin==pid)
        pylist=[]
@@ -938,6 +940,42 @@ class ClubApi(remote.Service):
            pylist+=list1
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        return CollegeFeed(items=pylist)
+
+   @endpoints.method(GetInformation,AdminFeed,path='adminFeed', http_method='POST', name='adminFeed')
+   def adminFeed(self, request):
+       pid = ndb.Key('Profile',int(request.pid))
+       clubId = ndb.Key('Club',int(request.clubId))
+       #post_requests = Post_Request.query(Post_Request.to_pid==pid,Post_Request.club_id==clubId).order(Post_Request.reqtimestamp)
+       #list1=[]
+       list2 = []
+       #for y in post_requests:
+           #list1.append(copyPostRequestToForm(y))
+
+       join_requests = Join_Creation.query(Join_Creation.to_pid==pid,Join_Creation.club_id==clubId).order(Join_Creation.timestamp)
+       for y in join_requests:
+           list2.append(copyJoinRequestToForm(y))
+
+
+       return AdminFeed(joinReq=list2)
+   @endpoints.method(GetInformation,SuperAdminFeedResponse,path='superAdminFeed', http_method='POST', name='superAdminFeed')
+   def superAdminFeed(self,request):
+       pid = ndb.Key('Profile',int(request.pid))
+       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+       profile = pid.get()
+       college = collegeId.get()
+       list1=[]
+       if collegeId in profile.superadmin:
+           query = Club_Creation.query(Club_Creation.to_pid==pid).order(Club_Creation.timestamp)
+           for x in query:
+             list1.append(copyToSuperAdminList(x))
+            
+
+       return SuperAdminFeedResponse(items=list1)
+       
+
+   
+
+
 
    @endpoints.method(ProfileRetrievalMiniForm, ProfileResponse,path='profileGCM', http_method='POST', name='profileGCM')
    def profileGCM(self, request):

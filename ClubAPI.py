@@ -1,13 +1,16 @@
 __author__ = 'Siddharth'
 
 import endpoints
+import datetime as dt
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import Club_Creation,CollegeDb,Profile,Club,ClubMiniForm
+from Models import Club_Creation,CollegeDb,Profile,Club,ClubMiniForm,ClubJoinResponse,SuperAdminFeed
+from datetime import datetime,date,time
+
 
 def createClub(request=None):
 
@@ -26,7 +29,7 @@ def createClub(request=None):
 
         if request and college :
 
-            for field in ('abbreviation','club_name','from_pid','to_pid','isAlumni','collegeId','description','approval_status','photoUrl'):
+            for field in ('abbreviation','club_name','from_pid','to_pid','isAlumni','collegeId','description','approval_status','photoUrl','timestamp'):
 
 
                 if field == "abbreviation":
@@ -81,6 +84,11 @@ def createClub(request=None):
                      if(request.photoUrl):
                          setattr(clubRequest, field, str(request.photoUrl))
 
+                elif field == "timestamp":
+                     print ("Going to enter timestamp")
+                     setattr(clubRequest, field, dt.datetime.now().replace(microsecond = 0))
+                
+
             clubRequest.put()
 
         return clubRequest
@@ -131,6 +139,10 @@ def createClubAfterApproval(requestentity=None):
 
             profile.follows.append(clubkey)
             print("Check if the profile has folowed the club",profile.follows)
+
+            #adding the club to his admin list
+
+            profile.admin.append(clubkey)
 
             profile.put()
 
@@ -229,3 +241,44 @@ def unfollowClub(request):
 
 
 
+def copyJoinRequestToForm(request):
+    a = ClubJoinResponse()
+    a.from_pid = str(request.from_pid.id())
+    a.from_name = request.from_pid.get().name
+    a.requestId = str(request.key.id())
+    a.from_photoUrl =  request.from_pid.get().photoUrl
+    a.club_name = request.club_id.get().name
+    a.timestamp = str(request.timestamp)
+    return a
+def copyToSuperAdminList(request):
+    saf = SuperAdminFeed()
+    for field in saf.all_fields():
+        if(hasattr(request,field.name)):
+            if (field.name == "from_pid"):
+                setattr(saf,field.name,str(request.from_pid.id()))
+            else:
+               setattr(saf,field.name,str(getattr(request,field.name)))
+
+        elif field.name == "requestId":
+            setattr(saf,field.name,str(request.key.id()))
+        elif field.name == "from_name":
+            setattr(saf,field.name,request.from_pid.get().name)
+        elif field.name == "from_photoUrl":
+            setattr(saf,field.name,request.from_pid.get().photoUrl)
+
+        elif field.name == "description":
+            setattr(saf,field.name,request.description)
+        
+        elif field.name == "club_name":
+            setattr(saf,field.name,request.club_name)
+        elif field.name == "abbreviation":
+            setattr(saf,field.name,request.abbreviation)
+        elif field.name == "isAlumni":
+            setattr(saf,field.name,request.isAlumni)
+        elif field.name == "timestamp":
+            setattr(saf,field.name,str(request.timestamp))
+              
+              
+
+
+    return saf   

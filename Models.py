@@ -51,6 +51,8 @@ class Profile(ndb.Model):
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many people
     eventsAttending = ndb.KeyProperty(kind='Event',repeated=True)
     photoUrl = ndb.StringProperty()
+    admin = ndb.KeyProperty(kind='Club', repeated=True)
+    superadmin = ndb.KeyProperty(kind='CollegeDb', repeated=True)
     #id = pid
 
 class Club(ndb.Model):
@@ -158,14 +160,18 @@ class GetInformation(messages.Message):
     date = messages.StringField(4)
     pageNumber = messages.StringField(5)
 
+
+
+
+
 class GetPostRequestsForm(messages.Message):
-    title = messages.StringField(1)
-    description = messages.StringField(2)
-    person_from = messages.StringField(3)
+    post_name = messages.StringField(1)
+    #description = messages.StringField(2)
+    from_name = messages.StringField(2)
+    from_photoUrl = messages.StringField(3)
     club_name = messages.StringField(4)
     postRequestId = messages.StringField(5)
-    date = messages.StringField(6)
-    time = messages.StringField(7)
+    timestamp = messages.StringField(6)
 
 class GetAllPostRequests(messages.Message):
     items = messages.MessageField(GetPostRequestsForm,1,repeated=True)
@@ -291,12 +297,13 @@ class Club_Creation(ndb.Model):
     #club_creation_id = ndb.StringProperty(required=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many club creation requests
     approval_status = ndb.StringProperty()
+    timestamp = ndb.DateTimeProperty()
     #id = club_creation_id
 class Join_Creation(ndb.Model):
     from_pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many club creation requests
     to_pid = ndb.KeyProperty(kind='Profile', required=True)  # many requests to student council admin
-    
     club_id = ndb.KeyProperty(kind='Club', required=True)
+    timestamp = ndb.DateTimeProperty()
     
 
 class ClubRequestMiniForm(messages.Message):
@@ -362,6 +369,7 @@ class CollegeDb(ndb.Model):
     alumni_sup = ndb.StringProperty()
     collegeId = ndb.StringProperty()
     sup_emailId = ndb.StringProperty(required=True)
+
 
 
 class CollegeDbMiniForm(messages.Message):
@@ -482,3 +490,28 @@ class PersonalResponse(messages.Message):
 class PersonalInfoResponse(messages.Message):
     items = messages.MessageField(PersonalResponse,1,repeated=True)
 
+class ClubJoinResponse(messages.Message):
+    from_pid = messages.StringField(1)
+    from_name = messages.StringField(2)
+    requestId = messages.StringField(3)
+    from_photoUrl = messages.StringField(4)
+    club_name = messages.StringField(5)
+    timestamp = messages.StringField(6)
+
+
+class AdminFeed(messages.Message):
+    joinReq = messages.MessageField(ClubJoinResponse,1,repeated=True)
+    #postItems = messages.MessageField(GetPostRequestsForm,1,repeated=True)    
+class SuperAdminFeed(messages.Message):
+    from_pid = messages.StringField(1)
+    from_name = messages.StringField(2)
+    from_photoUrl = messages.StringField(3)
+    description = messages.StringField(4)
+    club_name = messages.StringField(5)
+    abbreviation = messages.StringField(6)
+    isAlumni = messages.StringField(7)
+    requestId = messages.StringField(8)
+    timestamp = messages.StringField(9)
+
+class SuperAdminFeedResponse(messages.Message):
+    items = messages.MessageField(SuperAdminFeed,1,repeated=True)    
