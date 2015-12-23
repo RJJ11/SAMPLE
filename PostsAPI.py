@@ -1,6 +1,7 @@
 __author__ = 'rohit'
 import endpoints
 from datetime import datetime,date,time
+import datetime as dt
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -64,6 +65,8 @@ def postRequest(requestentity=None):
                     temp = datetime.strptime(getattr(requestentity,"date"),"%Y-%m-%d").date()
                     temp1 = datetime.strptime(getattr(requestentity,"time"),"%H:%M:%S").time()
                     setattr(post_request,field,datetime.combine(temp,temp1))
+                
+        
 
         print("About to createClubRequest")
         print(post_request)
@@ -288,7 +291,7 @@ def copyPostRequestToForm(request):
            if(hasattr(request,field.name)):
                setattr(reply,field.name,str(getattr(request,field.name)))
 
-           elif(field.name=="person_from"):
+           elif(field.name=="from_name"):
                person = request.from_pid.get().name
                setattr(reply,field.name,person)
 
@@ -296,11 +299,16 @@ def copyPostRequestToForm(request):
                club = request.club_id.get().name
                setattr(reply,field.name,club)
 
-           elif field.name == 'date':
-                setattr(reply, field.name, str(request.timestamp.strftime("%Y-%m-%d")))
-           elif field.name == 'time':
-                setattr(reply, field.name, str(request.timestamp.strftime("%H:%M:%S")))
-
+           elif field.name == 'timestamp':
+                setattr(reply, field.name, str(request.timestamp))
+           
+           elif field.name == "post_name":
+                setattr(reply, field.name, request.title)
+           elif(field.name == "from_photoUrl"):
+               from_photoUrl = request.from_pid.get().photoUrl
+               setattr(reply,field.name,from_photoUrl)
+      
+           
            else:
                setattr(reply,"postRequestId",str(request.key.id()))
 

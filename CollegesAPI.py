@@ -88,9 +88,9 @@ def createCollege(requestentity=None):
                             phone = phone,
                             isAlumni=isAlumni,
                             collegeId= collegeId)
-            profile.put()
-
-        return newCollege
+            profile.superadmin.append(collegeId)
+            key1 = profile.put()
+            return newCollege
 
 
 
