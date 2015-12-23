@@ -475,6 +475,8 @@ class UpdateGCM(messages.Message):
 class ProfileResponse(messages.Message):
     success = messages.StringField(1)
     result = messages.MessageField(ProfileMiniForm,2)
+    isAdmin = messages.StringField(3)
+    isSuperAdmin = messages.StringField(4)
 
 class NotificationMiniForm(messages.Message):
     pid = messages.StringField(1)
