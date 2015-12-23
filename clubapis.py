@@ -257,6 +257,18 @@ class ClubApi(remote.Service):
                    format_club.name = ret_club.admin.get().name
                    format_club.description = ret_club.description
                    format_club.club_id = str(ret_club.key.id())
+                   if(request.pid != None):
+                         format_club.isMember = "N"
+                         format_club.isFollower = "N"
+                         profileKey = ndb.Key('Profile',int(request.pid))
+                         print ("retrieved profile key is ", profileKey)
+
+                         if (profileKey in ret_club.follows):
+                             format_club.isFollower = "Y"
+                         if (profileKey in ret_club.members):
+                             format_club.isMember = "Y"
+
+
                    list_of_clubs.list.append(format_club)
 
 
@@ -264,6 +276,36 @@ class ClubApi(remote.Service):
 
 
         return list_of_clubs
+
+   @endpoints.method(NotificationMiniForm,ClubListResponse,path='getClubListofAdmin', http_method='POST', name='getClubListofAdmin')
+   def getClubListApiofAdmin(self,request):
+               #Make new api for GetList of clubs you are admin of.
+               #Take PID and return all clubs he is admin of.
+               #Return response just like getClubList response
+               profileKey = ndb.Key('Profile',int(request.pid))
+               profile = profileKey.get()
+               list_of_clubs = ClubListResponse()
+               for obj in profile.admin:
+                   ret_club = obj.get()
+                   format_club = ClubMiniForm()
+                   format_club.name = ret_club.name
+                   format_club.abbreviation = ret_club.abbreviation
+                   format_club.collegeName = ret_club.collegeId.get().name
+                   format_club.name = ret_club.admin.get().name
+                   format_club.description = ret_club.description
+                   format_club.club_id = str(ret_club.key.id())
+                   format_club.isMember = "Y"
+                   format_club.isFollower = "Y"
+                   list_of_clubs.list.append(format_club)
+
+
+
+
+
+               return list_of_clubs
+
+
+
 
    @endpoints.method(ClubRequestMiniForm,message_types.VoidMessage,path='club', http_method='POST', name='createClubRequest')
    def createClubRequest(self, request):

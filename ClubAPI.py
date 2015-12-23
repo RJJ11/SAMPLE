@@ -249,6 +249,8 @@ def copyJoinRequestToForm(request):
     a.from_photoUrl =  request.from_pid.get().photoUrl
     a.club_name = request.club_id.get().name
     a.timestamp = str(request.timestamp)
+    a.from_branch = request.from_pid.get().branch
+    a.from_batch = request.from_pid.get().batch
     return a
 def copyToSuperAdminList(request):
     saf = SuperAdminFeed()

@@ -396,6 +396,7 @@ class GetCollege(messages.Message):
 class ClubRetrievalMiniForm(messages.Message):
     """JoinRequestMiniForm -- What's shown on the UI for an join request"""
     college_id = messages.StringField(1, required=True)
+    pid = messages.StringField(2)
 
 class Colleges(messages.Message):
     collegeList = messages.MessageField(GetCollege,1,repeated=True)
@@ -497,7 +498,8 @@ class ClubJoinResponse(messages.Message):
     from_photoUrl = messages.StringField(4)
     club_name = messages.StringField(5)
     timestamp = messages.StringField(6)
-
+    from_branch = messages.StringField(7)
+    from_batch = messages.StringField(8)
 
 class AdminFeed(messages.Message):
     joinReq = messages.MessageField(ClubJoinResponse,1,repeated=True)
