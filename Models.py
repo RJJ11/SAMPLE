@@ -516,4 +516,8 @@ class SuperAdminFeed(messages.Message):
     timestamp = messages.StringField(9)
 
 class SuperAdminFeedResponse(messages.Message):
-    items = messages.MessageField(SuperAdminFeed,1,repeated=True)    
+    items = messages.MessageField(SuperAdminFeed,1,repeated=True) 
+class SetSuperAdminInputForm(messages.Message):
+    collegeId = messages.StringField(1)
+class SetAdminInputForm(messages.Message):
+    clubId = messages.StringField(1)              
