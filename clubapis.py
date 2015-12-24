@@ -22,7 +22,7 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse
+from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
@@ -1116,6 +1116,39 @@ class ClubApi(remote.Service):
            pylist.append(PersonalInfoForm(person))
 
        return PersonalInfoResponse(items = pylist)
+
+
+   @endpoints.method(SetSuperAdminInputForm,message_types.VoidMessage,path='setSuperAdmin', http_method='POST', name='setSuperAdmin')
+   def setSuperAdmin(self,request):
+       collegeKey = ndb.Key('CollegeDb',int(request.collegeId))
+       college = collegeKey.get()
+       emailId = college.sup_emailId
+       retrievedProfile = Profile.query(Profile.email==emailId).fetch(1)
+       print ("retrievedProfile is",retrievedProfile[0])
+
+       if not retrievedProfile[0].superadmin:
+          retrievedProfile[0].superadmin.append(collegeKey)
+          retrievedProfile[0].put()
+          print("inserted into profile table")       
+
+
+
+       return message_types.VoidMessage()
+
+   @endpoints.method(SetAdminInputForm,message_types.VoidMessage,path='setAdmin', http_method='POST', name='setAdmin')
+   def setAdmin(self,request):
+       clubKey = ndb.Key('Club',int(request.clubId))
+       club = clubKey.get()
+       adminProfile = club.admin.get()
+       
+       if clubKey not in adminProfile.admin:
+          adminProfile.admin.append(clubKey)
+          adminProfile.put()
+       
+
+
+
+       return message_types.VoidMessage()
 
 
 api = endpoints.api_server([ClubApi])   # register API
