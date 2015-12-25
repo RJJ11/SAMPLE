@@ -1051,7 +1051,7 @@ class ClubApi(remote.Service):
         if present ==1:
             success="True"
             a = _doProfile(email)
-            return ProfileResponse(success=success,result=a)
+            return ProfileResponse(success=success,result=a,isAdmin=isAdmin,isSuperAdmin=isSuperAdmin)
         else:
             success="False"
             a = ProfileMiniForm(name = '',
