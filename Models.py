@@ -403,8 +403,9 @@ class Colleges(messages.Message):
 
 
 class ProfileRetrievalMiniForm(messages.Message):
-    email=messages.StringField(1,required=True)
+    email=messages.StringField(1)
     gcmId=messages.StringField(2)
+    pid=messages.StringField(3)
 
 class Feed(messages.Message):
     title = messages.StringField(1)
@@ -527,3 +528,7 @@ class ChangeAdminInputForm(messages.Message):
     clubId = messages.StringField(1)
     currentAdminCheckId = messages.StringField(2)
     newAdminId =  messages.StringField(3)                 
+class AdminStatus(messages.Message):
+    isAdmin = messages.StringField(3)
+    isSuperAdmin = messages.StringField(4)
+
