@@ -522,4 +522,8 @@ class SuperAdminFeedResponse(messages.Message):
 class SetSuperAdminInputForm(messages.Message):
     collegeId = messages.StringField(1)
 class SetAdminInputForm(messages.Message):
-    clubId = messages.StringField(1)              
+    clubId = messages.StringField(1)  
+class ChangeAdminInputForm(messages.Message):
+    clubId = messages.StringField(1)
+    currentAdminCheckId = messages.StringField(2)
+    newAdminId =  messages.StringField(3)                 

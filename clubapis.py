@@ -22,7 +22,7 @@ from Models import JoinClubMiniForm
 from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm
+from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
@@ -1165,6 +1165,38 @@ class ClubApi(remote.Service):
 
 
        return message_types.VoidMessage()
+   
+   @endpoints.method(ChangeAdminInputForm,message_types.VoidMessage,path='changeAdmin', http_method='POST', name='changeAdmin')
+   def changeAdmin(self,request):
+       clubKey = ndb.Key('Club',int(request.clubId))
+       currentAdminCheckKey = ndb.Key('Profile',int(request.currentAdminCheckId))
+       currentAdmincheck = currentAdminCheckKey.get()  
+       newAdminKey = ndb.Key('Profile',int(request.newAdminId))
+       club = clubKey.get()
+       currentAdmin = club.admin.get()
+       newAdmin = newAdminKey.get()
 
+       
+       if(newAdmin and currentAdmincheck == currentAdmin):
+         club.admin = newAdminKey
+         newAdmin.admin.append(clubKey)
+         currentAdmin.admin.remove(clubKey)
+         #Check if newAdmin is not a member or a follower
+         if(newAdminKey not in club.follows):
+            club.follows.append(newAdminKey)
+         if(newAdminKey not in club.members):
+            club.members.append(newAdminKey)
+         if(clubKey not in newAdmin.clubsJoined):
+            newAdmin.clubsJoined.append(clubKey)   
+
+
+
+
+         club.put()
+         newAdmin.put()
+         currentAdmin.put()
+
+
+       return message_types.VoidMessage()
 
 api = endpoints.api_server([ClubApi])   # register API
