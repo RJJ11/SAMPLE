@@ -1205,10 +1205,10 @@ class ClubApi(remote.Service):
        isSuperAdmin="N"
        if person.admin is not None:
             if len(person.admin)>0:
-                    isAdmin="Y"
+                isAdmin="Y"
        if person.superadmin is not None:
             if len(person.superadmin)>0:
-                    isSuperAdmin="Y"
+                isSuperAdmin="Y"
 
        return AdminStatus(isSuperAdmin=isSuperAdmin,isAdmin=isAdmin)
 
