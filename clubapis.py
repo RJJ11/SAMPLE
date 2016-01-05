@@ -1190,6 +1190,12 @@ class ClubApi(remote.Service):
          if(clubKey not in newAdmin.clubsJoined):
             newAdmin.clubsJoined.append(clubKey)   
 
+         club.put()
+         newAdmin.put()
+         currentAdmin.put()
+
+
+       return message_types.VoidMessage()
 
    @endpoints.method(ProfileRetrievalMiniForm,AdminStatus,path='adminStatus', http_method='POST', name='adminStatus')
    def adminStatus(self,request):
@@ -1199,20 +1205,14 @@ class ClubApi(remote.Service):
        isSuperAdmin="N"
        if person.admin is not None:
             if len(person.admin)>0:
-                    isAdmin="Y"
+                isAdmin="Y"
        if person.superadmin is not None:
             if len(person.superadmin)>0:
-                    isSuperAdmin="Y"
+                isSuperAdmin="Y"
 
        return AdminStatus(isSuperAdmin=isSuperAdmin,isAdmin=isAdmin)
 
 
 
-         club.put()
-         newAdmin.put()
-         currentAdmin.put()
-
-
-       return message_types.VoidMessage()
 
 api = endpoints.api_server([ClubApi])   # register API
