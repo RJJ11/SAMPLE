@@ -23,7 +23,7 @@ from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Perso
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models import AdminStatus
+from Models import AdminStatus,UpdateStatus
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
@@ -1212,6 +1212,11 @@ class ClubApi(remote.Service):
 
        return AdminStatus(isSuperAdmin=isSuperAdmin,isAdmin=isAdmin)
 
+
+   @endpoints.method(message_types.VoidMessage,UpdateStatus,path='updateStatus', http_method='POST', name='updateStatus')
+   def updateStatus(self,request):
+       update="NO"
+       return UpdateStatus(update=update)
 
 
 
