@@ -23,7 +23,7 @@ from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Perso
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models import AdminStatus
+from Models import AdminStatus,UpdateStatus
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
@@ -1190,6 +1190,12 @@ class ClubApi(remote.Service):
          if(clubKey not in newAdmin.clubsJoined):
             newAdmin.clubsJoined.append(clubKey)   
 
+         club.put()
+         newAdmin.put()
+         currentAdmin.put()
+
+
+       return message_types.VoidMessage()
 
    @endpoints.method(ProfileRetrievalMiniForm,AdminStatus,path='adminStatus', http_method='POST', name='adminStatus')
    def adminStatus(self,request):
@@ -1199,20 +1205,19 @@ class ClubApi(remote.Service):
        isSuperAdmin="N"
        if person.admin is not None:
             if len(person.admin)>0:
-                    isAdmin="Y"
+                isAdmin="Y"
        if person.superadmin is not None:
             if len(person.superadmin)>0:
-                    isSuperAdmin="Y"
+                isSuperAdmin="Y"
 
        return AdminStatus(isSuperAdmin=isSuperAdmin,isAdmin=isAdmin)
 
 
+   @endpoints.method(message_types.VoidMessage,UpdateStatus,path='updateStatus', http_method='POST', name='updateStatus')
+   def updateStatus(self,request):
+       update="NO"
+       return UpdateStatus(update=update)
 
-         club.put()
-         newAdmin.put()
-         currentAdmin.put()
 
-
-       return message_types.VoidMessage()
 
 api = endpoints.api_server([ClubApi])   # register API

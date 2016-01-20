@@ -532,3 +532,5 @@ class AdminStatus(messages.Message):
     isAdmin = messages.StringField(3)
     isSuperAdmin = messages.StringField(4)
 
+class UpdateStatus(messages.Message):
+    update = messages.StringField(1)
