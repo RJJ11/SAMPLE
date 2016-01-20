@@ -543,8 +543,13 @@ class ClubApi(remote.Service):
    @endpoints.method(message_types.VoidMessage,Colleges,path='getColleges', http_method='GET', name='getColleges')
    def getAllColleges(self, request):
         print("Entered get all colleges Portion")
+        newList = []
         colleges = CollegeDb.query()
-        return Colleges(collegeList=[getColleges(x) for x in colleges])
+        for x in colleges:
+          if(str(x.key.id()) != '5720605454237696' and str(x.key.id()) != '5743114304094208'):
+             newList.append(x)
+
+        return Colleges(collegeList=[getColleges(x) for x in newList])
 
 
 
