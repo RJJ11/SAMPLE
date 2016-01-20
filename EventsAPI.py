@@ -194,6 +194,7 @@ def getEventsBasedonTimeLeft():
     logging.basicConfig(level=logging.DEBUG)
     LOG = logging.getLogger(__name__)
     current  = dt.datetime.now().replace(microsecond = 0)
+    #current_utc = current - dt.timedelta(hours =5,minutes=30)
     currentDate = current.date()
     currentTime  = current.time()
     LOG.info("Current time")
@@ -201,7 +202,11 @@ def getEventsBasedonTimeLeft():
     eventlist = []   
     event_query = Event.query().fetch()
     for event in event_query:
-        start_date =  event.start_time.date()
+        LOG.info("Event")
+        LOG.info(event.title)
+        LOG.info(event.start_time)
+        start_time_utc = event.start_time - dt.timedelta(hours=5,minutes=30) 
+        start_date =  start_time_utc.date()
         diff = start_date - currentDate
         LOG.info("Considering this event")
         LOG.info(event.title)
@@ -209,9 +214,10 @@ def getEventsBasedonTimeLeft():
         if(diff == dt.timedelta(hours=0) and diff == dt.timedelta(minutes=0) and diff == dt.timedelta(seconds = 0)):
              LOG.info("this event is happening today")
              LOG.info(event.title) 
-             start_time = event.start_time.time()
+             start_time = start_time_utc.time()
              FMT = '%H:%M:%S'
              tdelta = datetime.strptime(str(start_time), FMT) - datetime.strptime(str(currentTime), FMT)
+             LOG.info("Time delta is")
              LOG.info(tdelta) 
 
              b = dt.timedelta(days = 0)
