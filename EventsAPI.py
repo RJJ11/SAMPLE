@@ -157,6 +157,8 @@ def deleteEvent(request):
 
         if flag==1:
             event_id.delete()
+            person.eventsAttending.remove(event_id)
+            person.put()
 
         return
 
