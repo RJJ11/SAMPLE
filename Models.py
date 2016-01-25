@@ -92,7 +92,9 @@ class ClubMiniForm(messages.Message):
 class GetClubMiniForm(messages.Message):
     club_id = messages.StringField(1, required="True")
     pid = messages.StringField(2)
-
+class DelClubMiniForm(messages.Message):
+    club_id = messages.StringField(1, required="True")
+    pid = messages.StringField(2,required="True")
 
 class Post(ndb.Model):
     title = ndb.StringProperty(required=True)

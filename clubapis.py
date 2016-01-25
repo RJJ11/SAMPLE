@@ -23,12 +23,12 @@ from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Perso
 from Models import ClubListResponse
 from Models import ProfileMiniForm,Events,Event,ModifyEvent
 from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models import AdminStatus,UpdateStatus
+from Models import AdminStatus,UpdateStatus,DelClubMiniForm
 from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI import copyPostRequestToForm,update
 from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
-from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList
+from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList,deleteClub
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
@@ -1222,7 +1222,10 @@ class ClubApi(remote.Service):
    def updateStatus(self,request):
        update="NO"
        return UpdateStatus(update=update)
-
+   @endpoints.method(DelClubMiniForm,message_types.VoidMessage,path='delClub', http_method='POST', name='delClub')
+   def delClub(self,request):
+       deleteClub(request)
+       return message_types.VoidMessage() 
 
 
 api = endpoints.api_server([CampusConnectApi,ClubApi])   # register API

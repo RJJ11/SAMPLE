@@ -8,9 +8,10 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models import Club_Creation,CollegeDb,Profile,Club,ClubMiniForm,ClubJoinResponse,SuperAdminFeed
+from Models import Event,LikePost,ModifyEvent,Post_Request,Club_Creation,CollegeDb,Profile,Club,ClubMiniForm,ClubJoinResponse,SuperAdminFeed,Notifications,Join_Creation,Join_Request,Post
 from datetime import datetime,date,time
-
+from EventsAPI import deleteEvent
+from PostsAPI import deletePost
 
 def createClub(request=None):
 
@@ -284,3 +285,102 @@ def copyToSuperAdminList(request):
 
 
     return saf   
+
+def deleteClub(request):
+   #Steps to be incorporated for deletion of a club
+   #1) Remove the club key from the clubsJoined list of every profile
+   #2) Remove the club key from the follows list of every profile
+   #3) Remove the club key from the admin list of everyprofile
+   #4) Remove from college group list         
+   #5) Remove notifications that have the club id = given club id
+   #6)Remove Join Creations and Join Requests         
+   #Call deleteEvent and deletePost for all events and posts that belong to the club         
+   #Delete the club entity 
+
+   club_key_id = request.club_id
+   pid = request.pid
+   print ("Club_key_id",club_key_id)
+   clubKey = ndb.Key('Club',int(request.club_id))
+   pidKey = ndb.Key('Profile',int(request.pid))
+   profileconsidered = pidKey.get()
+   club = clubKey.get()
+   print ("Club to be removed",club)
+   # Check if the club's collegeId and Profile's collegeId are the same
+
+   print ("club.coolegeId",club.collegeId)
+   print ("profileconsidered.collegeId",profileconsidered.collegeId)
+   if(club.collegeId == profileconsidered.collegeId):
+
+   #check if the profile is the admin of the club or if he is the super admin of the college
+      print ("entered first part")
+      print ("Club.admin",club.admin)
+      print ("pidKey",pidKey)
+      
+
+      if(club.admin == pidKey or club.collegeId in profileconsidered.superadmin):
+
+   # Operation 1 : for every profile key in member list of club, extract profile and remove the club
+   # from the clubsJoined list
+         print("Ive Entered Corrctly")
+         for profile_key in club.members:
+          profile = profile_key.get()
+          profile.clubsJoined.remove(clubKey)
+          profile.put()
+   # Operation 2 : for every profile key in follows list of club, extract profile and remove the club
+   # from the follows list of Profile
+         for profile_key in club.follows:
+          profile = profile_key.get()
+          profile.follows.remove(clubKey)
+          profile.put()
+
+   #Operation 3 : Get the profile of the admin and remove the club key from his admin list
+         adminProfile = club.admin.get()
+         adminProfile.admin.remove(clubKey)
+         adminProfile.put()
+   #Operation 4 : Get the college and remove the club key from his grouplist
+         college = club.collegeId.get()
+         college.group_list.remove(clubKey)
+         college.put()
+   #Operation 5 : Get all notifications where it matches with clubKey and remove them
+
+         notificationsRet =  Notifications.query(Notifications.clubId == clubKey)
+         for notif in notificationsRet:
+             notif.key.delete()
+   
+   #Operation 6 : Get all JoinCreations and JoinRequests where it matches with clubKey and remove them
+
+         joinCreationRet =  Join_Creation.query(Join_Creation.club_id == clubKey)
+         for jc in joinCreationRet:
+             jc.key.delete()
+   
+         joinReqRet =  Join_Request.query(Join_Request.club_id == clubKey)
+         for jr in joinReqRet:
+             jr.key.delete()
+         postReqRet =  Post_Request.query(Post_Request.club_id == clubKey)
+         for pr in postReqRet:
+             pr.key.delete()
+
+
+   #Operation 7 - Posts and Events delete
+         postRet =  Post.query(Post.club_id == clubKey)
+   
+         for posts in postRet:
+             likePostmini = LikePost()
+             likePostmini.from_pid = str(club.admin.id())
+             likePostmini.postId = str(posts.key.id())   
+             deletePost(likePostmini)
+   
+         eventRet =  Event.query(Event.club_id == clubKey)
+   
+         for events in eventRet:
+             modifyeventmini = ModifyEvent()
+             modifyeventmini.from_pid = str(club.admin.id())
+             modifyeventmini.eventId = str(events.key.id())   
+             deleteEvent(modifyeventmini)
+
+   
+
+   
+   #Operation 8 - delete club
+         clubKey.delete()    
+   
