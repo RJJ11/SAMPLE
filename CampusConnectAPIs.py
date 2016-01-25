@@ -32,7 +32,7 @@ from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,appr
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
-from CampusConnectAPIs import CampusConnectApi
+
 #data = {'message': '5 mins later',"title":"Hi RKD"}
 #gcm_message = GCMMessage('cDXc7bMlwPQ:APA91bGAXV7203E6GUPkrbSOzQBv1_Xc4ztClQ6XcEcr80jw9jKBdZmLZ1U04_dTiH37AOydvv07_fBGiZXrszGkIxN5ZQgjsdqu35orSSOVq02XxDLVcBaqRMvxQTr-ucYQzbVoj5kE', data)
 #gcm_conn = GCMConnection()
@@ -44,15 +44,15 @@ EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
 
-@endpoints.api(name='clubs', version='v1',
+@endpoints.api(name='campusConnectApis', version='v1',
     allowed_client_ids=[ANROID_CLIENT_ID,WEB_CLIENT_ID,API_EXPLORER_CLIENT_ID,ANDROID_ID2,ANDROID_ID3],
     scopes=[EMAIL_SCOPE])
 
 # GETSTREAM KEY - urgm3xjebe9d
 
-class ClubApi(remote.Service):
+class CampusConnectApi(remote.Service):
 
-   @endpoints.method(GetClubMiniForm,ClubMiniForm,path='getClub', http_method='POST', name='getClub')
+   @endpoints.method(GetClubMiniForm,ClubMiniForm,path='getClub', http_method='GET', name='getClub')
    def getClubApi(self,request):
         print("Request entity is",request)
         retClub = ClubMiniForm()
@@ -61,7 +61,7 @@ class ClubApi(remote.Service):
 
         return retClub
 
-   @endpoints.method(GetClubMiniForm,PersonalInfoResponse,path='getClubMembers', http_method='POST', name='getClubMembers')
+   @endpoints.method(GetClubMiniForm,PersonalInfoResponse,path='getClubMembers', http_method='GET', name='getClubMembers')
    def getClubMembersApi(self,request):
         #print("Request entity is",request)
         clubKey = ndb.Key('Club',int(request.club_id))
@@ -235,7 +235,7 @@ class ClubApi(remote.Service):
 
         return message_types.VoidMessage()
 
-   @endpoints.method(ClubRetrievalMiniForm,ClubListResponse,path='getClubList', http_method='POST', name='getClubList')
+   @endpoints.method(ClubRetrievalMiniForm,ClubListResponse,path='getClubList', http_method='GET', name='getClubList')
    def getClubListApi(self,request):
         list_of_clubs = ClubListResponse()
         print("Request entity is",request)
@@ -258,6 +258,9 @@ class ClubApi(remote.Service):
                    format_club.name = ret_club.admin.get().name
                    format_club.description = ret_club.description
                    format_club.club_id = str(ret_club.key.id())
+                   format_club.membercount = str(len(ret_club.members))
+                   format_club.followercount = str(len(ret_club.follows))
+                   #format_club.membercount = str()
                    if(request.pid != None):
                          format_club.isMember = "N"
                          format_club.isFollower = "N"
@@ -278,7 +281,7 @@ class ClubApi(remote.Service):
 
         return list_of_clubs
 
-   @endpoints.method(NotificationMiniForm,ClubListResponse,path='getClubListofAdmin', http_method='POST', name='getClubListofAdmin')
+   @endpoints.method(NotificationMiniForm,ClubListResponse,path='getClubListofAdmin', http_method='GET', name='getClubListofAdmin')
    def getClubListApiofAdmin(self,request):
                #Make new api for GetList of clubs you are admin of.
                #Take PID and return all clubs he is admin of.
@@ -731,7 +734,7 @@ class ClubApi(remote.Service):
         return message_types.VoidMessage()
 
    @endpoints.method(GetInformation,GetAllPostRequests,
-            path='getPostRequests', http_method='POST', name='getPostRequests')
+            path='getPostRequests', http_method='GET', name='getPostRequests')
    def getPostRequests(self, request):
         """Update & return user profile."""
 
@@ -812,12 +815,13 @@ class ClubApi(remote.Service):
        x = attendEvent(request)
        return message_types.VoidMessage()
 
-   @endpoints.method(GetInformation,CollegeFeed,path='mainFeed', http_method='POST', name='collegeFeed')
+   @endpoints.method(GetInformation,CollegeFeed,path='mainFeed', http_method='GET', name='collegeFeed')
    def collegeFeed(self, request):
        print "Entered the Like Posts Section"
        temp = request.clubId
+       personId = ndb.Key('Profile',int(request.pid))
        flag =0
-       pageLimit = 5
+       pageLimit = 10
        skipCount=0
        upperBound=pageLimit
        print request.pageNumber
@@ -852,18 +856,18 @@ class ClubApi(remote.Service):
            print "TImestamp",type(x.timestamp.strftime("%Y-%m-%d"))
            if flag==1:
             if x.timestamp.strftime("%Y-%m-%d") == str(date):
-                pylist.append(copyToCollegeFeed(x))
+                pylist.append(copyToCollegeFeed(personId,x))
            else:
-               pylist.append(copyToCollegeFeed(x))
+               pylist.append(copyToCollegeFeed(personId,x))
        print pylist
        pylist2 = []
        for x in posts:
            print "TImestamp",type(x.timestamp.strftime("%Y-%m-%d"))
            if flag==1:
             if x.timestamp.strftime("%Y-%m-%d") == str(date):
-                pylist.append(copyToCollegeFeed(x))
+                pylist.append(copyToCollegeFeed(personId,x))
            else:
-               pylist.append(copyToCollegeFeed(x))
+               pylist.append(copyToCollegeFeed(personId,x))
        #pylist2 = [copyToCollegeFeed(x) for x in posts]
        pylist+=pylist2
        #pylist.append(copyToCollegeFeed(x) for x in events)
@@ -893,7 +897,7 @@ class ClubApi(remote.Service):
        return cf
 
 
-   @endpoints.method(GetInformation,CollegeFeed,path='myFeed', http_method='POST', name='personalFeed')
+   @endpoints.method(GetInformation,CollegeFeed,path='myFeed', http_method='GET', name='personalFeed')
    def personalFeed(self, request):
        pid = ndb.Key('Profile',int(request.pid))
        profile = pid.get()
@@ -901,7 +905,7 @@ class ClubApi(remote.Service):
        events = []
        pylist = []
        pylist2 = []
-       pageLimit = 5
+       pageLimit = 10
        skipCount=0
        upperBound=pageLimit
        print request.pageNumber
@@ -929,7 +933,7 @@ class ClubApi(remote.Service):
            iteration=0
            for y in posts:
                #if(iteration>=skipCount and iteration<upperBound):
-               list1.append(copyToCollegeFeed(y))
+               list1.append(copyToCollegeFeed(pid,y))
 
                #iteration+=1
                #if(iteration==upperBound):
@@ -939,7 +943,7 @@ class ClubApi(remote.Service):
 
            for z in events:
                #if(iteration>=skipCount and iteration<upperBound):
-                list1.append(copyToCollegeFeed(z))
+                list1.append(copyToCollegeFeed(pid,z))
                 #iteration+=1
                #if(iteration==upperBound):
                #    break
@@ -997,7 +1001,7 @@ class ClubApi(remote.Service):
        pylist.sort(key=lambda x: x.timestamp, reverse=True)
        return CollegeFeed(items=pylist)
 
-   @endpoints.method(GetInformation,AdminFeed,path='adminFeed', http_method='POST', name='adminFeed')
+   @endpoints.method(GetInformation,AdminFeed,path='adminFeed', http_method='GET', name='adminFeed')
    def adminFeed(self, request):
        pid = ndb.Key('Profile',int(request.pid))
        clubId = ndb.Key('Club',int(request.clubId))
@@ -1013,7 +1017,7 @@ class ClubApi(remote.Service):
 
 
        return AdminFeed(joinReq=list2)
-   @endpoints.method(GetInformation,SuperAdminFeedResponse,path='superAdminFeed', http_method='POST', name='superAdminFeed')
+   @endpoints.method(GetInformation,SuperAdminFeedResponse,path='superAdminFeed', http_method='GET', name='superAdminFeed')
    def superAdminFeed(self,request):
        pid = ndb.Key('Profile',int(request.pid))
        collegeId = ndb.Key('CollegeDb',int(request.collegeId))
@@ -1128,7 +1132,7 @@ class ClubApi(remote.Service):
 
        return listresponse
 
-   @endpoints.method(PersonalInfoRequest,PersonalInfoResponse,path='personalInfo', http_method='POST', name='personalInfo')
+   @endpoints.method(PersonalInfoRequest,PersonalInfoResponse,path='personalInfo', http_method='GET', name='personalInfo')
    def personalInfo(self,request):
        list1 = request.pid
        pylist=[]
@@ -1218,11 +1222,11 @@ class ClubApi(remote.Service):
        return AdminStatus(isSuperAdmin=isSuperAdmin,isAdmin=isAdmin)
 
 
-   @endpoints.method(message_types.VoidMessage,UpdateStatus,path='updateStatus', http_method='POST', name='updateStatus')
+   @endpoints.method(message_types.VoidMessage,UpdateStatus,path='updateStatus', http_method='GET', name='updateStatus')
    def updateStatus(self,request):
        update="NO"
        return UpdateStatus(update=update)
 
 
 
-api = endpoints.api_server([CampusConnectApi,ClubApi])   # register API
+# api = endpoints.api_server([CampusConnectApi])   # register API
