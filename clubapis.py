@@ -32,7 +32,7 @@ from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,appr
 from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
-from CampusConnectAPIs import CampusConnectApi
+from V1.CampusConnectAPIs import CampusConnectApi
 #data = {'message': '5 mins later',"title":"Hi RKD"}
 #gcm_message = GCMMessage('cDXc7bMlwPQ:APA91bGAXV7203E6GUPkrbSOzQBv1_Xc4ztClQ6XcEcr80jw9jKBdZmLZ1U04_dTiH37AOydvv07_fBGiZXrszGkIxN5ZQgjsdqu35orSSOVq02XxDLVcBaqRMvxQTr-ucYQzbVoj5kE', data)
 #gcm_conn = GCMConnection()

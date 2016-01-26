@@ -1,0 +1,6 @@
+cron:
+- description: Notification Cron
+  url: /crontasks
+  schedule: every 2 hours
+
+  target: cronmodule
