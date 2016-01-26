@@ -9,27 +9,27 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
+from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
     MessageResponse, ProfileResponse
-from Models import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
-from Models import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
-from Models import Profile,CollegeFeed
-from Models import CollegeDb,Notifications,NotificationResponseForm,NotificationList
-from Models import CollegeDbMiniForm
-from Models import ClubMiniForm
-from Models import GetClubMiniForm
-from Models import JoinClubMiniForm
-from Models import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
-from Models import ClubListResponse
-from Models import ProfileMiniForm,Events,Event,ModifyEvent
-from Models import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models import AdminStatus,UpdateStatus
-from CollegesAPI import getColleges,createCollege,copyToCollegeFeed
-from PostsAPI import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
-from PostsAPI import copyPostRequestToForm,update
-from EventsAPI import eventEntry,copyEventToForm,deleteEvent,attendEvent
-from ClubAPI import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList
-from ProfileAPI import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
+from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
+from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
+from Models_v1 import Profile,CollegeFeed
+from Models_v1 import CollegeDb,Notifications,NotificationResponseForm,NotificationList
+from Models_v1 import CollegeDbMiniForm
+from Models_v1 import ClubMiniForm
+from Models_v1 import GetClubMiniForm
+from Models_v1 import JoinClubMiniForm
+from Models_v1 import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
+from Models_v1 import ClubListResponse
+from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
+from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
+from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm
+from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
+from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
+from PostsAPI_v1 import copyPostRequestToForm,update
+from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent
+from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList
+from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 
@@ -64,7 +64,7 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(GetClubMiniForm,PersonalInfoResponse,path='getClubMembers', http_method='GET', name='getClubMembers')
    def getClubMembersApi(self,request):
         #print("Request entity is",request)
-        clubKey = ndb.Key('Club',int(request.club_id))
+        clubKey = ndb.Key('Club',int(request.clubId))
         club = clubKey.get()
         #print("Received Club is",club)  
         list1 = club.members
@@ -79,10 +79,10 @@ class CampusConnectApi(remote.Service):
    def joinClubApi(self,request):
             
             if request:
-             clubKey = ndb.Key('Club',int(request.club_id))
+             clubKey = ndb.Key('Club',int(request.clubId))
              club = clubKey.get()
 
-             profileKey = ndb.Key('Profile',int(request.from_pid))
+             profileKey = ndb.Key('Profile',int(request.fromPid))
              profile = profileKey.get()
              
              if (club and profile and profileKey not in club.members):
@@ -122,7 +122,7 @@ class CampusConnectApi(remote.Service):
    def joinClubApprovalApi(self,request):
         if request:
           
-          joinCreation = ndb.Key('Join_Creation',int(request.req_id)).get()
+          joinCreation = ndb.Key('Join_Creation',int(request.reqId)).get()
           club = joinCreation.club_id.get()
           profileKey = joinCreation.from_pid
           profile = profileKey.get()
@@ -199,10 +199,10 @@ class CampusConnectApi(remote.Service):
 
         if request:
 
-            clubKey = ndb.Key('Club',int(request.club_id))
+            clubKey = ndb.Key('Club',int(request.clubId))
             club = clubKey.get()
 
-            profileKey = ndb.Key('Profile',int(request.from_pid))
+            profileKey = ndb.Key('Profile',int(request.fromPid))
             profile = profileKey.get()
 
             if (club and profile and (profileKey not in  club.follows)):
@@ -243,7 +243,7 @@ class CampusConnectApi(remote.Service):
         if request:
 
 
-            collegeKey = ndb.Key('CollegeDb',int(request.college_id))
+            collegeKey = ndb.Key('CollegeDb',int(request.collegeId))
             college = collegeKey.get()
 
             if(college):
@@ -255,11 +255,11 @@ class CampusConnectApi(remote.Service):
                    format_club.name = ret_club.name
                    format_club.abbreviation = ret_club.abbreviation
                    format_club.collegeName = ret_club.collegeId.get().name
-                   format_club.name = ret_club.admin.get().name
+                   format_club.adminName = ret_club.admin.get().name
                    format_club.description = ret_club.description
-                   format_club.club_id = str(ret_club.key.id())
-                   format_club.membercount = str(len(ret_club.members))
-                   format_club.followercount = str(len(ret_club.follows))
+                   format_club.clubId = str(ret_club.key.id())
+                   format_club.memberCount = str(len(ret_club.members))
+                   format_club.followerCount = str(len(ret_club.follows))
                    #format_club.membercount = str()
                    if(request.pid != None):
                          format_club.isMember = "N"
@@ -295,9 +295,9 @@ class CampusConnectApi(remote.Service):
                    format_club.name = ret_club.name
                    format_club.abbreviation = ret_club.abbreviation
                    format_club.collegeName = ret_club.collegeId.get().name
-                   format_club.name = ret_club.admin.get().name
+                   format_club.adminName = ret_club.admin.get().name
                    format_club.description = ret_club.description
-                   format_club.club_id = str(ret_club.key.id())
+                   format_club.clubId = str(ret_club.key.id())
                    format_club.isMember = "Y"
                    format_club.isFollower = "Y"
                    list_of_clubs.list.append(format_club)
@@ -314,14 +314,14 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(ClubRequestMiniForm,message_types.VoidMessage,path='club', http_method='POST', name='createClubRequest')
    def createClubRequest(self, request):
 
-        collegeId = ndb.Key('CollegeDb',int(request.college_id))
+        collegeId = ndb.Key('CollegeDb',int(request.collegeId))
         print("Required College ID",collegeId)
 
         college_ret = collegeId.get()
 
         print("College Ret",college_ret)
         if(college_ret):
-           club_ret = Club.query(Club.name == request.club_name).filter(Club.abbreviation == request.abbreviation).filter(Club.collegeId == college_ret.key).fetch(1)
+           club_ret = Club.query(Club.name == request.clubName).filter(Club.abbreviation == request.abbreviation).filter(Club.collegeId == college_ret.key).fetch(1)
            print("Club Ret",club_ret)
            if(len(club_ret) == 0):
               clubRequest = createClub(request)
@@ -351,7 +351,7 @@ class CampusConnectApi(remote.Service):
    def approveClub(self,request):
         #Obtain the club request object
 
-        clubRequest = ndb.Key('Club_Creation',int(request.req_id))
+        clubRequest = ndb.Key('Club_Creation',int(request.reqId))
         action = request.action 
         
         print ("Action is",action)
@@ -473,11 +473,11 @@ class CampusConnectApi(remote.Service):
         print("Entered Post Entry Portion")
         flag=0
         try:
-            person_key = ndb.Key('Profile',int(request.from_pid))
+            person_key = ndb.Key('Profile',int(request.fromPid))
 
             profile = person_key.get()
             print(profile)
-            club_key = ndb.Key('Club',int(request.club_id))
+            club_key = ndb.Key('Club',int(request.clubId))
             if club_key in profile.follows:
                     print "Present"
                     newPost = postEntry(request,flag)
@@ -563,11 +563,11 @@ class CampusConnectApi(remote.Service):
         print("Entered Event Entry Portion")
         
         try:
-            person_key = ndb.Key('Profile',int(request.event_creator))
+            person_key = ndb.Key('Profile',int(request.eventCreator))
             print(person_key)
             profile = person_key.get()
             
-            club_key = ndb.Key('Club',int(request.club_id))
+            club_key = ndb.Key('Club',int(request.clubId))
             if club_key in profile.clubsJoined:
                     newEvent = eventEntry(request)
                     response.status = "1"
@@ -758,7 +758,7 @@ class CampusConnectApi(remote.Service):
         temp = request.collegeId
         temp2 = request.clubId
         date = request.date
-        future_date = request.future_date
+        future_date = request.futureDate
         
 
         print ("Future date is",future_date)
@@ -1206,7 +1206,7 @@ class CampusConnectApi(remote.Service):
 
        return message_types.VoidMessage()
 
-   @endpoints.method(ProfileRetrievalMiniForm,AdminStatus,path='adminStatus', http_method='POST', name='adminStatus')
+   @endpoints.method(ProfileRetrievalMiniForm,AdminStatus,path='adminStatus', http_method='GET', name='adminStatus')
    def adminStatus(self,request):
        profileKey = ndb.Key('Profile',int(request.pid))
        person = profileKey.get()
@@ -1227,6 +1227,9 @@ class CampusConnectApi(remote.Service):
        update="NO"
        return UpdateStatus(update=update)
 
-
+   @endpoints.method(DelClubMiniForm,message_types.VoidMessage,path='delClub', http_method='POST', name='delClub')
+   def delClub(self,request):
+       deleteClub(request)
+       return message_types.VoidMessage() 
 
 # api = endpoints.api_server([CampusConnectApi])   # register API
