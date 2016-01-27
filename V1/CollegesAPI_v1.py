@@ -39,14 +39,19 @@ def createCollege(requestentity=None):
 
         collegeName = ""
         if requestentity:
-            for field in ('name','abbreviation','location','student_sup','alumni_sup','email'):
+            for field in ('name','abbreviation','location','studentSup','alumniSup','email'):
                 val = getattr(requestentity, field)
                 if field == "name":
                     collegeName = getattr(requestentity, field).strip()
                 if val:
                     val = val.strip()
                     print("Value is",val)
-                    setattr(newCollege, field, str(val))
+                    if field == 'studentSup':
+                        setattr(newCollege, 'student_sup', str(val))
+                    elif field == 'alumniSup':
+                        setattr(newCollege, 'alumni_sup', str(val))
+                    else:
+                        setattr(newCollege, field, str(val))
             #Now setting the attributes not recieved from the front-end.
             setattr(newCollege, 'student_count', 0)
             setattr(newCollege, 'group_count', 0)
@@ -75,12 +80,12 @@ def createCollege(requestentity=None):
             print "Unique"
             email = getattr(requestentity, "email")
             phone = getattr(requestentity, "phone")
-            if(getattr(requestentity, "student_sup")==None):
+            if(getattr(requestentity, "studentSup")==None):
                 isAlumni = "Yes"
-                person_name = getattr(requestentity, "alumni_sup")
+                person_name = getattr(requestentity, "alumniSup")
             else:
                 isAlumni = "No"
-                person_name = getattr(requestentity, "student_sup")
+                person_name = getattr(requestentity, "studentSup")
 
             collegeId = newCollege.put()
             profile =  Profile(name = person_name ,
@@ -148,9 +153,9 @@ def copyToCollegeFeed(personId,entity):
                     print field.name
                     pylist=[]
                     print entity.title
-                    for key in entity.attendees:
-                        pylist.append(key.get().name)
-                    setattr(feed, field.name, pylist)
+                    #for key in entity.attendees:
+                    #    pylist.append(key.get().name)
+                    setattr(feed, field.name, str(len(entity.attendees)))
 
                 else:
                     setattr(feed, field.name, str(getattr(entity, field.name)))

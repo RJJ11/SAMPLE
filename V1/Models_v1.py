@@ -161,7 +161,7 @@ class GetInformation(messages.Message):
     clubId = messages.StringField(3)
     date = messages.StringField(4)
     pageNumber = messages.StringField(5)
-
+    eventId = messages.StringField(6)
 
 
 
@@ -421,7 +421,7 @@ class Feed(messages.Message):
     startTime = messages.StringField(7)
     endTime = messages.StringField(8)
     endDate = messages.StringField(9)
-    attendees = messages.StringField(10,repeated=True)
+    attendees = messages.StringField(10)
     completed = messages.StringField(11)
     views = messages.StringField(12)
     isAlumni = messages.StringField(13)
@@ -493,6 +493,7 @@ class PersonalResponse(messages.Message):
     batch = messages.StringField(2)
     branch = messages.StringField(3)
     photoUrl = messages.StringField(4)
+    pid = messages.StringField(5)
 
 class PersonalInfoResponse(messages.Message):
     items = messages.MessageField(PersonalResponse,1,repeated=True)

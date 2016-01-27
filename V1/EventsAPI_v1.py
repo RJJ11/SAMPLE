@@ -9,7 +9,8 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 import datetime as dt
 from datetime import datetime,date,time
-from Models_v1 import Event,CollegeDb,Profile,Club,EventForm,ModifyEvent,Notifications
+from Models_v1 import Event,CollegeDb,Profile,Club,EventForm,ModifyEvent,Notifications,PersonalResponse,PersonalInfoResponse
+from ProfileAPI_v1 import PersonalInfoForm
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 def eventEntry(requestentity=None):
 
@@ -20,40 +21,45 @@ def eventEntry(requestentity=None):
         start = ""
         end = ""
         flag = 0
+        profile_key = ""
         if requestentity:
             print "Begun"
-            for field in ('title','description','club_id','venue','start_time','end_time','attendees','completed','tags','views','isAlumni','event_creator','collegeId','timestamp','photo','photoUrl'):
+            profile_key=ndb.Key('Profile',int(getattr(requestentity,"eventCreator")))
+            person = profile_key.get()
+            print "Person's email-id ", person.email
+            person_collegeId = person.collegeId
+            for field in ('title','description','clubId','venue','startTime','endTime','attendees','completed','tags','views','isAlumni','eventCreator','collegeId','timestamp','photo','photoUrl'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
-                    if(field=="club_id"):
+                    if(field=="clubId"):
                         club_key=ndb.Key('Club',int(getattr(requestentity,"clubId")))
-                        setattr(event_request, field, club_key)
+                        setattr(event_request, 'club_id', club_key)
 
 
                     elif(field=="views"):
                         setattr(event_request, field, 0)
 
 
-                    elif field == "event_creator":
+                    elif field == "eventCreator":
                         profile_key=ndb.Key('Profile',int(getattr(requestentity,"eventCreator")))
                         person = profile_key.get()
                         print "Person's email-id ", person.email
                         person_collegeId = person.collegeId
-                        setattr(event_request, field, profile_key)
+                        setattr(event_request, 'event_creator', profile_key)
 
                     #setattr(event_request, 'from_pid', profile_key)
 
-                    elif field == "start_time":
+                    elif field == "startTime":
                         temp = datetime.strptime(getattr(requestentity,"startDate"),"%Y-%m-%d").date()
                         temp1 = datetime.strptime(getattr(requestentity,"startTime"),"%H:%M:%S").time()
-                        setattr(event_request,field,datetime.combine(temp,temp1))
+                        setattr(event_request,'start_time',datetime.combine(temp,temp1))
                         start = datetime.combine(temp,temp1)
 
-                    elif field == "end_time":
+                    elif field == "endTime":
                         temp = datetime.strptime(getattr(requestentity,"endDate"),"%Y-%m-%d").date()
                         temp1 = datetime.strptime(getattr(requestentity,"endTime"),"%H:%M:%S").time()
-                        setattr(event_request,field,datetime.combine(temp,temp1))
+                        setattr(event_request,'end_time',datetime.combine(temp,temp1))
                         end = datetime.combine(temp,temp1)
 
                     #elif field == "end_time":
@@ -66,6 +72,7 @@ def eventEntry(requestentity=None):
                         pylist = []
                         pylist.append(profile_key)
                         setattr(event_request,field,pylist)
+
 
                     elif field == "tags":
                         if (requestentity,field == "None"):
@@ -98,10 +105,23 @@ def eventEntry(requestentity=None):
         print(event_request)
         if(start<end):
             flag=1
+            print "SATISFIED"
 
         if(flag==1):
 
-            event_request.put()
+            event_id= event_request.put()
+            person = profile_key.get()
+            list1 = person.eventsAttending
+            if list1 == None:
+                list2 = []
+                list2.append(event_id)
+                person.eventsAttending = list2
+                person.put()
+            else:
+                person.eventsAttending.append(event_id)
+                person.put()
+
+
 
         return event_request
 
@@ -146,6 +166,7 @@ def copyEventToForm(event):
 def deleteEvent(request):
         event_id = ndb.Key('Event',int(request.eventId))
         from_pid = ndb.Key('Profile',int(request.fromPid))
+        person = from_pid.get()
         event = event_id.get()
         club_admin = event.club_id.get().admin
         flag=0
@@ -156,9 +177,13 @@ def deleteEvent(request):
             print "Different"
 
         if flag==1:
+            event = event_id.get()
+            for x in event.attendees:
+                person = x.get()
+                print person.eventsAttending
+                person.eventsAttending.remove(event_id)
+                person.put()
             event_id.delete()
-            person.eventsAttending.remove(event_id)
-            person.put()
 
         return
 
@@ -282,3 +307,14 @@ def getEventsBasedonTimeLeft():
                 LOG.info("This event is over")   
     
     LOG.info(eventlist)
+
+def attendeeDetails(eventId):
+    event = eventId.get()
+    pylist = []
+    for p in event.attendees:
+        person = p.get()
+        x=PersonalInfoForm(person)
+        setattr(x,'pid',str(p.id()))
+        pylist.append(x)
+
+    return PersonalInfoResponse(items = pylist)

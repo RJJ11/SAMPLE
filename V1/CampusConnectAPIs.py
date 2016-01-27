@@ -27,8 +27,9 @@ from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm
 from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
 from PostsAPI_v1 import copyPostRequestToForm,update
-from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent
-from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList
+from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails
+from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
+    deleteClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
@@ -69,9 +70,11 @@ class CampusConnectApi(remote.Service):
         #print("Received Club is",club)  
         list1 = club.members
         pylist=[]
-        for x in list1:
-           person = x.get()
-           pylist.append(PersonalInfoForm(person))
+        for p in list1:
+           person = p.get()
+           x=PersonalInfoForm(person)
+           setattr(x,'pid',str(p.id()))
+           pylist.append(x)
 
         return PersonalInfoResponse(items = pylist)
 
@@ -569,6 +572,7 @@ class CampusConnectApi(remote.Service):
             
             club_key = ndb.Key('Club',int(request.clubId))
             if club_key in profile.clubsJoined:
+                    print "GOING INTO EVENTS ENTRY"
                     newEvent = eventEntry(request)
                     response.status = "1"
                     response.text = "Inserted into Posts Table"
@@ -1230,6 +1234,11 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(DelClubMiniForm,message_types.VoidMessage,path='delClub', http_method='POST', name='delClub')
    def delClub(self,request):
        deleteClub(request)
-       return message_types.VoidMessage() 
+       return message_types.VoidMessage()
+
+   @endpoints.method(GetInformation,PersonalInfoResponse,path='getAttendeeDetails', http_method='GET', name='getAttendeeDetails')
+   def getAttendeeDetails(self,request):
+        eventId = ndb.Key('Event',int(request.eventId))
+        return attendeeDetails(eventId)
 
 # api = endpoints.api_server([CampusConnectApi])   # register API

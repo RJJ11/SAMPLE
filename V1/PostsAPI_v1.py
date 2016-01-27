@@ -27,14 +27,14 @@ def postRequest(requestentity=None):
                     #setattr(clubRequest, field, profile_key)
 
         if requestentity:
-            for field in ('to_pid','club_id','description','status','post_request_id','collegeId','title','from_pid','likers','timestamp','photoUrl'):
+            for field in ('to_pid','clubId','description','status','post_request_id','collegeId','title','fromPid','likers','timestamp','photoUrl'):
                 if hasattr(requestentity, field):
                     print(field,"is there")
                     val = getattr(requestentity, field)
-                    if(field=="club_id"):
-                        setattr(post_request, field, club_key)
-                    elif(field=="from_pid"):
-                        setattr(post_request, field, profile_key)
+                    if(field=="clubId"):
+                        setattr(post_request, 'club_id', club_key)
+                    elif(field=="fromPid"):
+                        setattr(post_request, 'from_pid', profile_key)
                     elif val:
                         print("Value is",val)
                         setattr(post_request, field, str(val))
@@ -68,7 +68,7 @@ def postRequest(requestentity=None):
                 
         
 
-        print("About to createClubRequest")
+        print("About to createPostRequest")
         print(post_request)
         post_request.put()
 
@@ -119,16 +119,16 @@ def postEntry(requestentity=None,check=0):
 
         if(flag==1 and flag1==1):
             if requestentity:
-                for field in ('title','description','club_id','from_pid','likes','views','timestamp','photo','photoUrl'):
+                for field in ('title','description','clubId','fromPid','likes','views','timestamp','photo','photoUrl'):
 
                     if hasattr(requestentity, field):
                         print(field,"is there")
                         val = getattr(requestentity, field)
-                        if(field=="club_id"):
+                        if(field=="clubId"):
                             print "Club_Id stage"
-                            setattr(newPost, field, club_key)
+                            setattr(newPost, 'club_id', club_key)
 
-                        elif field == "from_pid":
+                        elif field == "fromPid":
                             print "Entered here"
                             person = profile_key.get()
                             print "Person's email-id ", person.email
@@ -136,7 +136,7 @@ def postEntry(requestentity=None,check=0):
                             print "His college Id ", person.collegeId
                             college_details = person_collegeId.get()
                             print "The sup is ", college_details.student_sup
-                            setattr(newPost, field, profile_key)
+                            setattr(newPost, 'from_pid', profile_key)
                             print "Put PID"
                             setattr(newPost,'collegeId',person_collegeId)
                             print "Put college id"
