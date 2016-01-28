@@ -144,6 +144,7 @@ def postEntry(requestentity=None,check=0):
                         elif field=="timestamp":
                             setattr(newPost, field, val)
 
+                        
                         elif val:
                             print("Value is",val)
                             setattr(newPost, field, str(val))

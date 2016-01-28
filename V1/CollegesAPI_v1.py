@@ -117,25 +117,25 @@ def copyToCollegeFeed(personId,entity):
     feed = Feed()
     for field in feed.all_fields():
         if hasattr(entity, field.name):
-                if field.name == 'start_time':
+                if field.name == 'startTime':
                     print field.name
-                    setattr(feed,"start_date", str(entity.start_time.strftime("%Y-%m-%d")))
+                    setattr(feed,"startDate", str(entity.start_time.strftime("%Y-%m-%d")))
                     setattr(feed, field.name, str(entity.start_time.strftime("%H:%M:%S")))
-                elif field.name == 'end_time':
+                elif field.name == 'endTime':
                     print field.name
-                    setattr(feed, "end_date", str(entity.end_time.strftime("%Y-%m-%d")))
+                    setattr(feed, "endDate", str(entity.end_time.strftime("%Y-%m-%d")))
                     setattr(feed, field.name, str(entity.end_time.strftime("%H:%M:%S")))
-                elif field.name == 'club_name':
+                elif field.name == 'clubName':
                     print "field name" + field.name
                     setattr(feed, field.name, entity.club_id.get().name)
-                elif field.name == 'club_id':
+                elif field.name == 'clubId':
                     setattr(feed, field.name, str(entity.club_id.id()))
 
                 elif field.name == 'collegeId':
                     print field.name
                     setattr(feed, field.name, entity.collegeId.get().name)
 
-                elif (field.name=='event_creator'):
+                elif (field.name=='eventCreator'):
                     print field.name
                     setattr(feed, field.name, entity.event_creator.get().name)
                 elif (field.name=='likers'):
@@ -156,6 +156,7 @@ def copyToCollegeFeed(personId,entity):
                     #for key in entity.attendees:
                     #    pylist.append(key.get().name)
                     setattr(feed, field.name, str(len(entity.attendees)))
+                      
 
                 else:
                     setattr(feed, field.name, str(getattr(entity, field.name)))
@@ -164,22 +165,31 @@ def copyToCollegeFeed(personId,entity):
             print field.name
             setattr(feed, field.name, str(entity.key.id()))
 
-        elif (field.name=='event_creator'):
+        elif (field.name=='eventCreator'):
             print field.name
-            setattr(feed, field.name, entity.from_pid.get().name)
+            setattr(feed, field.name, entity.event_creator.get().name)
 
 
         elif field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
                 setattr(feed, field.name, entity.club_id.get().photoUrl)
-        elif field.name == 'club_name':
+        elif field.name == 'clubName':
                 print "field name" + field.name
                 setattr(feed, field.name, entity.club_id.get().name)
-        elif field.name == 'club_id':
+        elif field.name == 'clubId':
                 setattr(feed, field.name, str(entity.club_id.id()))
         elif field.name == 'clubabbreviation':
                 setattr(feed, field.name, entity.club_id.get().abbreviation)
+        elif field.name == 'isAttending':
+                setattr(feed, field.name, "N")
+
+                profile_key = personId
+                if hasattr(entity,'attendees'):
+                  #if entity.attendees:
+                    if profile_key in entity.attendees:
+                          setattr(feed, field.name, "Y")        
+
 
         """
         elif field.name == 'date':

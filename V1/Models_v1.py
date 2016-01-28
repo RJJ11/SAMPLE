@@ -436,7 +436,7 @@ class Feed(messages.Message):
     likes = messages.StringField(22)
     clubabbreviation = messages.StringField(23)
     hasLiked = messages.StringField(24)
-
+    isAttending = messages.StringField(25)
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
     completed = messages.StringField(2)
