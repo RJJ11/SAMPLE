@@ -212,6 +212,8 @@ def copyPostToForm(post):
                 setattr(pf, field.name, str(getattr(post, field.name)))
             if field.name == 'postId':
                 setattr(pf, field.name, str(post.key.id()))
+            if field.name == 'fromPid':
+                setattr(pf, field.name, str(post.from_pid))
             #if field.name == 'date':
             #    setattr(pf, field.name, str(post.timestamp.strftime("%Y-%m-%d")))
             #if field.name == 'time':

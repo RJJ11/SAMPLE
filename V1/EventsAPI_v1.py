@@ -129,14 +129,16 @@ def copyEventToForm(event):
         pf = EventForm()
         for field in pf.all_fields():
             if hasattr(event, field.name):
-                if field.name == 'startTime':
+                    setattr(pf, field.name, str(getattr(event, field.name)))
+            elif field.name == 'startTime':
                     setattr(pf,"startDate", str(event.start_time.strftime("%Y-%m-%d")))
                     setattr(pf, field.name, str(event.start_time.strftime("%H:%M:%S")))
-                elif field.name == 'endTime':
+            elif field.name == 'endTime':
                     setattr(pf, "endDate", str(event.end_time.strftime("%Y-%m-%d")))
                     setattr(pf, field.name, str(event.end_time.strftime("%H:%M:%S")))
-                else:
-                    setattr(pf, field.name, str(getattr(event, field.name)))
+            elif field.name == "eventCreator":
+                    setattr(pf,field.name,str(event.event_creator.get().name))
+
             if field.name == 'eventId':
                 setattr(pf, field.name, str(event.key.id()))
             #if field.name == 'date':
