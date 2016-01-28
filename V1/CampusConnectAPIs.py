@@ -665,7 +665,7 @@ class CampusConnectApi(remote.Service):
         #print "the list"
         #print pylist
 
-        return Posts(items=list(reversed([copyPostToForm(x) for x in posts])))
+        return Posts(items=list(([copyPostToForm(x) for x in posts])))
         #clubRequest = self.postEntry(request)
         #print("Inserted into the events table")
 
@@ -781,17 +781,17 @@ class CampusConnectApi(remote.Service):
         if(temp2==None):
             print "No CLubId"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            events = Event.query(Event.collegeId==collegeId).order(-Event.start_time)
+            events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
         elif(temp==None):
             print "No collegeID"
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.club_id==clubId).order(-Event.start_time)
+            events = Event.query(Event.club_id==clubId).order(-Event.timestamp)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.start_time)
+            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.timestamp)
 
         #All events have been obtained, check if date field is provided and take only those that have start date = req.date
 
@@ -806,17 +806,17 @@ class CampusConnectApi(remote.Service):
                  print ("Event to be added",x.title)
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=list(reversed([copyEventToForm(x) for x in finalList])))
+           return Events(items=list(([copyEventToForm(x) for x in finalList])))
         elif(date != None):
            for x in events:
               start_date = str(x.start_time.date())
               if(start_date == date):	
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=list(reversed([copyEventToForm(x) for x in finalList])))
+           return Events(items=list(([copyEventToForm(x) for x in finalList])))
         else:
            print("Returning all events from Events List")
-           return Events(items=list(reversed([copyEventToForm(x) for x in events])))
+           return Events(items=list(([copyEventToForm(x) for x in events])))
 
    @endpoints.method(ModifyEvent,message_types.VoidMessage,
             path='deleteEvent', http_method='DELETE', name='delEvent')
