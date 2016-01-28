@@ -62,6 +62,9 @@ def eventEntry(requestentity=None):
                         setattr(event_request,'end_time',datetime.combine(temp,temp1))
                         end = datetime.combine(temp,temp1)
 
+                    elif field=="photoUrl" and val == None:
+                            setattr(event_request, field, "https://lh3.googleusercontent.com/VLbWVdaJaq2HoYnu6J3T5aKC9DP_ku0KC3eelxawe6sqsPdNTarc5Vc0sx6VGqZ1Y-MlguZNd0plkDEZKYM9OnDbvR2tomX-Kg")
+
                     #elif field == "end_time":
                      #   temp = datetime.strptime(getattr(requestentity,field),"%H:%M:%S").time()
                       #  setattr(event_request,field,temp)
@@ -264,8 +267,7 @@ def getEventsBasedonTimeLeft():
                     groupName = group.name
                     
                     
-                    data = {'message': event.title + "About to start soon","title": groupName,
-                            'id':str(event.key.id()),'type':"Event" }
+                    data = {'message': event.title + "About to start soon","title": groupName }
                     LOG.info(data)
                     
                     #get the followers of the club pids. Get GCM Id's from those and send
