@@ -9,7 +9,7 @@ from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
-from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
+from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm,CommentsResponseForm,CommentsResponse, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
     MessageResponse, ProfileResponse
 from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
@@ -25,7 +25,8 @@ from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
 from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
 from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm
 from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
-from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost
+from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost, \
+    copyCommentToForm
 from PostsAPI_v1 import copyPostRequestToForm,update
 from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails
 from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
@@ -677,7 +678,7 @@ class CampusConnectApi(remote.Service):
 
    @endpoints.method(CommentsForm,message_types.VoidMessage,path='comment', http_method='POST', name='comments')
    def comments(self, request):
-       print "Entered the Like Posts Section"
+       print "Entered the comments Section"
        return commentForm(request)
        return message_types.VoidMessage()
 
@@ -1240,5 +1241,41 @@ class CampusConnectApi(remote.Service):
    def getAttendeeDetails(self,request):
         eventId = ndb.Key('Event',int(request.eventId))
         return attendeeDetails(eventId)
+
+   @endpoints.method(GetInformation,CommentsResponse,path='getComments', http_method='GET', name='getComments')
+   def getAttendeeDetails(self,request):
+       postId = ndb.Key('Post',int(request.postId))
+       pageLimit = 2
+       skipCount=0
+       upperBound=pageLimit
+       print request.pageNumber
+
+       try:
+        skipCount = (int(request.pageNumber)-1)*pageLimit
+        upperBound = int(request.pageNumber)*pageLimit
+       except:
+          print "Didnt give pageNumber-Default to 1"
+
+       q = Comments.query(Comments.postId==postId)
+       pylist=[]
+       for x in q:
+           pylist.append(copyCommentToForm(x))
+
+       pylist.sort(key=lambda x: x.timestamp, reverse=True)
+
+       finalList = []
+       for i in xrange(skipCount,upperBound):
+           if(i>=len(pylist)):
+            break
+           finalList.append(pylist[i])
+
+       cf = CommentsResponse()
+       cf.items = finalList
+       cf.completed=str(0)
+       if(upperBound>=len(pylist)):
+                cf.completed=str(1)
+
+
+       return cf
 
 # api = endpoints.api_server([CampusConnectApi])   # register API

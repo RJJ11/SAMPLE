@@ -7,7 +7,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models_v1 import GetCollege,CollegeDb,Event,Profile,Feed,Post
+from Models_v1 import GetCollege,CollegeDb,Event,Profile,Feed,Post,Comments
 
 def createCollege(requestentity=None):
 
@@ -116,29 +116,43 @@ def getColleges(college):
 def copyToCollegeFeed(personId,entity):
     feed = Feed()
     for field in feed.all_fields():
-        if hasattr(entity, field.name):
-                if field.name == 'start_time':
+
+        if field.name == "startTime":
+            x = "start_time"
+        elif field.name == "endTime":
+            x = "end_time"
+
+        elif field.name == "contentCreator":
+            x = "event_creator"
+
+        else:
+            x = field.name
+
+        if hasattr(entity, x):
+                if x == 'start_time':
                     print field.name
-                    setattr(feed,"start_date", str(entity.start_time.strftime("%Y-%m-%d")))
-                    setattr(feed, field.name, str(entity.start_time.strftime("%H:%M:%S")))
-                elif field.name == 'end_time':
+                    setattr(feed,"startDate", str(entity.start_time.strftime("%Y-%m-%d")))
+                    setattr(feed, "startTime", str(entity.start_time.strftime("%H:%M:%S")))
+                elif x == 'end_time':
                     print field.name
-                    setattr(feed, "end_date", str(entity.end_time.strftime("%Y-%m-%d")))
-                    setattr(feed, field.name, str(entity.end_time.strftime("%H:%M:%S")))
-                elif field.name == 'club_name':
+                    setattr(feed, "endDate", str(entity.end_time.strftime("%Y-%m-%d")))
+                    setattr(feed, "endTime", str(entity.end_time.strftime("%H:%M:%S")))
+
+                elif x == 'clubName':
                     print "field name" + field.name
-                    setattr(feed, field.name, entity.club_id.get().name)
-                elif field.name == 'club_id':
-                    setattr(feed, field.name, str(entity.club_id.id()))
+                    setattr(feed, "clubName", entity.club_id.get().name)
+                elif x == 'clubId':
+                    setattr(feed, "clubId", str(entity.club_id.id()))
 
-                elif field.name == 'collegeId':
-                    print field.name
-                    setattr(feed, field.name, entity.collegeId.get().name)
+                elif x == 'collegeId':
+                    print x
+                    setattr(feed, x, entity.collegeId.get().name)
 
-                elif (field.name=='event_creator'):
-                    print field.name
-                    setattr(feed, field.name, entity.event_creator.get().name)
-                elif (field.name=='likers'):
+                elif (x=='event_creator'):
+                    #print entity, field.name
+                    setattr(feed, "contentCreator", entity.event_creator.get().name)
+
+                elif (x=='likers'):
                     print field.name
                     pylist=[]
                     for key in entity.likers:
@@ -147,15 +161,19 @@ def copyToCollegeFeed(personId,entity):
                     if personId in entity.likers:
                         liked = "Y"
                     setattr(feed,"hasLiked",liked)
-                    setattr(feed, field.name, pylist)
+                    setattr(feed, x, pylist)
 
-                elif (field.name=='attendees'):
-                    print field.name
+                elif (x=='attendees'):
+                    print x
                     pylist=[]
                     print entity.title
+                    isAttending = "N"
+                    if personId in entity.attendees:
+                        isAttending = "Y"
                     #for key in entity.attendees:
                     #    pylist.append(key.get().name)
-                    setattr(feed, field.name, str(len(entity.attendees)))
+                    setattr(feed, x, str(len(entity.attendees)))
+                    setattr(feed, "isAttending", isAttending)
 
                 else:
                     setattr(feed, field.name, str(getattr(entity, field.name)))
@@ -164,29 +182,50 @@ def copyToCollegeFeed(personId,entity):
             print field.name
             setattr(feed, field.name, str(entity.key.id()))
 
-        elif (field.name=='event_creator'):
-            print field.name
-            setattr(feed, field.name, entity.from_pid.get().name)
+        elif (field.name=='contentCreator'):  #FOR THE POST PART
+            print field.name, "HERE"
+            setattr(feed, "contentCreator", entity.from_pid.get().name)
 
 
         elif field.name == 'clubphotoUrl':
                 print "Reached here-1"
                 #print str(post.club_id.get().picture)
                 setattr(feed, field.name, entity.club_id.get().photoUrl)
-        elif field.name == 'club_name':
+
+        elif field.name == 'clubName':
                 print "field name" + field.name
                 setattr(feed, field.name, entity.club_id.get().name)
-        elif field.name == 'club_id':
-                setattr(feed, field.name, str(entity.club_id.id()))
+
+        elif field.name == 'clubId':
+                setattr(feed, field.name , str(entity.club_id.id()))
+
         elif field.name == 'clubabbreviation':
                 setattr(feed, field.name, entity.club_id.get().abbreviation)
+
+
+        elif field.name == 'clubName':
+            print "field name" + field.name
+            setattr(feed, "clubName", entity.club_id.get().name)
+        elif field.name == 'clubId':
+            setattr(feed, "clubId", str(entity.club_id.id()))
+
+
 
         """
         elif field.name == 'date':
                 setattr(feed, field.name, str(entity.timestamp.strftime("%Y-%m-%d")))
         elif field.name == 'time':
                 setattr(feed, field.name, str(entity.timestamp.strftime("%H:%M:%S")))
+
         """
+
+    postId = ndb.Key('Post',entity.key.id())
+    query = Comments.query(Comments.postId==postId)
+    count = 0
+    for q in query:
+        count+=1
+
+    setattr(feed, "commentCount", str(count))
     return feed
 
 """

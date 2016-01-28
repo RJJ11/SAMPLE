@@ -8,7 +8,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models_v1 import Post_Request,CollegeDb,Post,Profile,Club
+from Models_v1 import Post_Request,CollegeDb,Post,Profile,Club, CommentsResponseForm
 from Models_v1 import PostForm,LikePost,CommentsForm,Comments,GetPostRequestsForm
 
 def postRequest(requestentity=None):
@@ -280,6 +280,9 @@ def commentForm(request):
                     setattr(comment,field.name,str(getattr(request,field.name)))
 
        setattr(comment,'likes',0)
+       temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
+       temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
+       setattr(comment,"timestamp",datetime.combine(temp,temp1))
        comment.put()
        return message_types.VoidMessage()
 
@@ -327,3 +330,17 @@ def update(request):
            print "Oops"
            requestId.delete()
        return
+
+def copyCommentToForm(comment):
+    commentForm = CommentsResponseForm()
+    for field in commentForm.all_fields():
+        if field.name == "commentor":
+            setattr(commentForm,field.name,comment.pid.get().name)
+
+        elif field.name == "photoUrl":
+            setattr(commentForm,field.name,comment.pid.get().photoUrl)
+
+        else:
+            setattr(commentForm,field.name,str(getattr(comment,field.name)))
+
+    return commentForm
