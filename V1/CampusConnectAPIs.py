@@ -28,7 +28,7 @@ from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost, \
     copyCommentToForm
 from PostsAPI_v1 import copyPostRequestToForm,update
-from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails
+from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend
 from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
     deleteClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
@@ -1261,7 +1261,7 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(GetInformation,CommentsResponse,path='getComments', http_method='GET', name='getComments')
    def getAttendeeDetails(self,request):
        postId = ndb.Key('Post',int(request.postId))
-       pageLimit = 2
+       pageLimit = 10
        skipCount=0
        upperBound=pageLimit
        print request.pageNumber
@@ -1293,5 +1293,12 @@ class CampusConnectApi(remote.Service):
 
 
        return cf
+
+   @endpoints.method(LikePost,message_types.VoidMessage,path='unAttendEvent', http_method='POST', name='unAttendEvent')
+   def unAttendEvent(self,request):
+       unAttend(request)
+       return message_types.VoidMessage()
+
+
 
 # api = endpoints.api_server([CampusConnectApi])   # register API

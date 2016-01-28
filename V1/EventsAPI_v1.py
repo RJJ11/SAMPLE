@@ -319,3 +319,23 @@ def attendeeDetails(eventId):
         pylist.append(x)
 
     return PersonalInfoResponse(items = pylist)
+
+
+def unAttend(request):
+    person = ndb.Key('Profile',int(request.fromPid))
+    eventId = ndb.Key('Event',int(request.postId))
+
+    if person not in eventId.get().attendees:
+        return
+    else:
+        event = eventId.get()
+
+        event.attendees.remove(person)
+        event.put()
+
+        p = person.get()
+        p.eventsAttending.remove(eventId)
+        p.put()
+
+    return
+
