@@ -162,6 +162,7 @@ class GetInformation(messages.Message):
     date = messages.StringField(4)
     pageNumber = messages.StringField(5)
     eventId = messages.StringField(6)
+    postId = messages.StringField(7)
 
 
 
@@ -217,7 +218,6 @@ class Event(ndb.Model):
     event_creator = ndb.KeyProperty(kind='Profile',required=True)  # ancestor relationship?
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many events
     tags = ndb.StringProperty(repeated=True)
-    likers = ndb.KeyProperty(kind='Profile', repeated=True)
     timestamp = ndb.DateTimeProperty()
 
 class EventMiniForm(messages.Message):
@@ -348,8 +348,8 @@ class FollowClubMiniForm(messages.Message):
 class Comments(ndb.Model):
     pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many comments
     # postId = ndb.KeyProperty(kind=Post,required=True)
-    comment_body = ndb.StringProperty(required=True)
-    timestamp = ndb.StringProperty(required=True)
+    commentBody = ndb.StringProperty(required=True)
+    timestamp = ndb.DateTimeProperty(required=True)
     likes = ndb.IntegerProperty()
     postId = ndb.KeyProperty(kind='Post',required=True)
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many comments
@@ -357,8 +357,19 @@ class Comments(ndb.Model):
 class CommentsForm(messages.Message):
     pid = messages.StringField(1,required=True)
     commentBody = messages.StringField(2,required=True)
-    timestamp = messages.StringField(3,required=True)
-    postId = messages.StringField(4,required=True)
+    date = messages.StringField(3,required=True)
+    time = messages.StringField(4,required=True)
+    postId = messages.StringField(5,required=True)
+
+class CommentsResponseForm(messages.Message):
+    commentor = messages.StringField(1)
+    commentBody = messages.StringField(2)
+    timestamp = messages.StringField(3)
+    photoUrl = messages.StringField(4)
+
+class CommentsResponse(messages.Message):
+    completed = messages.StringField(2)
+    items = messages.MessageField(CommentsResponseForm,1,repeated=True)
 
 class CollegeDb(ndb.Model):
     name = ndb.StringProperty(required=True)
@@ -425,8 +436,7 @@ class Feed(messages.Message):
     completed = messages.StringField(11)
     views = messages.StringField(12)
     isAlumni = messages.StringField(13)
-    eventCreator = messages.StringField(14)
-    collegeId = messages.StringField(15)
+    contentCreator = messages.StringField(14)
     id = messages.StringField(16) #the post or event creator
     tags = messages.StringField(17)
     likers = messages.StringField(18,repeated=True)
@@ -437,6 +447,8 @@ class Feed(messages.Message):
     clubabbreviation = messages.StringField(23)
     hasLiked = messages.StringField(24)
     isAttending = messages.StringField(25)
+    commentCount = messages.StringField(26)
+
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)
     completed = messages.StringField(2)
