@@ -694,22 +694,26 @@ class CampusConnectApi(remote.Service):
    def getProfile(self, request):
         """Return user profile."""
         email=getattr(request,"email")
-        result = Profile.query(Profile.email==email)
+        pid = ndb.Key('Profile',int(request.pid))
+        #result = Profile.query(Profile.email==email)
+        profile = pid.get()
         present =0
         isAdmin="N"
         isSuperAdmin="N"
-        for y in result:
-            if y.email == email:
-                present = 1
-                if y.admin is not None:
-                    if len(y.admin)>0:
+        #for y in result:
+        #    if y.email == email:
+        #        present = 1
+        if profile:
+                present = 1        
+                if profile.admin is not None:
+                    if len(profile.admin)>0:
                         isAdmin="Y"
-                if y.superadmin is not None:
-                    if len(y.superadmin)>0:
+                if profile.superadmin is not None:
+                    if len(profile.superadmin)>0:
                         isSuperAdmin="Y"
         if present ==1:
             success="True"
-            a = _doProfile(email)
+            a = _doProfile(profile.email)
             return ProfileResponse(success=success,result=a,isAdmin=isAdmin,isSuperAdmin=isSuperAdmin)
         else:
             success="False"
@@ -1248,6 +1252,11 @@ class CampusConnectApi(remote.Service):
    def getAttendeeDetails(self,request):
         eventId = ndb.Key('Event',int(request.eventId))
         return attendeeDetails(eventId)
+   @endpoints.method(GetInformation,PersonalInfoResponse,path='getAttendeeDetails', http_method='GET', name='getAttendeeDetails')
+   def getAttendeeDetails(self,request):
+        eventId = ndb.Key('Event',int(request.eventId))
+        return attendeeDetails(eventId)
+
 
    @endpoints.method(GetInformation,CommentsResponse,path='getComments', http_method='GET', name='getComments')
    def getAttendeeDetails(self,request):
