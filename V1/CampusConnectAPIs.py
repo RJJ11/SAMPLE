@@ -111,9 +111,7 @@ class CampusConnectApi(remote.Service):
                 print("Notification to be inserted in join approval",newNotif)
                 newNotifKey = newNotif.put()
                  
-                data = {'message': profile.name + " wishes to join","title":  club.name,
-                        'id':str(joinCreationObjKey.id()),'type':"Join_Creation"
-                       }
+                data = {'message': profile.name + " wishes to join","title":  club.name}
                 print (data)
                 gcmId = to_pidProfile.gcmId
                 gcm_message = GCMMessage(gcmId, data)
@@ -149,7 +147,7 @@ class CampusConnectApi(remote.Service):
 
                  print("Notification to be inserted in join approval",newNotif)
                  newNotifKey = newNotif.put()
-                 data = {'message': "Approval Denied","title": club.name,'id':str(club.key.id()),'type':"Club"}
+                 data = {'message': "Approval Denied","title": club.name}
                  print (data)
                  gcmId = profile.gcmId
                  gcm_message = GCMMessage(gcmId, data)
@@ -187,7 +185,7 @@ class CampusConnectApi(remote.Service):
 
                  print("Notification to be inserted in join approval",newNotif)
                  newNotifKey = newNotif.put()
-                 data = {'message': "You are now a member","title": currentClub.name,'id':str(currentClub.key.id()),'type':"Club"}
+                 data = {'message': "You are now a member","title": currentClub.name}
                  print (data)
                  gcmId = currentProfile.gcmId
                  gcm_message = GCMMessage(gcmId, data)
@@ -266,7 +264,7 @@ class CampusConnectApi(remote.Service):
                    format_club.clubId = str(ret_club.key.id())
                    format_club.memberCount = str(len(ret_club.members))
                    format_club.followerCount = str(len(ret_club.follows))
-                   format_club.photoUrl = ret_club.photoUrl
+                   #format_club.membercount = str()
                    if(request.pid != None):
                          format_club.isMember = "N"
                          format_club.isFollower = "N"
@@ -342,7 +340,7 @@ class CampusConnectApi(remote.Service):
 
               print("Notification to be inserted in club creation request",newNotif)
               newNotifKey = newNotif.put()
-              data = {'message': clubRequest.club_name,"title": "Creation Request",'id':str(clubRequest.key.id()),'type':"Club_Creation"}
+              data = {'message': clubRequest.club_name,"title": "Creation Request"}
               print (data)
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
@@ -380,7 +378,7 @@ class CampusConnectApi(remote.Service):
 
             print("Notification to be inserted in club approval rejection",newNotif)
             newNotifKey = newNotif.put()
-            data = {'message': req.club_name,"title": "Creation Request Denied",'id':"None",'type':"None"}
+            data = {'message': req.club_name,"title": "Creation Request Denied"}
             print (data)
             gcmId = currentProfile.gcmId
             gcm_message = GCMMessage(gcmId, data)
@@ -406,8 +404,7 @@ class CampusConnectApi(remote.Service):
 
               print("Notification to be inserted in club approval ",newNotif)
               newNotifKey = newNotif.put()
-              data = {'message': newClub.name,"title": "Creation Request Approved",
-                      'id':str(newClub.key.id()),'type':"Club"}
+              data = {'message': newClub.name,"title": "Creation Request Approved"}
               print (data)
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
@@ -428,8 +425,7 @@ class CampusConnectApi(remote.Service):
 
               print("Notification to be inserted in club approval rejection",newNotif)
               newNotifKey = newNotif.put()
-              data = {'message': req.club_name,"title": "Creation Request Denied",
-                      'id':"None",'type':"None"}
+              data = {'message': req.club_name,"title": "Creation Request Denied"}
               print (data)
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
@@ -465,8 +461,7 @@ class CampusConnectApi(remote.Service):
 
         print("Notification to be inserted in Post Creation Request",newNotif)
         newNotifKey = newNotif.put()
-        data = {'message': clubRequest.title,"title": "Post Creation Request",
-                'id':str(clubRequest.key.id()),'type':"Post_Request"}
+        data = {'message': clubRequest.title,"title": "Post Creation Request"}
         print (data)
         gcmId = currentProfile.gcmId
         gcm_message = GCMMessage(gcmId, data)
@@ -497,8 +492,7 @@ class CampusConnectApi(remote.Service):
                     #Create Notification Feed
                     group = newPost.club_id.get()
                     groupName = group.name
-                    data = {'message': groupName,"title": newPost.title,
-                            'id':str(newPost.key.id()),'type':"Post"}
+                    data = {'message': groupName,"title": newPost.title}
                     
                     postlist = []
                     if (group.follows):
@@ -588,8 +582,7 @@ class CampusConnectApi(remote.Service):
 
                     
 
-                    data = {'message': groupName,"title": newEvent.title,
-                           'id':str(newEvent.key.id()),'type':"newEvent"}
+                    data = {'message': groupName,"title": newEvent.title}
                     
                     #get the followers of the club pids. Get GCM Id's from those and send
                     print ("GROUP FOLLOWS LIST ", group.follows)
@@ -694,26 +687,22 @@ class CampusConnectApi(remote.Service):
    def getProfile(self, request):
         """Return user profile."""
         email=getattr(request,"email")
-        pid = ndb.Key('Profile',int(request.pid))
-        #result = Profile.query(Profile.email==email)
-        profile = pid.get()
+        result = Profile.query(Profile.email==email)
         present =0
         isAdmin="N"
         isSuperAdmin="N"
-        #for y in result:
-        #    if y.email == email:
-        #        present = 1
-        if profile:
-                present = 1        
-                if profile.admin is not None:
-                    if len(profile.admin)>0:
+        for y in result:
+            if y.email == email:
+                present = 1
+                if y.admin is not None:
+                    if len(y.admin)>0:
                         isAdmin="Y"
-                if profile.superadmin is not None:
-                    if len(profile.superadmin)>0:
+                if y.superadmin is not None:
+                    if len(y.superadmin)>0:
                         isSuperAdmin="Y"
         if present ==1:
             success="True"
-            a = _doProfile(profile.email)
+            a = _doProfile(email)
             return ProfileResponse(success=success,result=a,isAdmin=isAdmin,isSuperAdmin=isSuperAdmin)
         else:
             success="False"
@@ -1252,16 +1241,11 @@ class CampusConnectApi(remote.Service):
    def getAttendeeDetails(self,request):
         eventId = ndb.Key('Event',int(request.eventId))
         return attendeeDetails(eventId)
-   @endpoints.method(GetInformation,PersonalInfoResponse,path='getAttendeeDetails', http_method='GET', name='getAttendeeDetails')
-   def getAttendeeDetails(self,request):
-        eventId = ndb.Key('Event',int(request.eventId))
-        return attendeeDetails(eventId)
-
 
    @endpoints.method(GetInformation,CommentsResponse,path='getComments', http_method='GET', name='getComments')
    def getAttendeeDetails(self,request):
        postId = ndb.Key('Post',int(request.postId))
-       pageLimit = 10
+       pageLimit = 25
        skipCount=0
        upperBound=pageLimit
        print request.pageNumber

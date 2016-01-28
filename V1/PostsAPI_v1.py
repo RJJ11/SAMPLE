@@ -144,7 +144,9 @@ def postEntry(requestentity=None,check=0):
                         elif field=="timestamp":
                             setattr(newPost, field, val)
 
-                        
+                        elif field=="photoUrl" and val == None:
+                            setattr(newPost, field, "https://lh3.googleusercontent.com/VLbWVdaJaq2HoYnu6J3T5aKC9DP_ku0KC3eelxawe6sqsPdNTarc5Vc0sx6VGqZ1Y-MlguZNd0plkDEZKYM9OnDbvR2tomX-Kg")
+
                         elif val:
                             print("Value is",val)
                             setattr(newPost, field, str(val))
