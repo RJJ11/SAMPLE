@@ -1253,7 +1253,7 @@ class CampusConnectApi(remote.Service):
         return attendeeDetails(eventId)
 
    @endpoints.method(GetInformation,CommentsResponse,path='getComments', http_method='GET', name='getComments')
-   def getAttendeeDetails(self,request):
+   def getComments(self,request):
        postId = ndb.Key('Post',int(request.postId))
        pageLimit = 25
        skipCount=0
