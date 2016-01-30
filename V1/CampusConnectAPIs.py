@@ -1239,7 +1239,7 @@ class CampusConnectApi(remote.Service):
 
    @endpoints.method(message_types.VoidMessage,UpdateStatus,path='updateStatus', http_method='GET', name='updateStatus')
    def updateStatus(self,request):
-       update="NO"
+       update="5"
        return UpdateStatus(update=update)
 
    @endpoints.method(DelClubMiniForm,message_types.VoidMessage,path='delClub', http_method='POST', name='delClub')
