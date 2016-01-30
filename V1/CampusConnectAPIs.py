@@ -10,7 +10,7 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
 from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm,CommentsResponseForm,CommentsResponse, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
-    MessageResponse, ProfileResponse
+    MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments
 from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models_v1 import Profile,CollegeFeed
@@ -1326,5 +1326,23 @@ class CampusConnectApi(remote.Service):
 
        return message_types.VoidMessage()
 
+   @endpoints.method(message_types.VoidMessage,BDCommentResponse,path='BDCommentCount', http_method='GET', name='BDCommentCount')
+   def propUpBDCommentCountdate(self,request):
+       #query = BDComments.query(BDComments.commentHashTag == request.commentHashTag)
+       count = 0
+       #for q in query:
+       stateList = ['#GJ','#RJ','#BR','#UP','#MP','#UB','#KA','#KR','#AP','#TS','#MH','#NE','#TN','#WB']
+       pylist = []
+       for x in stateList:
+           query = BDComments.query(BDComments.commentHashTag ==x)
+           count = 0
+           BD = BDCommentCount()
+           for q in query:
+                count+=1
+           BD.commentHashTag=x
+           BD.count=str(count)
+           pylist.append(BD)
+
+       return BDCommentResponse(items=pylist)
 
 # api = endpoints.api_server([CampusConnectApi])   # register API

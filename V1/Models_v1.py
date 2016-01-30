@@ -562,3 +562,12 @@ class BDComments(ndb.Model):
     commentBody = ndb.StringProperty(repeated=True)
     commentHashTag = ndb.StringProperty()
     name = ndb.StringProperty()
+
+
+
+class BDCommentCount(messages.Message):
+    count = messages.StringField(1)
+    commentHashTag = messages.StringField(2)
+
+class BDCommentResponse(messages.Message):
+    items = messages.MessageField(BDCommentCount,1,repeated=True)
