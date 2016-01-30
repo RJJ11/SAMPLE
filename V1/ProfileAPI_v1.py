@@ -113,7 +113,9 @@ def _doProfile(email,save_request=None):
                     else:
                         setattr(prof,field.name,val)
             if flag==1:
-                prof.put()
+                k1 = prof.put()
+                print "Inserted"
+                print k1
 
         return _copyProfileToForm(prof)
 

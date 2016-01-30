@@ -555,3 +555,10 @@ class UpdateGCMMessageMiniForm(messages.Message):
     type = messages.StringField(2)
     id = messages.StringField(3)
     message = messages.StringField(4)
+
+class BDComments(ndb.Model):
+    pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many comments
+    # postId = ndb.KeyProperty(kind=Post,required=True)
+    commentBody = ndb.StringProperty(repeated=True)
+    commentHashTag = ndb.StringProperty()
+    name = ndb.StringProperty()
