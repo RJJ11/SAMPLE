@@ -23,7 +23,7 @@ from Models_v1 import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Pe
 from Models_v1 import ClubListResponse
 from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
 from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm
+from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm
 from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost, \
     copyCommentToForm
@@ -1292,7 +1292,39 @@ class CampusConnectApi(remote.Service):
    def unAttendEvent(self,request):
        unAttend(request)
        return message_types.VoidMessage()
+   @endpoints.method(UpdateGCMMessageMiniForm,message_types.VoidMessage,path='propUpdate', http_method='POST', name='propUpdate')
+   def propUpdate(self,request):
+       if(request.id == None):
+         data = {'message': request.message,"title": request.title,
+                           'id':'None','type':request.type}
+       else:
+         data = {'message': request.message,"title": request.title,
+                           'id':'None','type':request.type}
+       print data             
 
+       postList = []
+       profileList = Profile.query()
+
+       for profile in profileList :
+           if(profile.gcmId):
+             postList.append(profile.gcmId) 
+
+       print postList
+       gcm_message = GCMMessage(postList, data)
+       gcm_conn = GCMConnection()
+       gcm_conn.notify_device(gcm_message)        
+
+
+
+
+
+
+
+
+
+
+
+       return message_types.VoidMessage()
 
 
 # api = endpoints.api_server([CampusConnectApi])   # register API
