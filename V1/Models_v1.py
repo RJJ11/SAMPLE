@@ -550,3 +550,8 @@ class AdminStatus(messages.Message):
 
 class UpdateStatus(messages.Message):
     update = messages.StringField(1)
+class UpdateGCMMessageMiniForm(messages.Message):
+    title = messages.StringField(1)
+    type = messages.StringField(2)
+    id = messages.StringField(3)
+    message = messages.StringField(4)
