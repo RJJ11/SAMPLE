@@ -559,3 +559,20 @@ class UpdateGCMMessageMiniForm(messages.Message):
 class EditBatchMiniForm(messages.Message):
     fromBatch = messages.StringField(1,required=True)
     toBatch = messages.StringField(2,required=True)
+
+
+class BDComments(ndb.Model):
+    pid = ndb.KeyProperty(kind='Profile', required=True)  # One profile can have many comments
+    # postId = ndb.KeyProperty(kind=Post,required=True)
+    commentBody = ndb.StringProperty(repeated=True)
+    commentHashTag = ndb.StringProperty()
+    name = ndb.StringProperty()
+
+
+
+class BDCommentCount(messages.Message):
+    count = messages.StringField(1)
+    commentHashTag = messages.StringField(2)
+
+class BDCommentResponse(messages.Message):
+    items = messages.MessageField(BDCommentCount,1,repeated=True)

@@ -10,6 +10,7 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 from Models_v1 import Post_Request,CollegeDb,Post,Profile,Club, CommentsResponseForm
 from Models_v1 import PostForm,LikePost,CommentsForm,Comments,GetPostRequestsForm
+from Hashtags import processTags
 
 def postRequest(requestentity=None):
 
@@ -289,6 +290,11 @@ def commentForm(request):
        temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
        setattr(comment,"timestamp",datetime.combine(temp,temp1))
        comment.put()
+
+       BDeventId = ndb.Key('Post',int(5666536245166080))
+       if comment.postId == BDeventId:
+           processTags(comment)
+
        return message_types.VoidMessage()
 
 
