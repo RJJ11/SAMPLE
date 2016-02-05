@@ -23,7 +23,7 @@ from Models_v1 import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Pe
 from Models_v1 import ClubListResponse
 from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
 from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm
+from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm
 from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost, \
     copyCommentToForm
@@ -34,6 +34,7 @@ from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,a
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
+from helpers import messageProp
 
 #data = {'message': '5 mins later',"title":"Hi RKD"}
 #gcm_message = GCMMessage('cDXc7bMlwPQ:APA91bGAXV7203E6GUPkrbSOzQBv1_Xc4ztClQ6XcEcr80jw9jKBdZmLZ1U04_dTiH37AOydvv07_fBGiZXrszGkIxN5ZQgjsdqu35orSSOVq02XxDLVcBaqRMvxQTr-ucYQzbVoj5kE', data)
@@ -1294,37 +1295,40 @@ class CampusConnectApi(remote.Service):
        return message_types.VoidMessage()
    @endpoints.method(UpdateGCMMessageMiniForm,message_types.VoidMessage,path='propUpdate', http_method='POST', name='propUpdate')
    def propUpdate(self,request):
-       if(request.id == None):
-         data = {'message': request.message,"title": request.title,
+      if(request.id == None):
+          data = {'message': request.message,"title": request.title,
                            'id':'None','type':request.type}
-       else:
-         data = {'message': request.message,"title": request.title,
-                           'id':'None','type':request.type}
-       print data             
+      else:
+          data = {'message': request.message,"title": request.title,
+                           'id':request.id,'type':request.type}
+      print data             
 
-       postList = []
-       profileList = Profile.query()
+      if(request.batch != None):# and request.type == "BatchRequest"):
+          #sending GCM message to a batch
+          print "Entered batch in campusConnectApis"
+          
 
-       for profile in profileList :
-           if(profile.gcmId):
-             postList.append(profile.gcmId) 
+          messageProp(request.batch,data)
+      else :
+          #send message to everyone
+          print "Entered none in campusConnectApis"
+          
+          messageProp(None,data) 
+      return message_types.VoidMessage()
+    
+   @endpoints.method(EditBatchMiniForm,message_types.VoidMessage,path='modifyBatch', http_method='POST', name='modifyBatch')
+   def modifyBatch(self,request):
+        profileList = Profile.query(Profile.batch == request.fromBatch,Profile.isAlumni == "N") 
 
-       print postList
-       gcm_message = GCMMessage(postList, data)
-       gcm_conn = GCMConnection()
-       gcm_conn.notify_device(gcm_message)        
+        if(profileList):
+           for profile in profileList:
+               print profile.batch 
 
+               profile.batch = request.toBatch
+               profile.put() 
+        
+        return message_types.VoidMessage()   
 
-
-
-
-
-
-
-
-
-
-       return message_types.VoidMessage()
 
 
 # api = endpoints.api_server([CampusConnectApi])   # register API

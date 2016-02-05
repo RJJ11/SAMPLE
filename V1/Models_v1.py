@@ -555,3 +555,7 @@ class UpdateGCMMessageMiniForm(messages.Message):
     type = messages.StringField(2)
     id = messages.StringField(3)
     message = messages.StringField(4)
+    batch = messages.StringField(5)
+class EditBatchMiniForm(messages.Message):
+    fromBatch = messages.StringField(1,required=True)
+    toBatch = messages.StringField(2,required=True)
