@@ -6,7 +6,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models_v1 import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm,UpdateGCM,PersonalResponse
+from Models_v1 import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm,UpdateGCM,PersonalResponse,Post,Event,Club_Creation,Join_Creation,Post_Request,Join_Request,Comments,Notifications
 
 def _copyProfileToForm(prof):
         pf = ProfileMiniForm()
@@ -142,3 +142,109 @@ def PersonalInfoForm(request):
         setattr(a,x,getattr(request,x))
 
     return a
+
+def deleteProfile(request):
+   #Steps to be incorporated for deletion of a profile
+   #1) Check if fromKey == pidKey 
+   from_key = ndb.Key('Profile',int(request.fromPid)) 
+   pid_key = ndb.Key('Profile',int(request.pid))
+   if(from_key == pid_key and pid_key!=None):
+      profile = pid_key.get()
+      print profile.name
+   
+   #2) Remove the profile key from followers and members of every club
+   #3) If the profile is in club.admin then remove it from club.admin and make Superadmin the admin of the club   
+   clubList = Club.query()
+   
+   for club in clubList:
+       
+       
+       if(len(club.members)!=0):
+          if pid_key in club.members:
+             print ("club key is",club.key)
+             club.members.remove(pid_key)
+             
+       
+       if(len(club.follows)!=0):
+      
+          if pid_key in club.follows:
+             club.follows.remove(pid_key)
+             
+       if pid_key == club.admin:
+          #obtain super admin profile of college
+          college = club.collegeId.get()
+          emailId = college.sup_emailId
+          profileret = Profile.query(Profile.email == emailId)
+          for superadmin in profileret:
+            print ("Superadmin",superadmin.name)
+            superadmin.admin.append(club.key)
+            club.admin = superadmin.key
+            superadmin.clubsJoined.append(club.key)
+            superadmin.follows.append(club.key)
+            club.members.admin(superadmin.key)
+            club.follows.admin(superadmin.key)
+            superadmin.put()
+       club.put()
+          
+
+
+   #4 Delete Posts which are created by the profile
+   postRet =  Post.query(Post.from_pid == pid_key)
+   
+   for posts in postRet:
+         likePostmini = LikePost()
+         likePostmini.from_pid = str(pid_key.id())
+         likePostmini.postId = str(posts.key.id())   
+         deletePost(likePostmini)
+     
+   # Remove pid_key from event_attendees list
+   eventlist = Event.query()
+   for event in eventlist:
+      if(len(event.attendees)!=0):
+          if(pid_key in event.attendees):
+
+             event.attendees.remove(pid_key)
+             event.put()
+             
+    #Remove Events created by that profile
+   eventRet =  Event.query(Event.event_creator == pid_key)
+   for events in eventRet:
+         modifyeventmini = ModifyEvent()
+         modifyeventmini.from_pid = str(pid_key.id())
+         modifyeventmini.eventId = str(events.key.id())   
+         deleteEvent(modifyeventmini)
+
+    #Remove Club_Creation requests by that profile or to that profile 
+   clubcreationlist = Club_Creation.query(ndb.OR(Club_Creation.from_pid == pid_key,Club_Creation.to_pid == pid_key))
+   
+   for clubcreation in clubcreationlist:
+             print clubcreation
+             clubcreation.key.delete()
+
+    #Remove Join Creation, Join Requests, Post_Requests
+   joinCreationRet =  Join_Creation.query(ndb.OR(Join_Creation.from_pid == pid_key,Join_Creation.to_pid == pid_key)) 
+   for jc in joinCreationRet:
+             print jc
+             jc.key.delete()
+   
+   joinReqRet =  Join_Request.query(ndb.OR(Join_Request.from_pid == pid_key,Join_Request.to_pid == pid_key))
+   for jr in joinReqRet:
+             print jr
+             jr.key.delete()
+   postReqRet =  Post_Request.query(ndb.OR(Post_Request.from_pid == pid_key or Post_Request.to_pid == pid_key ))
+   
+   for pr in postReqRet:
+         print pr
+         pr.key.delete()
+
+   commentlist = Comments.query(Comments.pid == pid_key)
+   for comments in commentlist:
+         print comments
+         comments.key.delete()         
+
+   notificationsRet =  Notifications.query(Notifications.to_pid == pid_key)
+   for notif in notificationsRet:
+        notif.key.delete()
+
+   #Delete the profile entity
+   pid_key.delete()   
