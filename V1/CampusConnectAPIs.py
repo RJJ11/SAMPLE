@@ -23,7 +23,7 @@ from Models_v1 import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Pe
 from Models_v1 import ClubListResponse
 from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
 from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm
+from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm,DelProfileMiniForm
 from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost, \
     copyCommentToForm
@@ -31,7 +31,7 @@ from PostsAPI_v1 import copyPostRequestToForm,update
 from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend
 from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
     deleteClub
-from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm
+from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm,deleteProfile
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 from helpers import messageProp
@@ -1247,6 +1247,11 @@ class CampusConnectApi(remote.Service):
    def delClub(self,request):
        deleteClub(request)
        return message_types.VoidMessage()
+
+   @endpoints.method(DelProfileMiniForm,message_types.VoidMessage,path='delProfile', http_method='POST', name='delProfile')
+   def delProfile(self,request):
+       deleteProfile(request)
+       return message_types.VoidMessage()    
 
    @endpoints.method(GetInformation,PersonalInfoResponse,path='getAttendeeDetails', http_method='GET', name='getAttendeeDetails')
    def getAttendeeDetails(self,request):
