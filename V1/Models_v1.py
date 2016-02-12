@@ -581,3 +581,8 @@ class BDCommentResponse(messages.Message):
 class DelProfileMiniForm(messages.Message):
     fromPid = messages.StringField(1)
     pid = messages.StringField(2)
+
+
+class MiscCount(messages.Message):
+    count = messages.StringField(1)
+
