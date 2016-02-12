@@ -10,7 +10,7 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
 from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm,CommentsResponseForm,CommentsResponse, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
-    MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments
+    MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments, MiscCount
 from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models_v1 import Profile,CollegeFeed
@@ -1355,4 +1355,33 @@ class CampusConnectApi(remote.Service):
 
        return BDCommentResponse(items=pylist)
 
+   @endpoints.method(GetInformation,MiscCount,path='clubCount', http_method='GET', name='clubCount')
+   def clubCount(self,request):
+
+       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+
+       query = Club.query(Club.collegeId==collegeId)
+       print query
+       Count = 0
+
+       for q in query:
+
+           Count+=1
+
+
+
+       return MiscCount(count=str(Count))
+
+   @endpoints.method(GetInformation,MiscCount,path='eventCount', http_method='GET', name='eventCount')
+   def eventCount(self,request):
+       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+       date = request.date
+       count = 0
+       events = Event.query(Event.collegeId==collegeId)
+       for x in events:
+              start_date = str(x.start_time.date())
+              if(start_date == date):
+                 count+=1
+
+       return MiscCount(count=str(Count))
 # api = endpoints.api_server([CampusConnectApi])   # register API
