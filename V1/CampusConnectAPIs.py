@@ -396,7 +396,7 @@ class CampusConnectApi(remote.Service):
               newClub = createClubAfterApproval(req)
               currentProfile = newClub.admin.get()
               if(newClub):
-              	  newNotif = Notifications(
+                  newNotif = Notifications(
                      clubName = newClub.name,
                      clubId = newClub.key,
                      clubphotoUrl = newClub.photoUrl,
@@ -504,7 +504,7 @@ class CampusConnectApi(remote.Service):
                     
                     postlist = []
                     if (group.follows):
-                    	for pid in group.follows:
+                      for pid in group.follows:
                            person = pid.get()
                            print ("PID is",person)
                            gcmId = person.gcmId
@@ -775,7 +775,8 @@ class CampusConnectApi(remote.Service):
         temp2 = request.clubId
         date = request.date
         future_date = request.futureDate
-        
+        pid = ndb.Key('Profile',int(request.pid))
+        #person = pid.get()
 
         print ("Future date is",future_date)
         if(temp2==None):
@@ -806,17 +807,17 @@ class CampusConnectApi(remote.Service):
                  print ("Event to be added",x.title)
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=list(([copyEventToForm(x) for x in finalList])))
+           return Events(items=list(([copyEventToForm(x,pid) for x in finalList])))
         elif(date != None):
            for x in events:
               start_date = str(x.start_time.date())
-              if(start_date == date):	
+              if(start_date == date): 
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=list(([copyEventToForm(x) for x in finalList])))
+           return Events(items=list(([copyEventToForm(x,pid) for x in finalList])))
         else:
            print("Returning all events from Events List")
-           return Events(items=list(([copyEventToForm(x) for x in events])))
+           return Events(items=list(([copyEventToForm(x,pid) for x in events])))
 
    @endpoints.method(ModifyEvent,message_types.VoidMessage,
             path='deleteEvent', http_method='DELETE', name='delEvent')
