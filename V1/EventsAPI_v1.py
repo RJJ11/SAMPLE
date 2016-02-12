@@ -128,7 +128,7 @@ def eventEntry(requestentity=None):
 
         return event_request
 
-def copyEventToForm(event):
+def copyEventToForm(event,pid):
         pf = EventForm()
         for field in pf.all_fields():
             if hasattr(event, field.name):
@@ -142,6 +142,11 @@ def copyEventToForm(event):
             elif field.name == "eventCreator":
                     setattr(pf,field.name,str(event.event_creator.get().name))
 
+            elif field.name == "isAttending":
+                if pid in event.attendees:
+                     setattr(pf,field.name,"Y")
+                else:
+                    setattr(pf,field.name,"N")
             if field.name == 'eventId':
                 setattr(pf, field.name, str(event.key.id()))
             #if field.name == 'date':

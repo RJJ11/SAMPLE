@@ -141,6 +141,7 @@ class GetAllPosts(messages.Message):
     clubId = messages.StringField(2)
     date = messages.StringField(3)
     futureDate = messages.StringField(4)
+    pid = messages.StringField(5)
 
 
 class Post_Request(ndb.Model):
@@ -267,6 +268,7 @@ class EventForm(messages.Message):
     clubphotoUrl = messages.StringField(18)
     clubName = messages.StringField(19)
     photoUrl = messages.StringField(20)
+    isAttending = messages.StringField(21)
     
 # id=eventId
 
