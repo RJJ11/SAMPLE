@@ -640,11 +640,12 @@ class CampusConnectApi(remote.Service):
 
         return response
 
-   @endpoints.method(GetAllPosts,Posts,path='getPosts', http_method='GET', name='getPosts')
+   @endpoints.method(GetAllPosts,CollegeFeed,path='getPosts', http_method='GET', name='getPosts')
    def getPosts(self, request):
         print("Entered Get Posts Portion")
         temp = request.collegeId
         temp2 = request.clubId
+        pid = ndb.Key('Profile',int(request.pid))
         print "temp" + str(temp)
         print "temp2" + str(temp2)
         if(temp2==None):
@@ -666,7 +667,7 @@ class CampusConnectApi(remote.Service):
         #print "the list"
         #print pylist
 
-        return Posts(items=list(([copyPostToForm(x) for x in posts])))
+        return CollegeFeed(items=list(([copyToCollegeFeed(pid,x) for x in posts])))
         #clubRequest = self.postEntry(request)
         #print("Inserted into the events table")
 
@@ -768,7 +769,7 @@ class CampusConnectApi(remote.Service):
         update(request)
         return message_types.VoidMessage()
 
-   @endpoints.method(GetAllPosts,Events,path='getEvents', http_method='GET', name='getEvents')
+   @endpoints.method(GetAllPosts,CollegeFeed,path='getEvents', http_method='GET', name='getEvents')
    def getEvents(self, request):
         print("Entered Get Events Portion")
         temp = request.collegeId
@@ -807,17 +808,17 @@ class CampusConnectApi(remote.Service):
                  print ("Event to be added",x.title)
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=list(([copyEventToForm(x,pid) for x in finalList])))
+           return CollegeFeed(items=list(([copyToCollegeFeed(pid,x) for x in finalList])))
         elif(date != None):
            for x in events:
               start_date = str(x.start_time.date())
-              if(start_date == date): 
+              if(start_date == date):
                  finalList.append(x)
            print("Returning all events from Final List")
-           return Events(items=list(([copyEventToForm(x,pid) for x in finalList])))
+           return CollegeFeed(items=list(([copyToCollegeFeed(pid,x)  for x in finalList])))
         else:
            print("Returning all events from Events List")
-           return Events(items=list(([copyEventToForm(x,pid) for x in events])))
+           return CollegeFeed(items=list(([copyToCollegeFeed(pid,x)  for x in events])))
 
    @endpoints.method(ModifyEvent,message_types.VoidMessage,
             path='deleteEvent', http_method='DELETE', name='delEvent')
