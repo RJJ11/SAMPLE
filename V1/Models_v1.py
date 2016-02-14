@@ -142,6 +142,7 @@ class GetAllPosts(messages.Message):
     date = messages.StringField(3)
     futureDate = messages.StringField(4)
     pid = messages.StringField(5)
+    postId = messages.StringField(6)
 
 
 class Post_Request(ndb.Model):
