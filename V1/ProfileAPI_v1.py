@@ -40,7 +40,7 @@ def _copyProfileToForm(prof):
                         format_club = ClubMiniForm()
                         format_club.name = ret_club.name
                         format_club.abbreviation = ret_club.abbreviation
-                        format_club.admin = ret_club.admin.get().name
+                        format_club.adminName = ret_club.admin.get().name
                         format_club.collegeName = ret_club.collegeId.get().name
                         format_club.description = ret_club.description
                         format_club.clubId = str(ret_club.key.id())
