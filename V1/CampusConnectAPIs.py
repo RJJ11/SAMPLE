@@ -649,9 +649,8 @@ class CampusConnectApi(remote.Service):
         print "temp" + str(temp)
         print "temp2" + str(temp2)
 
-        postId = ndb.Key('Post',int(request.postId))
-
-        if postId!=None: # This is when you're just querying a single post
+        if request.postId is not None:
+            postId = ndb.Key('Post',int(request.postId))
             post = postId.get() #IMprove this with try catch later
             return CollegeFeed(items=list(([copyToCollegeFeed(pid,post)])))
 
@@ -785,9 +784,8 @@ class CampusConnectApi(remote.Service):
         future_date = request.futureDate
         pid = ndb.Key('Profile',int(request.pid))
 
-        postId = ndb.Key('Event',int(request.postId))
-
-        if postId!=None: # This is when you're just querying a single post
+        if request.postId is not None:
+            postId = ndb.Key('Event',int(request.postId))
             event = postId.get()
             return CollegeFeed(items=list(([copyToCollegeFeed(pid,event)])))
 
