@@ -37,7 +37,7 @@ def messageProp(batch,data):
        gcm_conn.notify_device(gcm_message)
 
 
-def collegeFeedHelper(request,callFlag,newPost=""):
+def collegeFeedHelper(request,callFlag,newPost="abcd"):
    print "Entered the Like Posts Section"
    temp = request.clubId
    flagclub =0 #To see which parameter is called and set cache accordingly
@@ -164,7 +164,7 @@ def collegeFeedHelper(request,callFlag,newPost=""):
 
    # ADDING THE NEW POST/EVENT THAT DOESN'T GET ADDED DUE TO LATENCY ISSUES
 
-   if newPost == None:
+   if newPost == "abcd":
        print "NEW POST IS NONE"
    else:
        print newPost

@@ -198,30 +198,36 @@ def copyToCollegeFeed(personId,entity):
 
         elif (field.name=='contentCreator'):  #FOR THE POST PART
             print field.name, "HERE"
+            #print "DATA"
+            #print "ENTITY", entity
             setattr(feed, "contentCreator", entity.from_pid.get().name)
 
 
         elif field.name == 'clubphotoUrl':
                 print "Reached here-1"
+                #print entity
                 #print str(post.club_id.get().picture)
                 setattr(feed, field.name, entity.club_id.get().photoUrl)
 
         elif field.name == 'clubName':
                 print "field name" + field.name
-                print entity
+                #print entity
                 setattr(feed, field.name, entity.club_id.get().name)
 
         elif field.name == 'clubId':
+                #print entity
                 setattr(feed, field.name , str(entity.club_id.id()))
 
         elif field.name == 'clubabbreviation':
+                #print entity
                 setattr(feed, field.name, entity.club_id.get().abbreviation)
 
 
         elif field.name == 'clubName':
-            print "field name" + field.name
+            #print "field name" + field.name
             setattr(feed, "clubName", entity.club_id.get().name)
         elif field.name == 'clubId':
+            #print entity
             setattr(feed, "clubId", str(entity.club_id.id()))
 
 
