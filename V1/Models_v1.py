@@ -451,6 +451,9 @@ class Feed(messages.Message):
     hasLiked = messages.StringField(24)
     isAttending = messages.StringField(25)
     commentCount = messages.StringField(26)
+    attendeeList = messages.StringField(27,repeated=True)
+    likersList = messages.StringField(28,repeated=True)
+    feedType = messages.StringField(29)
 
 class CollegeFeed(messages.Message):
     items = messages.MessageField(Feed,1,repeated=True)

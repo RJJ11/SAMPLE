@@ -113,6 +113,7 @@ def getColleges(college):
 
     return gc
 
+
 def copyToCollegeFeed(personId,entity):
     feed = Feed()
     for field in feed.all_fields():
@@ -155,6 +156,7 @@ def copyToCollegeFeed(personId,entity):
                 elif (x=='likers'):
                     print field.name
                     pylist=[]
+                    pylist2=[]
                     for key in entity.likers:
                         pylist.append(key.get().name)
                     liked = "N"
@@ -162,6 +164,12 @@ def copyToCollegeFeed(personId,entity):
                         liked = "Y"
                     setattr(feed,"hasLiked",liked)
                     setattr(feed, x, pylist)
+                    print "JUST SET THE LIKERS WITH " , pylist
+                    #pylist2.append(str(entity.likers))
+                    for y in entity.likers:
+                        pylist2.append(str(y.id()))
+                    setattr(feed,"likersList",pylist2)
+                    setattr(feed,"feedType","Post")
 
                 elif (x=='attendees'):
                     print x
@@ -174,9 +182,15 @@ def copyToCollegeFeed(personId,entity):
                     #    pylist.append(key.get().name)
                     setattr(feed, x, str(len(entity.attendees)))
                     setattr(feed, "isAttending", isAttending)
+                    for y in entity.attendees:
+                        pylist.append(str(y.id()))
+                    #pylist.append(str(entity.attendees))
+                    setattr(feed, "attendeeList", pylist)
+                    setattr(feed,"feedType","Event")
 
                 else:
                     setattr(feed, field.name, str(getattr(entity, field.name)))
+                    print "JUST SET", field.name
 
         elif (field.name=='id'):
             print field.name
@@ -194,6 +208,7 @@ def copyToCollegeFeed(personId,entity):
 
         elif field.name == 'clubName':
                 print "field name" + field.name
+                print entity
                 setattr(feed, field.name, entity.club_id.get().name)
 
         elif field.name == 'clubId':
@@ -226,7 +241,14 @@ def copyToCollegeFeed(personId,entity):
         count+=1
 
     setattr(feed, "commentCount", str(count))
-    return feed
+
+    if hasattr(feed,"likes"):
+        print "HAS FIELD LIKES" , feed
+        return feed
+    else:
+        print "DIDNT HAVE FIELD LIKES" , feed
+        delattr(feed,"likers")
+        return feed
 
 """
 def copyToCollegeFeed(entity):

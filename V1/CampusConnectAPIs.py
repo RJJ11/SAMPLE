@@ -32,9 +32,10 @@ from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,atte
 from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
     deleteClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm,deleteProfile
+from V1.Helpers import collegeFeedHelper
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
-from helpers import messageProp
+from Helpers import messageProp
 
 #data = {'message': '5 mins later',"title":"Hi RKD"}
 #gcm_message = GCMMessage('cDXc7bMlwPQ:APA91bGAXV7203E6GUPkrbSOzQBv1_Xc4ztClQ6XcEcr80jw9jKBdZmLZ1U04_dTiH37AOydvv07_fBGiZXrszGkIxN5ZQgjsdqu35orSSOVq02XxDLVcBaqRMvxQTr-ucYQzbVoj5kE', data)
@@ -486,9 +487,10 @@ class CampusConnectApi(remote.Service):
             person_key = ndb.Key('Profile',int(request.fromPid))
 
             profile = person_key.get()
+            collegeId = profile.collegeId
             print(profile)
             club_key = ndb.Key('Club',int(request.clubId))
-            if club_key in profile.follows:
+            if club_key in profile.clubsJoined:
                     print "Present"
                     newPost = postEntry(request,flag)
 
@@ -526,7 +528,10 @@ class CampusConnectApi(remote.Service):
                            newNotifKey = newNotif.put()  
 
                            
-                    
+                    dummyRequest = GetInformation()
+                    dummyRequest.collegeId = str(collegeId.id())
+                    dummyRequest.pid = "123432"
+                    collegeFeedHelper(dummyRequest,0,newPost)
                     
                     print ("post list is",postlist)
                     gcm_message = GCMMessage(postlist, data)
@@ -578,13 +583,29 @@ class CampusConnectApi(remote.Service):
             person_key = ndb.Key('Profile',int(request.eventCreator))
             print(person_key)
             profile = person_key.get()
-            
+            collegeId = profile.collegeId
             club_key = ndb.Key('Club',int(request.clubId))
             if club_key in profile.clubsJoined:
                     print "GOING INTO EVENTS ENTRY"
                     newEvent = eventEntry(request)
+
+                    temp = datetime.strptime(getattr(request,"startDate"),"%Y-%m-%d").date()
+                    temp1 = datetime.strptime(getattr(request,"startTime"),"%H:%M:%S").time()
+                    start = datetime.combine(temp,temp1)
+
+
+                    temp = datetime.strptime(getattr(request,"endDate"),"%Y-%m-%d").date()
+                    temp1 = datetime.strptime(getattr(request,"endTime"),"%H:%M:%S").time()
+
+                    end = datetime.combine(temp,temp1)
+
+                    if start > end:
+                        response.status = "2"
+                        response.text = "Could not insert"
+                        return response
+
                     response.status = "1"
-                    response.text = "Inserted into Posts Table"
+                    response.text = "Inserted into events Table"
                     group = newEvent.club_id.get()
                     groupName = group.name
 
@@ -594,6 +615,11 @@ class CampusConnectApi(remote.Service):
                            'id':str(newEvent.key.id()),'type':"newEvent"}
                     #get the followers of the club pids. Get GCM Id's from those and send
                     print ("GROUP FOLLOWS LIST ", group.follows)
+
+                    dummyRequest = GetInformation()
+                    dummyRequest.collegeId = str(collegeId.id())
+                    dummyRequest.pid = "123432"
+                    collegeFeedHelper(dummyRequest,0,newEvent)
 
                     eventlist = []
                     if (group.follows):
@@ -847,82 +873,8 @@ class CampusConnectApi(remote.Service):
 
    @endpoints.method(GetInformation,CollegeFeed,path='mainFeed', http_method='GET', name='collegeFeed')
    def collegeFeed(self, request):
-       print "Entered the Like Posts Section"
-       temp = request.clubId
-       personId = ndb.Key('Profile',int(request.pid))
-       flag =0
-       pageLimit = 10
-       skipCount=0
-       upperBound=pageLimit
-       print request.pageNumber
-
-       try:
-        skipCount = (int(request.pageNumber)-1)*pageLimit
-        upperBound = int(request.pageNumber)*pageLimit
-
-       except:
-          print "Didnt give pageNumber-Default to 1"
-
-       if request.date != None:
-        date = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
-        flag = 1
-       #print "TYPE-DATE", type(date)
-       if (temp==None):
-           collegeId = ndb.Key('CollegeDb',int(request.collegeId))
-           posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
-           events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
-           print "TEMP IS NONE"
-       else:
-           clubId = ndb.Key('Club',int(request.clubId))
-           posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
-           events = Event.query(Event.club_id==clubId).order(-Event.timestamp)
-
-       print events
-       #CollegeFeed(items=[copyEventToForm(x) for x in posts])
-       #CollegeFeed(items=[copyEventToForm(x) for x in events])
-       #pylist = [copyToCollegeFeed(x) for x in events]
-       pylist=[]
-       for x in events:
-           print "TImestamp",type(x.timestamp.strftime("%Y-%m-%d"))
-           if flag==1:
-            if x.timestamp.strftime("%Y-%m-%d") == str(date):
-                pylist.append(copyToCollegeFeed(personId,x))
-           else:
-               pylist.append(copyToCollegeFeed(personId,x))
-       print pylist
-       pylist2 = []
-       for x in posts:
-           print "TImestamp",type(x.timestamp.strftime("%Y-%m-%d"))
-           if flag==1:
-            if x.timestamp.strftime("%Y-%m-%d") == str(date):
-                pylist.append(copyToCollegeFeed(personId,x))
-           else:
-               pylist.append(copyToCollegeFeed(personId,x))
-       #pylist2 = [copyToCollegeFeed(x) for x in posts]
-       pylist+=pylist2
-       #pylist.append(copyToCollegeFeed(x) for x in events)
-       pylist.sort(key=lambda x: x.timestamp, reverse=True)
-       #print pylist[1].timestamp
-       #print pylist
-       #CollegeFeed(items=pylist)
-       #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
-       #return CollegeFeed(items=pylist)
-
-       finalList = []
-       for i in xrange(skipCount,upperBound):
-           if(i>=len(pylist)):
-            break
-           finalList.append(pylist[i])
-
-       cf = CollegeFeed()
-       cf.items = finalList
-       cf.completed=str(0)
-       if(upperBound>=len(pylist)):
-                cf.completed=str(1)
-       #print pylist[1].timestamp
-       #print pylist
-
-       CollegeFeed(items=finalList)
+       flag = 1
+       cf = collegeFeedHelper(request,flag)
        #return CollegeFeed(items=[copyToCollegeFeed(x) for x in events])
        return cf
 
@@ -1389,12 +1341,31 @@ class CampusConnectApi(remote.Service):
    def eventCount(self,request):
        collegeId = ndb.Key('CollegeDb',int(request.collegeId))
        date = request.date
-       count = 0
+       Count = 0
        events = Event.query(Event.collegeId==collegeId)
        for x in events:
               start_date = str(x.start_time.date())
               if(start_date == date):
-                 count+=1
+                 Count+=1
 
        return MiscCount(count=str(Count))
+
+   @endpoints.method(GetInformation,message_types.VoidMessage,path='delComment', http_method='POST', name='delComment')
+   def delComment(self,request):
+        personId = ndb.Key('Profile',int(request.pid))
+        commentId = ndb.Key('Comments',int(request.commentId))
+
+        person = personId.get()
+        comment = commentId.get()
+        post = comment.postId.get()
+
+        supEmail = post.collegeId.get().sup_emailId
+        query = Profile.query(Profile.email==supEmail)
+        supKey=  ""
+        for q in query:
+            supKey = q.key
+
+        if comment.pid == personId or personId == post.from_pid or personId == supKey:
+            commentId.key.delete()
+
 # api = endpoints.api_server([CampusConnectApi])   # register API
