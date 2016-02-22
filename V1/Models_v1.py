@@ -10,7 +10,7 @@ class Notifications(ndb.Model):
     clubphotoUrl = ndb.StringProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
-    to_pid = ndb.KeyProperty(kind = 'Profile')
+    to_pid = ndb.KeyProperty(kind = 'Profile',repeated=True)
     postName = ndb.StringProperty()
     postId = ndb.KeyProperty(kind ='Post')
     timestamp = ndb.DateTimeProperty()
