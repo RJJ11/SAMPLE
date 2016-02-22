@@ -282,27 +282,38 @@ def getEventsBasedonTimeLeft():
 
                     attendeeslist = []
                     if (event.attendees):
-                                                            
-                       for pid in event.attendees:
-                           person = pid.get()
-                           LOG.info("PID is")
-                           LOG.info(person)
-                           gcmId = person.gcmId
-                           
-
-
-                           if (gcmId):
-                             attendeeslist.append(gcmId)
-                           newNotif = Notifications(
+                       newNotif = Notifications(
                                       clubName = groupName,
                                       clubId = event.club_id,
                                       clubphotoUrl = group.photoUrl,
                                       eventName = event.title,
                                       eventId = event.key,
                                       timestamp = dt.datetime.now().replace(microsecond = 0),
-                                      type = "Reminder",
-                                      to_pid = pid)  
-                           newNotifKey = newNotif.put()
+                                      type = "Reminder")                                     
+                       
+                       for pid in event.attendees:
+                           person = pid.get()
+                           LOG.info("PID is")
+                           LOG.info(person)
+                           gcmId = person.gcmId
+                           
+                                      #to_pid = pid)
+
+
+                           if (gcmId):
+                             attendeeslist.append(gcmId)
+                             newNotif.to_pid.append(pid)
+                           #newNotif = Notifications(
+                           #           clubName = groupName,
+                           #           clubId = event.club_id,
+                           #           clubphotoUrl = group.photoUrl,
+                           #           eventName = event.title,
+                           #           eventId = event.key,
+                           #           timestamp = dt.datetime.now().replace(microsecond = 0),
+                           #           type = "Reminder",
+                           #           to_pid = pid)
+                             
+                       newNotifKey = newNotif.put()
                     
                     LOG.info("Attendees GCM list is")
                     LOG.info(attendeeslist)

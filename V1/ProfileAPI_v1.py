@@ -242,7 +242,8 @@ def deleteProfile(request):
          print comments
          comments.key.delete()         
 
-   notificationsRet =  Notifications.query(Notifications.to_pid == pid_key)
+   #notificationsRet =  Notifications.query(Notifications.to_pid == pid_key)
+   notificationsRet = Notifications.query(Notifications.to_pid.IN([pid_key]))
    for notif in notificationsRet:
         notif.key.delete()
 
