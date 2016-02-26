@@ -258,7 +258,7 @@ def createClubRequestHelper(request):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-              newNotif.to_pid.append(clubRequest.to_pid)
+              newNotif.to_pid_list.append(clubRequest.to_pid)
 
               print("Notification to be inserted in club creation request",newNotif)
               newNotifKey = newNotif.put()
@@ -294,7 +294,7 @@ def approveClubHelper(request):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-            newNotif.to_pid.append(req.from_pid)
+            newNotif.to_pid_list.append(req.from_pid)
             print("Notification to be inserted in club approval rejection",newNotif)
             newNotifKey = newNotif.put()
             data = {'message': req.club_name,"title": "Creation Request Denied",'id':"None",'type':"None"}
@@ -320,7 +320,7 @@ def approveClubHelper(request):
                      type = "Approved Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
-                  newNotif.to_pid.append(newClub.admin)
+                  newNotif.to_pid_list.append(newClub.admin)
 
               print("Notification to be inserted in club approval ",newNotif)
               newNotifKey = newNotif.put()
@@ -344,7 +344,7 @@ def approveClubHelper(request):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-              newNotif.to_pid.append(req.from_pid)
+              newNotif.to_pid_list.append(req.from_pid)
 
               print("Notification to be inserted in club approval rejection",newNotif)
               newNotifKey = newNotif.put()
@@ -402,7 +402,7 @@ def createEventHelper(request):
 
                         for pid in group.follows:
                            person = pid.get()
-                           newNotif.to_pid.append(pid)
+                           newNotif.to_pid_list.append(pid)
                            gcmId = person.gcmId
                            if (gcmId):
                              print ("GCM ID is",gcmId)
@@ -484,7 +484,7 @@ def createPostHelper(request):
                                       )
                       for pid in group.follows:
                            person = pid.get()
-                           newNotif.to_pid.append(pid)
+                           newNotif.to_pid_list.append(pid)
                            print ("PID is",person)
                            gcmId = person.gcmId
                            if (gcmId):
