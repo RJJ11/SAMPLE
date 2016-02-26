@@ -120,7 +120,7 @@ def postEntry(requestentity=None,check=0):
 
         if(flag==1 and flag1==1):
             if requestentity:
-                for field in ('title','description','clubId','fromPid','likes','views','timestamp','photo','photoUrl'):
+                for field in ('title','description','clubId','fromPid','likes','views','timestamp','photo','photoUrl','tags'):
 
                     if hasattr(requestentity, field):
                         print(field,"is there")
@@ -147,6 +147,10 @@ def postEntry(requestentity=None,check=0):
 
                         elif field=="photoUrl" and val == None:
                             setattr(newPost, field, "https://lh3.googleusercontent.com/VLbWVdaJaq2HoYnu6J3T5aKC9DP_ku0KC3eelxawe6sqsPdNTarc5Vc0sx6VGqZ1Y-MlguZNd0plkDEZKYM9OnDbvR2tomX-Kg")
+
+                        elif field=="tags":
+                            print("Value is",val)
+                            setattr(newPost, field, (val))
 
                         elif val:
                             print("Value is",val)

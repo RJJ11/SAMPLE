@@ -7,7 +7,9 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models_v1 import GetCollege,CollegeDb,Event,Profile,Feed,Post,Comments
+from Models_v1 import GetCollege,CollegeDb,Event,Profile,Feed,Post,Comments, ProspectiveColleges, AddCollege, \
+    AddCollegeForm
+
 
 def createCollege(requestentity=None):
 
@@ -116,6 +118,7 @@ def getColleges(college):
 
 def copyToCollegeFeed(personId,entity):
     feed = Feed()
+    liked = "N"
     for field in feed.all_fields():
 
         if field.name == "startTime":
@@ -159,10 +162,10 @@ def copyToCollegeFeed(personId,entity):
                     pylist2=[]
                     for key in entity.likers:
                         pylist.append(key.get().name)
-                    liked = "N"
+
                     if personId in entity.likers:
                         liked = "Y"
-                    setattr(feed,"hasLiked",liked)
+
                     setattr(feed, x, pylist)
                     print "JUST SET THE LIKERS WITH " , pylist
                     #pylist2.append(str(entity.likers))
@@ -187,6 +190,11 @@ def copyToCollegeFeed(personId,entity):
                     #pylist.append(str(entity.attendees))
                     setattr(feed, "attendeeList", pylist)
                     setattr(feed,"feedType","Event")
+
+                elif (x=="tags"):
+                    setattr(feed, field.name, (getattr(entity, field.name)))
+                    print "JUST SET", field.name
+
 
                 else:
                     setattr(feed, field.name, str(getattr(entity, field.name)))
@@ -240,6 +248,8 @@ def copyToCollegeFeed(personId,entity):
 
         """
 
+
+
     postId = ndb.Key('Post',entity.key.id())
     query = Comments.query(Comments.postId==postId)
     count = 0
@@ -248,13 +258,50 @@ def copyToCollegeFeed(personId,entity):
 
     setattr(feed, "commentCount", str(count))
 
-    if hasattr(feed,"likes"):
+    if feed.feedType == "Post":
         print "HAS FIELD LIKES" , feed
+        setattr(feed,"hasLiked",liked)
         return feed
     else:
         print "DIDNT HAVE FIELD LIKES" , feed
-        delattr(feed,"likers")
+        #delattr(feed,"likers")
+        #feed.hasLiked = None
         return feed
+
+
+def addCollegeFn(request):
+    college = AddCollegeForm()
+    newContact = AddCollege()
+    query = AddCollege.query()
+    flag = 0
+    for q in query:
+        if (q.collegeName.upper() == request.collegeName.upper() and q.location.upper() == request.location.upper()):
+            flag = 1
+
+    if flag ==1:
+        return 1
+
+    for x in college.all_fields():
+        if hasattr(request,x.name):
+            setattr(newContact,x.name,str(getattr(request,x.name)))
+
+    newContact.put()
+    return 0
+
+def prospectiveCollegeFn():
+    query = AddCollege.query()
+    #college = addCollegeForm()
+    pylist = []
+    for q in query:
+        college = AddCollegeForm()
+        for x in college.all_fields():
+            if hasattr(q,x.name):
+                setattr(college,x.name,str(getattr(q,x.name)))
+
+        pylist.append(college)
+
+    return ProspectiveColleges(items=pylist)
+
 
 """
 def copyToCollegeFeed(entity):

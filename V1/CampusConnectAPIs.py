@@ -2,6 +2,7 @@ from datetime import datetime
 import endpoints
 import datetime as dt
 import time as t
+import os
 from protorpc import messages
 from protorpc import message_types
 from protorpc import remote
@@ -11,7 +12,8 @@ from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
 
 from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm,CommentsResponseForm,CommentsResponse, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
-    MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments, MiscCount
+    MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments, MiscCount, KMCScoreHandler, KMCScore, \
+    KMCScoreModel, AddCollegeForm, ProspectiveColleges
 from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models_v1 import Profile,CollegeFeed
@@ -25,13 +27,12 @@ from Models_v1 import ClubListResponse
 from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
 from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
 from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm,DelProfileMiniForm
-from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed
-from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost, \
-    copyCommentToForm
+from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed, addCollegeFn, prospectiveCollegeFn
+from PostsAPI import editPostFn
+from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost,copyCommentToForm
 from PostsAPI_v1 import copyPostRequestToForm,update
-from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend
-from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
-    deleteClub
+from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend, editEventFn
+from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, deleteClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm,deleteProfile
 from V1.Helpers import collegeFeedHelper
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
@@ -1408,6 +1409,7 @@ class CampusConnectApi(remote.Service):
         if comment.pid == personId or personId == post.from_pid or personId == supKey:
             commentId.key.delete()
 
+
    @endpoints.method(message_types.VoidMessage,message_types.VoidMessage,path='testAllInOne', http_method='POST', name='testAllInOne')
    def testAllInOne(self,request):
         requestforcreatecollege = CollegeDbMiniForm()
@@ -1490,6 +1492,7 @@ class CampusConnectApi(remote.Service):
         evententryrequest1.eventCreator = str(profileId)
         evententryrequest1.date = "2016-03-12"
         evententryrequest1.time = "04:00:00"
+        evententryrequest1.tags = ["TAG-1","TAG-2"]
         evententry1 = createEventHelper(evententryrequest1)
         
         evententryrequest2 = EventMiniForm()
@@ -1506,6 +1509,7 @@ class CampusConnectApi(remote.Service):
         evententryrequest2.isAlumni = "N"
         evententryrequest2.eventCreator = str(profileId)
         evententryrequest2.date = "2016-03-12"
+        evententryrequest1.tags = ["TAG-3","TAG-4"]
         evententryrequest2.time = "04:00:00"
         
         evententry2 = createEventHelper(evententryrequest2)
@@ -1520,7 +1524,7 @@ class CampusConnectApi(remote.Service):
         postentryrequest1.date = "2016-03-12"
         postentryrequest1.time = "04:00:00"
         postentryrequest1.photoUrl = "TAIOCCP1PhotoUrl"
-   
+        postentryrequest1.tags = ["TAG-1","TAG-2"]
         
         postentry1 = createPostHelper(postentryrequest1)
 
@@ -1532,7 +1536,7 @@ class CampusConnectApi(remote.Service):
         postentryrequest2.date = "2016-03-12"
         postentryrequest2.time = "04:00:00"
         postentryrequest2.photoUrl = "TAIOCCP2PhotoUrl"
-   
+        postentryrequest2.tags = ["TAG-3","TAG-4"]
         
         postentry2 = createPostHelper(postentryrequest2)
         
@@ -1546,5 +1550,263 @@ class CampusConnectApi(remote.Service):
 
 
 
+
+
+   @endpoints.method(PostMiniForm,MessageResponse,path='editPost', http_method='POST', name='editPost')
+   def editPost(self,request):
+        response = MessageResponse()
+        print("Entered Post Entry Portion")
+        flag=0
+        try:
+            person_key = ndb.Key('Profile',int(request.fromPid))
+
+            profile = person_key.get()
+            collegeId = profile.collegeId
+
+            postId = ndb.Key('Post',int(request.postId))
+            post = postId.get()
+
+            if post.from_pid != person_key:
+                print "Error"
+                response.status = "3"
+                response.text = "Can't edit this post"
+                return response
+
+            print(profile)
+
+            club_key = ndb.Key('Club',int(request.clubId))
+            if club_key in profile.clubsJoined:
+                    print "Present"
+                    newPost = editPostFn(request,post)
+
+                    print("NEW POST",newPost)
+                    response.status = "1"
+                    response.text = "Inserted into Posts Table"
+                    #Create Notification Feed
+                    group = newPost.club_id.get()
+                    groupName = group.name
+                    data = {'message': groupName,"title": newPost.title,
+                            'id':str(newPost.key.id()),'type':"Post"}
+
+
+                    postlist = []
+                    if (group.follows):
+                      for pid in group.follows:
+                           person = pid.get()
+                           print ("PID is",person)
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             print ("GCM ID is",gcmId)
+                             postlist.append(gcmId)
+                           newNotif = Notifications(
+                                      clubName = groupName,
+                                      clubId = newPost.club_id,
+                                      clubphotoUrl = group.photoUrl,
+                                      postName = newPost.title,
+                                      postId = newPost.key,
+                                      timestamp = newPost.timestamp,
+                                      type = "Post",
+                                      to_pid = pid
+                                      )
+
+                           print("Notification to be inserted",newNotif)
+                           newNotifKey = newNotif.put()
+
+
+                    dummyRequest = GetInformation()
+                    dummyRequest.collegeId = str(collegeId.id())
+                    dummyRequest.pid = "123432"
+                    collegeFeedHelper(dummyRequest,0,newPost,"Y")
+
+                    print ("post list is",postlist)
+                    gcm_message = GCMMessage(postlist, data)
+                    gcm_conn = GCMConnection()
+                    gcm_conn.notify_device(gcm_message)
+
+
+
+
+            else:
+                print "Not present"
+                clubRequest = postRequest(request)
+                response.status = "2"
+                response.text = "Inserted into Posts Requests Table"
+
+        except:
+                print "Error"
+                response.status = "3"
+                response.text = "Couldn't insert into Posts Table"
+
+
+
+        print("Inserted into the posts table")
+
+
+
+        return response
+
+   @endpoints.method(EventMiniForm,MessageResponse,path='editEvent', http_method='POST', name='editEvent')
+   def editEvent(self,request):
+        response = MessageResponse()
+        print("Entered Event Entry Portion")
+
+        try:
+            person_key = ndb.Key('Profile',int(request.eventCreator))
+            print(person_key)
+            profile = person_key.get()
+            collegeId = profile.collegeId
+            club_key = ndb.Key('Club',int(request.clubId))
+            eventId = ndb.Key('Event',int(request.eventId))
+            event = eventId.get()
+
+
+            if event.event_creator != person_key:
+                print "Error"
+                response.status = "3"
+                response.text = "Can't edit this post"
+                return response
+
+
+            if club_key in profile.clubsJoined:
+                    print "GOING INTO EVENTS ENTRY"
+
+                    newEvent = editEventFn(request,event)
+
+                    temp = datetime.strptime(getattr(request,"startDate"),"%Y-%m-%d").date()
+                    temp1 = datetime.strptime(getattr(request,"startTime"),"%H:%M:%S").time()
+                    start = datetime.combine(temp,temp1)
+
+
+                    temp = datetime.strptime(getattr(request,"endDate"),"%Y-%m-%d").date()
+                    temp1 = datetime.strptime(getattr(request,"endTime"),"%H:%M:%S").time()
+
+                    end = datetime.combine(temp,temp1)
+
+                    if start > end:
+                        response.status = "2"
+                        response.text = "Could not insert"
+                        return response
+
+                    response.status = "1"
+                    response.text = "Inserted into events Table"
+                    group = newEvent.club_id.get()
+                    groupName = group.name
+
+
+
+                    data = {'message': groupName,"title": newEvent.title,
+                           'id':str(newEvent.key.id()),'type':"newEvent"}
+                    #get the followers of the club pids. Get GCM Id's from those and send
+                    print ("GROUP FOLLOWS LIST ", group.follows)
+
+                    dummyRequest = GetInformation()
+                    dummyRequest.collegeId = str(collegeId.id())
+                    dummyRequest.pid = "123432"
+                    collegeFeedHelper(dummyRequest,0,newEvent,"Y")
+
+                    eventlist = []
+                    if (group.follows):
+                        for pid in group.follows:
+                           person = pid.get()
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             print ("GCM ID is",gcmId)
+                             eventlist.append(gcmId)
+                           newNotif = Notifications(
+                                        clubName = groupName,
+                                        clubId = newEvent.club_id,
+                                        clubphotoUrl = group.photoUrl,
+                                        eventName = newEvent.title,
+                                        eventId = newEvent.key,
+                                        timestamp = newEvent.timestamp,
+                                        type = "Event",
+                                        to_pid = pid
+                                        )
+                           print("Notification to be inserted",newNotif)
+                           newNotifKey = newNotif.put()
+
+
+
+
+
+                    print ("Event list is",eventlist)
+                    gcm_message = GCMMessage(eventlist, data)
+                    gcm_conn = GCMConnection()
+                    gcm_conn.notify_device(gcm_message)
+
+                    print("Should have worked")
+
+            else:
+                print "Not Present"
+                response.status = "2"
+                response.text = "Could not insert"
+
+        except Exception,e:
+                print "Error"
+                print str(e)
+                response.status = "3"
+                response.text = "Error"
+
+        return response
+
+
+   @endpoints.method(KMCScoreHandler,message_types.VoidMessage,path='kmcScoreUpdate', http_method='POST', name='kmcScoreUpdate')
+   def kmcScoreUpdate(self,request):
+       scoreCategories = ["ONE","TWO","THREE","FOUR","FIVE","SIX"]
+       print "Reached here"
+       #t.sleep(10)
+       print "FILE PATH " + os.getcwd()
+       #f = open(os.getcwd()+'/V1/KMC/scores.txt','w')
+       for x in request.items:
+           ob = KMCScoreModel()
+           ob.batch = str(x.batch)
+           ob.score = str(x.score)
+           query = KMCScoreModel.query(KMCScoreModel.batch==x.batch.upper())
+           print "QUERY IS",query
+           count = 0
+           for q in query:
+               count+=1
+           if count == 0:
+               ob.put()
+           else:
+               for q in query:
+                   q.score = ob.score
+                   q.put()
+
+
+
+       return message_types.VoidMessage()
+
+
+   @endpoints.method(message_types.VoidMessage,KMCScoreHandler,path='kmcScoreQuery', http_method='GET', name='kmcScoreQuery')
+   def kmcScoreQuery(self,request):
+       query = KMCScoreModel.query()
+       pylist = []
+       for q in query:
+           ob = KMCScore()
+           ob.batch = q.batch
+           ob.score = q.score
+           pylist.append(ob)
+
+       return KMCScoreHandler(items=pylist)
+
+   @endpoints.method(AddCollegeForm,MessageResponse,path='addCollege', http_method='POST', name='addCollege')
+   def addCollege(self,request):
+        mr = MessageResponse()
+
+        status = addCollegeFn(request)
+        if status == 1:
+            mr.status = "2"
+            mr.text = "Already Existing Record"
+        else:
+            mr.status = "1"
+            mr.text = "Inserted"
+
+        return mr
+
+   @endpoints.method(message_types.VoidMessage,ProspectiveColleges,path='prospectiveColleges', http_method='GET', name='prospectiveColleges')
+   def prospectiveColleges(self,request):
+
+       return prospectiveCollegeFn()
 
 # api = endpoints.api_server([CampusConnectApi])   # register API

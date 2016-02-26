@@ -109,6 +109,7 @@ class Post(ndb.Model):
     collegeId = ndb.KeyProperty(kind='CollegeDb', required=True)  # One college has many posts
     timestamp = ndb.DateTimeProperty()
     photoUrl = ndb.StringProperty()
+    tags = ndb.StringProperty(repeated=True)
 
 class PostForm(messages.Message):
     title = messages.StringField(1)
@@ -196,6 +197,8 @@ class PostMiniForm(messages.Message):
     date = messages.StringField(6)
     time = messages.StringField(7)
     photoUrl = messages.StringField(8)
+    postId = messages.StringField(9)
+    tags = messages.StringField(10,repeated=True)
     # '''photo ='''
 
 
@@ -239,9 +242,10 @@ class EventMiniForm(messages.Message):
     views = messages.StringField(11)
     isAlumni = messages.StringField(12, required=True)
     eventCreator = messages.StringField(13, required=True)
-    tags = messages.StringField(14)
+    tags = messages.StringField(14,repeated=True)
     date = messages.StringField(15)
     time = messages.StringField(16)
+    eventId = messages.StringField(18)
 
 class EventForm(messages.Message):
     title = messages.StringField(1)
@@ -441,7 +445,7 @@ class Feed(messages.Message):
     isAlumni = messages.StringField(13)
     contentCreator = messages.StringField(14)
     id = messages.StringField(16) #the post or event creator
-    tags = messages.StringField(17)
+    tags = messages.StringField(17,repeated=True)
     likers = messages.StringField(18,repeated=True)
     timestamp = messages.StringField(19)
     photoUrl = messages.StringField(20)
@@ -590,3 +594,31 @@ class DelProfileMiniForm(messages.Message):
 class MiscCount(messages.Message):
     count = messages.StringField(1)
 
+class KMCScoreModel(ndb.Model):
+    batch = ndb.StringProperty(required=True)
+    score = ndb.StringProperty(required=True)
+
+class KMCScore(messages.Message):
+    batch = messages.StringField(1,required=True)
+    score = messages.StringField(2,required=True)
+
+class KMCScoreHandler(messages.Message):
+    items = messages.MessageField(KMCScore,1,repeated=True)
+
+
+class AddCollege(ndb.Model):
+    name = ndb.StringProperty(required=True)
+    collegeName = ndb.StringProperty(required=True)
+    phone = ndb.StringProperty(required=True)
+    email = ndb.StringProperty(required=True)
+    location = ndb.StringProperty(required=True)
+
+class AddCollegeForm(messages.Message):
+    name = messages.StringField(1,required=True)
+    collegeName = messages.StringField(2,required=True)
+    phone = messages.StringField(3,required=True)
+    email = messages.StringField(4,required=True)
+    location = messages.StringField(5,required=True)
+
+class ProspectiveColleges(messages.Message):
+    items = messages.MessageField(AddCollegeForm,1,repeated=True)

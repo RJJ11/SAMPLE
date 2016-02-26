@@ -327,3 +327,16 @@ def update(request):
            print "Oops"
            requestId.delete()
        return
+
+
+def editPostFn(request,post):
+    post.title = request.title
+    post.description = request.description
+    post.photoUrl = request.photoUrl
+    temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
+    temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
+
+    post.timestamp = datetime.combine(temp,temp1)
+
+    key1 = post.put()
+    return post

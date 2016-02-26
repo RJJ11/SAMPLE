@@ -6,7 +6,9 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models_v1 import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm,UpdateGCM,PersonalResponse,Post,Event,Club_Creation,Join_Creation,Post_Request,Join_Request,Comments,Notifications
+from Models_v1 import Profile,ProfileMiniForm,CollegeDb,Club,ClubMiniForm,UpdateGCM,PersonalResponse,Post,Event,Club_Creation,Join_Creation,Post_Request,Join_Request,Comments,Notifications, LikePost, ModifyEvent
+#from EventsAPI_v1 import deleteEvent
+#from PostsAPI_v1 import deletePost
 
 def _copyProfileToForm(prof):
         pf = ProfileMiniForm()
@@ -91,7 +93,7 @@ def _doProfile(email,save_request=None):
             for field in pf.all_fields():
                 #collegeLocation=getattr(save_request,'collegeLocation')
                 #print collegeLocation,"is location"
-                if field.name=='followsNames' or field.name=='follows' or field.name=='clubsJoined' or field.name=='club_names' or field.name=='tags':
+                if field.name=='followsNames' or field.name=='follows' or field.name=='clubsJoined' or field.name=='club_names':
                     continue
 
                 if hasattr(save_request, field.name):

@@ -78,17 +78,10 @@ def eventEntry(requestentity=None):
 
 
                     elif field == "tags":
-                        if (requestentity,field == "None"):
-                            continue
-                        pylist = getattr(requestentity,field).split(",")
-                        length = len(pylist)
-                        i = 0
-                        newlist = []
-                        while(i<length):
-                            newlist.append(pylist[i])
-                            i = i+1
+                        print("TAGS Value is",val)
+                        setattr(event_request, field, val)
 
-                        setattr(event_request,field,newlist)
+
 
                     elif val:
                         print("Value is",val)
@@ -113,6 +106,7 @@ def eventEntry(requestentity=None):
         if(flag==1):
 
             event_id= event_request.put()
+            print "INSERTED THE EVENT"
             person = profile_key.get()
             list1 = person.eventsAttending
             if list1 == None:
@@ -360,3 +354,29 @@ def unAttend(request):
 
     return
 
+def editEventFn(request,event):
+    event.title = request.title
+    event.description = request.description
+    event.photoUrl = request.photoUrl
+    event.venue = request.venue
+
+
+    temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
+    temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
+
+    event.timestamp = datetime.combine(temp,temp1)
+
+    temp = datetime.strptime(getattr(request,"startDate"),"%Y-%m-%d").date()
+    temp1 = datetime.strptime(getattr(request,"startTime"),"%H:%M:%S").time()
+    start = datetime.combine(temp,temp1)
+    event.start_time = start
+
+
+    temp = datetime.strptime(getattr(request,"endDate"),"%Y-%m-%d").date()
+    temp1 = datetime.strptime(getattr(request,"endTime"),"%H:%M:%S").time()
+    end = datetime.combine(temp,temp1)
+    event.end_time = end
+
+
+    key1 = event.put()
+    return event

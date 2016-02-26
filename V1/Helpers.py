@@ -44,8 +44,7 @@ def messageProp(batch,data):
        gcm_conn.notify_device(gcm_message)
 
 
-def collegeFeedHelper(request,callFlag,newPost="abcd"):
-   print "Entered the Like Posts Section"
+def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
    temp = request.clubId
    flagclub =0 #To see which parameter is called and set cache accordingly
    personId = ndb.Key('Profile',int(request.pid))
@@ -76,7 +75,7 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
            print "CALLING FROM MEMCACHE BITCHES"
            tempFeed = data
            for x in tempFeed.items:
-               if hasattr(x,"likers"):
+               if (x.feedType=="Post"):
                     print "FOUND LIKES IN" , x.title
                     if request.pid in x.likersList:
                         x.hasLiked = "Y"
@@ -102,6 +101,7 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
        else:
            posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
            events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
+
        print "TEMP IS NONE"
 
    else:
@@ -112,7 +112,7 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
            print "CALLING FROM MEMCACHE BITCHES"
            tempFeed = data
            for x in tempFeed.items:
-               if hasattr(x,"likers"):
+               if (x.feedType=="Post"):
                     print "FOUND LIKES IN" , x.title
                     if x.likersList:
                         print "Reached here"
@@ -120,8 +120,8 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
                             x.hasLiked = "Y"
                         else:
                             x.hasLiked = "N"
+                            x.likersList=[]
 
-                        x.likersList=[]
                         print "moving on"
                if hasattr(x,"attendees"):
                    print "Attendee List ->"
@@ -131,7 +131,7 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
                             x.isAttending = "Y"
                        else:
                             x.isAttending = "N"
-                       x.attendeeList=[]
+                            x.attendeeList=[]
 
                """if x.feedType == "Post":
                    delattr(x,"isAttending")
@@ -171,13 +171,17 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
 
    # ADDING THE NEW POST/EVENT THAT DOESN'T GET ADDED DUE TO LATENCY ISSUES
 
-   if newPost == "abcd":
+   if newPost == "abcd" and editFlag == "N" :
        print "NEW POST IS NONE"
+
+   elif editFlag == "Y":
+       print "Editing"
+
    else:
        print newPost
        print "NOT NULL"
        #freshPost = newPost.get()
-       pylist2.append(copyToCollegeFeed(personId,newPost))
+       #pylist2.append(copyToCollegeFeed(personId,newPost))
 
 
    print pylist2
@@ -212,12 +216,12 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
        memData.completed = str(1)
        #memcache.add(key="clubFeed"+request.clubId, value=memData, time=3600)
        if callFlag: #This implies that it has been called from the endpoints api and should therefore return a response
-        memcache.add(key="clubFeed"+request.clubId, value=memData, time=3600)
+        memcache.set(key="clubFeed"+request.clubId, value=memData, time=86400)
         return collegeFeedHelper(request,callFlag)
        else:    #Called from the cron job which is updating the cache
            memcache.delete("clubFeed"+request.clubId)
            #time.sleep(10)
-           memcache.add(key="clubFeed"+request.clubId, value=memData, time=3600)
+           memcache.set(key="clubFeed"+request.clubId, value=memData, time=86400)
            return
    else:
        memData = CollegeFeed()
@@ -225,12 +229,13 @@ def collegeFeedHelper(request,callFlag,newPost="abcd"):
        memData.completed = str(1)
        #memcache.add(key="collegeFeed"+request.collegeId, value=memData, time=3600)
        if callFlag:
-        memcache.add(key="collegeFeed"+request.collegeId, value=memData, time=3600)
+        memcache.set(key="collegeFeed"+request.collegeId, value=memData, time=86400)
         return collegeFeedHelper(request,callFlag)
        else:
            memcache.delete("collegeFeed"+request.collegeId)
+           memcache.flush_all()
            #time.sleep(10)
-           memcache.add(key="collegeFeed"+request.collegeId, value=memData, time=3600)
+           memcache.set(key="collegeFeed"+request.collegeId, value=memData, time=86400)
            return
 
 def createCollegeHelper(request):
@@ -522,8 +527,9 @@ def createPostHelper(request):
                 response.status = "2"
                 response.text = "Inserted into Posts Requests Table"
 
-        except:
+        except Exception,e:
                 print "Error"
+                print str(e)
                 response.status = "3"
                 response.text = "Couldn't insert into Posts Table"
 
