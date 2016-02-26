@@ -8,7 +8,7 @@ from protorpc import remote
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
-from Models_v1 import Event,LikePost,ModifyEvent,Post_Request,Club_Creation,CollegeDb,Profile,Club,ClubMiniForm,ClubJoinResponse,SuperAdminFeed,Notifications,Join_Creation,Join_Request,Post
+from Models_v1 import Event,LikePost,ModifyEvent,Post_Request,Club_Creation,CollegeDb,Profile,Club,ClubMiniForm,ClubJoinResponse,SuperAdminFeed,Notifications,Join_Creation,Join_Request,Post,UnjoinClubMiniForm
 from datetime import datetime,date,time
 from EventsAPI_v1 import deleteEvent
 from PostsAPI_v1 import deletePost
@@ -384,3 +384,80 @@ def deleteClub(request):
    #Operation 8 - delete club
          clubKey.delete()    
    
+def unJoinClub(request):
+        ''' steps that need to be done
+        get the profile from pid and the fromProfile from the from pid.
+
+        if fromProfile == Profile (Same person ) or if from profile is from the club admin then allow the unjoining of Profile       
+        else
+        dont allow 
+        '''
+        print("Request for unJoin is ",request)
+
+        from_pid = ndb.Key('Profile',int(request.fromPid))
+        fromProfile = from_pid.get() #received from Profile
+ 
+        pid = ndb.Key('Profile',int(request.pid))
+        profile = pid.get()
+        
+        clubId = ndb.Key('Club',int(request.clubId))
+        club = clubId.get()
+
+
+        if club and len(club.members)!=0:     
+           if pid in club.members:
+                if (club.admin == from_pid or from_pid == pid) :
+                    print ("Entered part1")
+                    if(club.admin == from_pid and from_pid == pid): #Case when club admin doesnt want to be a member anymore. In this case make SUP the admin of the club
+                            print ("Entered part2")
+                            collegeId = club.collegeId
+                            college = collegeId.get()
+                            print ("College",college)
+                            profileofSup = Profile.query(Profile.email == college.sup_emailId).fetch()
+                            for x in profileofSup:
+                                if clubId not in x.admin:
+                                   x.admin.append(clubId)
+                                if clubId not in x.clubsJoined:
+                                   x.clubsJoined.append(clubId)
+                                if clubId not in x.follows:
+                                   x.follows.append(clubId)
+
+                                if x.key not in club.follows:
+                                   club.follows.append(x.key)
+                                if x.key not in club.members:
+                                   club.members.append(x.key)
+                                
+                                club.admin = x.key
+
+
+                                club.members.remove(pid)
+                                profile.clubsJoined.remove(clubId)
+
+                                print ("Club",club)
+                                club.put()
+                                profile.put()
+                                x.put()
+                            return True
+                   
+                    else: #General case when a member wants to leave the club. Change the details of the club.members, profile.members 
+                      print ("Entered part3")
+                      club.members.remove(pid)
+                      profile.clubsJoined.remove(clubId)
+                      club.put()
+                      profile.put()
+                      return True
+                else :
+                    print ("Entered part4")
+                    return False
+
+           else:
+             print ("Entered part5")
+             return False         
+
+        else:
+            print ("No members in this club")
+            return False
+
+
+
+        

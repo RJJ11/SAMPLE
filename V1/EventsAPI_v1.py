@@ -188,11 +188,13 @@ def deleteEvent(request):
 
         if flag==1:
             event = event_id.get()
-            for x in event.attendees:
-                person = x.get()
-                print person.eventsAttending
-                person.eventsAttending.remove(event_id)
-                person.put()
+
+            if (len(event.attendees)!=0):
+                for x in event.attendees:
+                  person = x.get()
+                  print person.eventsAttending
+                  person.eventsAttending.remove(event_id)
+                  person.put()
             event_id.delete()
 
         return
@@ -302,7 +304,7 @@ def getEventsBasedonTimeLeft():
 
                            if (gcmId):
                              attendeeslist.append(gcmId)
-                             newNotif.to_pid.append(pid)
+                             newNotif.to_pid_list.append(pid)
                            #newNotif = Notifications(
                            #           clubName = groupName,
                            #           clubId = event.club_id,
