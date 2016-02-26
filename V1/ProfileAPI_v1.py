@@ -245,9 +245,14 @@ def deleteProfile(request):
          comments.key.delete()         
 
    #notificationsRet =  Notifications.query(Notifications.to_pid == pid_key)
-   notificationsRet = Notifications.query(Notifications.to_pid.IN([pid_key]))
+   notificationsRet = Notifications.query(Notifications.to_pid_list.IN([pid_key]))
    for notif in notificationsRet:
         notif.key.delete()
+
+   notificationsRet2 = Notifications.query(Notifications.to_pid == pid)
+   for notif in notificationsRet2:
+        notif.key.delete()
+
 
    #Delete the profile entity
    pid_key.delete()   

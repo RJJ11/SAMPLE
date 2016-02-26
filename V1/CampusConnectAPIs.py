@@ -26,13 +26,14 @@ from Models_v1 import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,Pe
 from Models_v1 import ClubListResponse
 from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
 from Models_v1 import ClubRetrievalMiniForm,UpdateGCM,Join_Creation,AdminFeed,SuperAdminFeedResponse,SetSuperAdminInputForm,SetAdminInputForm,ChangeAdminInputForm
-from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm,DelProfileMiniForm
 from CollegesAPI_v1 import getColleges,createCollege,copyToCollegeFeed, addCollegeFn, prospectiveCollegeFn
 from PostsAPI import editPostFn
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost,copyCommentToForm
+from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm,DelProfileMiniForm,UnjoinClubMiniForm
 from PostsAPI_v1 import copyPostRequestToForm,update
 from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend, editEventFn
-from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, deleteClub
+from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
+    deleteClub,unJoinClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm,deleteProfile
 from V1.Helpers import collegeFeedHelper
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
@@ -112,7 +113,7 @@ class CampusConnectApi(remote.Service):
                      type = "Join Request",
                      timestamp = joinCreationObj.timestamp
                     )
-                newNotif.to_pid.append(joinCreationObj.to_pid)
+                newNotif.to_pid_list.append(joinCreationObj.to_pid)
 
                 print("Notification to be inserted in join approval",newNotif)
                 newNotifKey = newNotif.put()
@@ -152,7 +153,7 @@ class CampusConnectApi(remote.Service):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                      
                     )
-                 newNotif.to_pid.append(joinCreation.from_pid)
+                 newNotif.to_pid_list.append(joinCreation.from_pid)
 
 
                  print("Notification to be inserted in join approval",newNotif)
@@ -193,7 +194,7 @@ class CampusConnectApi(remote.Service):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-                 newNotif.to_pid.append(joinCreation.from_pid)
+                 newNotif.to_pid_list.append(joinCreation.from_pid)
 
                  print("Notification to be inserted in join approval",newNotif)
                  newNotifKey = newNotif.put()
@@ -250,6 +251,19 @@ class CampusConnectApi(remote.Service):
           print("Operation not allowed")
 
         return message_types.VoidMessage()
+
+
+   @endpoints.method(UnjoinClubMiniForm,message_types.VoidMessage,path='unJoinClub', http_method='POST', name='unjClub')
+   def unjClub(self, request):
+        """Update & return user profile."""
+        ret = unJoinClub(request)
+
+        if(ret == True):
+          print("Cool")
+        else:
+          print("Operation not allowed")
+
+        return message_types.VoidMessage()     
 
    @endpoints.method(ClubRetrievalMiniForm,ClubListResponse,path='getClubList', http_method='GET', name='getClubList')
    def getClubListApi(self,request):
@@ -350,7 +364,7 @@ class CampusConnectApi(remote.Service):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-              newNotif.to_pid.append(clubRequest.to_pid)
+              newNotif.to_pid_list.append(clubRequest.to_pid)
 
               print("Notification to be inserted in club creation request",newNotif)
               newNotifKey = newNotif.put()
@@ -390,7 +404,7 @@ class CampusConnectApi(remote.Service):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-            newNotif.to_pid.append(req.from_pid)
+            newNotif.to_pid_list.append(req.from_pid)
             print("Notification to be inserted in club approval rejection",newNotif)
             newNotifKey = newNotif.put()
             data = {'message': req.club_name,"title": "Creation Request Denied",'id':"None",'type':"None"}
@@ -416,7 +430,7 @@ class CampusConnectApi(remote.Service):
                      type = "Approved Club Creation Request",
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
-                  newNotif.to_pid.append(newClub.admin)
+                  newNotif.to_pid_list.append(newClub.admin)
 
               print("Notification to be inserted in club approval ",newNotif)
               newNotifKey = newNotif.put()
@@ -440,7 +454,7 @@ class CampusConnectApi(remote.Service):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     )
 
-              newNotif.to_pid.append(req.from_pid)
+              newNotif.to_pid_list.append(req.from_pid)
 
               print("Notification to be inserted in club approval rejection",newNotif)
               newNotifKey = newNotif.put()
@@ -478,7 +492,7 @@ class CampusConnectApi(remote.Service):
                      timestamp  = dt.datetime.now().replace(microsecond = 0)
                     
                     )
-        newNotif.to_pid.append(clubRequest.to_pid)
+        newNotif.to_pid_list.append(clubRequest.to_pid)
 
         print("Notification to be inserted in Post Creation Request",newNotif)
         newNotifKey = newNotif.put()
@@ -538,7 +552,7 @@ class CampusConnectApi(remote.Service):
                            if (gcmId):
                              print ("GCM ID is",gcmId)
                              postlist.append(gcmId)
-                             newNotif.to_pid.append(pid)
+                             newNotif.to_pid_list.append(pid)
                            #newNotif = Notifications(
                            #          clubName = groupName,
                            #           clubId = newPost.club_id,
@@ -668,7 +682,7 @@ class CampusConnectApi(remote.Service):
                            if (gcmId):
                              print ("GCM ID is",gcmId)
                              eventlist.append(gcmId)
-                             newNotif.to_pid.append(pid)
+                             newNotif.to_pid_list.append(pid)
                            #newNotif = Notifications(
                            #             clubName = groupName,
                            #             clubId = newEvent.club_id,
@@ -1154,6 +1168,75 @@ class CampusConnectApi(remote.Service):
 
        return listresponse
 
+   @endpoints.method(NotificationMiniForm,NotificationList,path='myNotificationsMod', http_method='POST', name='myNotificationFeedMod')
+   def myNotificationFeedMod(self, request):
+       pid = ndb.Key('Profile',int(request.pid))
+       #notificationslist = Notifications.query(Notifications.to_pid == pid).order(-Notifications.timestamp).fetch()
+       notificationslist = Notifications.query(Notifications.to_pid_list.IN([pid])).order(-Notifications.timestamp)
+       listresponse = NotificationList()
+
+       for obj in notificationslist:
+          newListObj = NotificationResponseForm()
+             
+          if( pid in obj.to_pid_list):
+
+             if(obj.clubName != None):
+                  newListObj.clubName = obj.clubName
+             else:
+                  newListObj.clubName = None
+             
+
+             if(obj.clubId != None):
+                  newListObj.clubId = str(obj.clubId.id())
+             else:
+                  newListObj.clubId = None
+                          
+             if(obj.clubphotoUrl != None):
+                  newListObj.clubphotoUrl = obj.clubphotoUrl
+             else:
+                  newListObj.clubphotoUrl = None
+
+             if(obj.eventName != None):
+                  newListObj.eventName = obj.eventName
+             else:
+                  newListObj.eventName = None
+             
+
+             if(obj.eventId != None):
+                  newListObj.eventId = str(obj.eventId.id())
+             else:
+                  newListObj.eventId = None
+             
+
+             if(obj.postName != None):
+                  newListObj.postName = obj.postName
+             else :
+                  newListObj.postName = None
+             
+
+             if(obj.postId != None):
+                  newListObj.postId = str(obj.postId.id())
+             else :
+                  newListObj.postId = None
+             newListObj.timestamp = str(obj.timestamp)   
+             
+             newListObj.type = obj.type
+             listresponse.list.append(newListObj) 
+               
+       
+       
+
+       return listresponse
+
+
+
+
+
+
+
+
+
+
    @endpoints.method(PersonalInfoRequest,PersonalInfoResponse,path='personalInfo', http_method='GET', name='personalInfo')
    def personalInfo(self,request):
        list1 = request.pid
@@ -1423,7 +1506,7 @@ class CampusConnectApi(remote.Service):
         collegeReq = createCollegeHelper(requestforcreatecollege)
         #Create college along with sup_profile is done
         
-        t.sleep(8)
+        t.sleep(20)
 
 
         college = CollegeDb.query(CollegeDb.sup_emailId == requestforcreatecollege.email).fetch()
@@ -1453,7 +1536,7 @@ class CampusConnectApi(remote.Service):
 
         clubReq = createClubRequestHelper(requestforcreateclubrequest)
 
-        t.sleep(8)
+        t.sleep(20)
         #Club Request has been created. Now the request needs to be approved
 
         clubcreation = Club_Creation.query(Club_Creation.abbreviation == requestforcreateclubrequest.abbreviation).fetch()
@@ -1469,7 +1552,7 @@ class CampusConnectApi(remote.Service):
 
         #Club has been created
 
-        t.sleep(8)
+        t.sleep(20)
 
         club = Club.query(Club.abbreviation == requestforcreateclubrequest.abbreviation).fetch()
         for x in club :

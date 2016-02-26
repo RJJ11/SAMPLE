@@ -10,7 +10,8 @@ class Notifications(ndb.Model):
     clubphotoUrl = ndb.StringProperty()
     eventName = ndb.StringProperty()
     eventId = ndb.KeyProperty(kind ='Event')
-    to_pid = ndb.KeyProperty(kind = 'Profile',repeated=True)
+    to_pid = ndb.KeyProperty(kind = 'Profile')
+    to_pid_list = ndb.KeyProperty(kind = 'Profile',repeated=True)
     postName = ndb.StringProperty()
     postId = ndb.KeyProperty(kind ='Post')
     timestamp = ndb.DateTimeProperty()
@@ -589,6 +590,11 @@ class BDCommentResponse(messages.Message):
 class DelProfileMiniForm(messages.Message):
     fromPid = messages.StringField(1)
     pid = messages.StringField(2)
+
+class UnjoinClubMiniForm(messages.Message):
+    fromPid = messages.StringField(1,required=True)
+    pid = messages.StringField(2,required=True)
+    clubId = messages.StringField(3,required=True)
 
 
 class MiscCount(messages.Message):
