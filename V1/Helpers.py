@@ -180,8 +180,11 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
    else:
        print newPost
        print "NOT NULL"
+       print "PYLIST-2 BEFORE "
+       print pylist2
+       print "BOO"
        #freshPost = newPost.get()
-       #pylist2.append(copyToCollegeFeed(personId,newPost))
+       pylist2.append(copyToCollegeFeed(personId,newPost))
 
 
    print pylist2
@@ -217,7 +220,9 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
        #memcache.add(key="clubFeed"+request.clubId, value=memData, time=3600)
        if callFlag: #This implies that it has been called from the endpoints api and should therefore return a response
         memcache.set(key="clubFeed"+request.clubId, value=memData, time=86400)
-        return collegeFeedHelper(request,callFlag)
+        #return collegeFeedHelper(request,callFlag)
+        return cf
+
        else:    #Called from the cron job which is updating the cache
            memcache.delete("clubFeed"+request.clubId)
            #time.sleep(10)
@@ -230,7 +235,8 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
        #memcache.add(key="collegeFeed"+request.collegeId, value=memData, time=3600)
        if callFlag:
         memcache.set(key="collegeFeed"+request.collegeId, value=memData, time=86400)
-        return collegeFeedHelper(request,callFlag)
+        #return collegeFeedHelper(request,callFlag)
+        return cf
        else:
            memcache.delete("collegeFeed"+request.collegeId)
            memcache.flush_all()
