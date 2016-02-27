@@ -190,6 +190,8 @@ def deleteEvent(request):
                   person.eventsAttending.remove(event_id)
                   person.put()
             event_id.delete()
+            memcache.delete("collegeFeed"+str(event.collegeId.id()))
+            memcache.delete("clubFeed"+str(event.club_id.id()))
 
         return
 

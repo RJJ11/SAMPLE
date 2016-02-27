@@ -193,6 +193,8 @@ def deletePost(request):
 
         if flag==1:
             post_id.delete()
+            memcache.delete("collegeFeed"+str(post.collegeId.id()))
+            memcache.delete("clubFeed"+str(post.club_id.id()))
 
         return
 
