@@ -170,7 +170,11 @@ def copyEventToForm(event,pid):
 def deleteEvent(request):
         event_id = ndb.Key('Event',int(request.eventId))
         from_pid = ndb.Key('Profile',int(request.fromPid))
-        person = from_pid.get()
+        try:
+            person = from_pid.get()
+        except:
+            print "Non existent person"
+
         event = event_id.get()
         club_admin = event.club_id.get().admin
         flag=0
@@ -185,10 +189,14 @@ def deleteEvent(request):
 
             if (len(event.attendees)!=0):
                 for x in event.attendees:
-                  person = x.get()
-                  print person.eventsAttending
-                  person.eventsAttending.remove(event_id)
-                  person.put()
+                  try:
+                    person = x.get()
+                    print person.eventsAttending
+                    person.eventsAttending.remove(event_id)
+                    person.put()
+                  except:
+                      print "PROFILE NOT AVAILABLE"
+
             event_id.delete()
             memcache.delete("collegeFeed"+str(event.collegeId.id()))
             memcache.delete("clubFeed"+str(event.club_id.id()))
