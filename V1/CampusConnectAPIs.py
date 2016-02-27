@@ -125,7 +125,7 @@ class CampusConnectApi(remote.Service):
                 gcmId = to_pidProfile.gcmId
                 gcm_message = GCMMessage(gcmId, data)
                 gcm_conn = GCMConnection()
-                #gcm_conn.notify_device(gcm_message)
+                gcm_conn.notify_device(gcm_message)
              
            
             return message_types.VoidMessage()
@@ -163,7 +163,7 @@ class CampusConnectApi(remote.Service):
                  gcmId = profile.gcmId
                  gcm_message = GCMMessage(gcmId, data)
                  gcm_conn = GCMConnection()
-                 #gcm_conn.notify_device(gcm_message)
+                 gcm_conn.notify_device(gcm_message)
                  joinCreation.key.delete()
 
 
@@ -203,7 +203,7 @@ class CampusConnectApi(remote.Service):
                  gcmId = currentProfile.gcmId
                  gcm_message = GCMMessage(gcmId, data)
                  gcm_conn = GCMConnection()
-                 #gcm_conn.notify_device(gcm_message)
+                 gcm_conn.notify_device(gcm_message)
                  joinCreation.key.delete()
           
 
@@ -373,7 +373,7 @@ class CampusConnectApi(remote.Service):
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
               gcm_conn = GCMConnection()
-              #gcm_conn.notify_device(gcm_message)
+              gcm_conn.notify_device(gcm_message)
               print("Finished the clubRequest")
 
 
@@ -412,7 +412,7 @@ class CampusConnectApi(remote.Service):
             gcmId = currentProfile.gcmId
             gcm_message = GCMMessage(gcmId, data)
             gcm_conn = GCMConnection()
-            #gcm_conn.notify_device(gcm_message)
+            gcm_conn.notify_device(gcm_message)
             req.key.delete()
         
         elif (req and req.approval_status == "N"):
@@ -440,7 +440,7 @@ class CampusConnectApi(remote.Service):
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
               gcm_conn = GCMConnection()
-              #gcm_conn.notify_device(gcm_message)
+              gcm_conn.notify_device(gcm_message)
               
               print("The club that has been created is",newClub)
               req.key.delete()
@@ -464,7 +464,7 @@ class CampusConnectApi(remote.Service):
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
               gcm_conn = GCMConnection()
-              #gcm_conn.notify_device(gcm_message)
+              gcm_conn.notify_device(gcm_message)
               req.key.delete()
             
         return message_types.VoidMessage()
@@ -502,7 +502,7 @@ class CampusConnectApi(remote.Service):
         gcmId = currentProfile.gcmId
         gcm_message = GCMMessage(gcmId, data)
         gcm_conn = GCMConnection()
-        #gcm_conn.notify_device(gcm_message)
+        gcm_conn.notify_device(gcm_message)
         print("Inserted into the post request table")
         return message_types.VoidMessage()
 
@@ -576,7 +576,7 @@ class CampusConnectApi(remote.Service):
                     print ("post list is",postlist)
                     gcm_message = GCMMessage(postlist, data)
                     gcm_conn = GCMConnection()
-                    #gcm_conn.notify_device(gcm_message)
+                    gcm_conn.notify_device(gcm_message)
                    
 
 
@@ -703,7 +703,7 @@ class CampusConnectApi(remote.Service):
                     print ("Event list is",eventlist)
                     gcm_message = GCMMessage(eventlist, data)
                     gcm_conn = GCMConnection()
-                    #gcm_conn.notify_device(gcm_message)
+                    gcm_conn.notify_device(gcm_message)
                    
                     print("Should have worked")
 
@@ -1111,14 +1111,14 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(NotificationMiniForm,NotificationList,path='myNotifications', http_method='POST', name='myNotificationFeed')
    def myNotificationFeed(self, request):
        pid = ndb.Key('Profile',int(request.pid))
-       #notificationslist = Notifications.query(Notifications.to_pid == pid).order(-Notifications.timestamp).fetch()
-       notificationslist = Notifications.query(Notifications.to_pid.IN([pid])).order(-Notifications.timestamp)
+       notificationslist = Notifications.query(Notifications.to_pid == pid).order(-Notifications.timestamp).fetch()
+       #notificationslist = Notifications.query(Notifications.to_pid.IN([pid])).order(-Notifications.timestamp)
        listresponse = NotificationList()
 
        for obj in notificationslist:
           newListObj = NotificationResponseForm()
              
-          if( pid in obj.to_pid):
+          if( pid == obj.to_pid):
 
              if(obj.clubName != None):
                   newListObj.clubName = obj.clubName
@@ -1777,7 +1777,7 @@ class CampusConnectApi(remote.Service):
 
 
 
-                    data = {'message': groupName,"title": newEvent.title,
+                    data = {'message': "Details of event have been changed","title": newEvent.title,
                            'id':str(newEvent.key.id()),'type':"newEvent"}
                     #get the followers of the club pids. Get GCM Id's from those and send
                     print ("GROUP FOLLOWS LIST ", group.follows)
@@ -1795,18 +1795,18 @@ class CampusConnectApi(remote.Service):
                            if (gcmId):
                              print ("GCM ID is",gcmId)
                              eventlist.append(gcmId)
-                           newNotif = Notifications(
-                                        clubName = groupName,
-                                        clubId = newEvent.club_id,
-                                        clubphotoUrl = group.photoUrl,
-                                        eventName = newEvent.title,
-                                        eventId = newEvent.key,
-                                        timestamp = newEvent.timestamp,
-                                        type = "Event",
-                                        to_pid = pid
-                                        )
-                           print("Notification to be inserted",newNotif)
-                           newNotifKey = newNotif.put()
+                           #newNotif = Notifications(
+                           #             clubName = groupName,
+                           #             clubId = newEvent.club_id,
+                           #             clubphotoUrl = group.photoUrl,
+                           #             eventName = newEvent.title,
+                           #             eventId = newEvent.key,
+                           #             timestamp = newEvent.timestamp,
+                           #             type = "Event",
+                                        #to_pid = pid
+                           #             )
+                           #print("Notification to be inserted",newNotif)
+                           #newNotifKey = newNotif.put()
 
 
 
