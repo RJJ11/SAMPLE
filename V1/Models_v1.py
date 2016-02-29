@@ -167,7 +167,7 @@ class GetInformation(messages.Message):
     pageNumber = messages.StringField(5)
     eventId = messages.StringField(6)
     postId = messages.StringField(7)
-
+    messageId = messages.StringField(8)
 
 
 
@@ -630,6 +630,7 @@ class ProspectiveColleges(messages.Message):
     items = messages.MessageField(AddCollegeForm,1,repeated=True)
 
 
+
 class GetEventsEitherSideMiniForm(messages.Message):
     timestamp = messages.StringField(1,required=True)
     collegeId = messages.StringField(2,required=True)
@@ -640,3 +641,64 @@ class GetEventsESReturnForm(messages.Message):
 
 class GetEventsResponse(messages.Message):
     items = messages.MessageField(GetEventsESReturnForm,1,repeated=True)     
+
+class EventsByDateForm(messages.Message):
+    collegeId = messages.StringField(1)
+    date = messages.StringField(2)
+    time = messages.StringField(3)
+
+class EventsByDate(messages.Message):
+    eventName = messages.StringField(1)
+
+
+class LiveComments(ndb.Model):
+    name = ndb.StringProperty()
+    personPhotoUrl = ndb.BlobProperty()
+    imageUrl = ndb.StringProperty()
+    description = ndb.StringProperty()
+    tags = ndb.StringProperty()
+    timestamp = ndb.DateTimeProperty()
+    collegeId = ndb.KeyProperty(kind = 'CollegeDb')
+    reportCount = ndb.IntegerProperty()
+
+class LiveCommentsForm(messages.Message):
+    name = messages.StringField(1)
+    personPhotoUrl = messages.StringField(2)
+    imageUrl = messages.StringField(3)
+    description = messages.StringField(4)
+    tags = messages.StringField(5)
+    date = messages.StringField(6)
+    time = messages.StringField(7)
+    timestamp = messages.StringField(8)
+    collegeId = messages.StringField(9)
+    messageId = messages.StringField(10)
+    reportCount = messages.IntegerField(11)
+
+class LiveCommentsResponse(messages.Message):
+    items = messages.MessageField(LiveCommentsForm,1,repeated=True)
+    completed = messages.StringField(2)
+
+
+class SlamDunkScoreBoard(ndb.Model):
+    team1 = ndb.StringProperty()
+    team2 = ndb.StringProperty()
+    score1 = ndb.StringProperty()
+    score2 = ndb.StringProperty()
+    quarter = ndb.StringProperty()
+    round = ndb.StringProperty()
+    gender = ndb.StringProperty()
+    completed = ndb.StringProperty()
+
+class SlamDunkScoreBoardForm(messages.Message):
+    team1 = messages.StringField(1)
+    team2 = messages.StringField(2)
+    score1 = messages.StringField(3)
+    score2 = messages.StringField(4)
+    quarter = messages.StringField(5)
+    gender = messages.StringField(6)
+    round = messages.StringField(7)
+    completed = messages.StringField(8)
+
+class ScoreResponse(messages.Message):
+    items = messages.MessageField(SlamDunkScoreBoardForm,1,repeated=True)
+

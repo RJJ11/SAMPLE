@@ -13,7 +13,8 @@ from google.appengine.ext import ndb
 
 from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm,CommentsResponseForm,CommentsResponse, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
     MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments, MiscCount, KMCScoreHandler, KMCScore, \
-    KMCScoreModel, AddCollegeForm, ProspectiveColleges
+    KMCScoreModel, AddCollegeForm, ProspectiveColleges, EventsByDateForm, EventsByDate, LiveCommentsForm, LiveComments, \
+    LiveCommentsResponse, SlamDunkScoreBoardForm, SlamDunkScoreBoard, ScoreResponse
 from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models_v1 import Profile,CollegeFeed
@@ -1893,7 +1894,163 @@ class CampusConnectApi(remote.Service):
        return prospectiveCollegeFn()
    @endpoints.method(GetEventsEitherSideMiniForm,GetEventsResponse,path='getEventsES', http_method='GET', name='getEventsES')
    def getEventsES(self,request):
+       return getEventsEitherSide(request) 
 
-      
-      return getEventsEitherSide(request) 
+   
+
+
+   @endpoints.method(LiveCommentsForm,message_types.VoidMessage,path='liveComments', http_method='POST', name='liveComments')
+   def liveComments(self,request):
+       ob = LiveComments()
+       for field in request.all_fields():
+           if field.name == "date":
+                temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
+
+           elif field.name == "time":
+               temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
+
+           elif field.name == "collegeId":
+               collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+               setattr(ob,field.name,collegeId)
+
+           elif field.name == "personPhotoUrl":
+               setattr(ob,field.name,str(getattr(request,field.name)))
+
+           else:
+            setattr(ob,field.name,getattr(request,field.name))
+
+
+       setattr(ob,"timestamp",datetime.combine(temp,temp1))
+
+       if getattr(request,"reportCount") is None:
+           ob.reportCount = 0
+
+       ob.put()
+
+       #print "REPORT COUNT ", getattr(request,"reportCount")
+
+       return message_types.VoidMessage()
+
+
+   @endpoints.method(GetInformation,LiveCommentsResponse,path='liveCommentsFeed', http_method='GET', name='liveCommentsFeed')
+   def liveCommentsFeed(self,request):
+
+       flag =0
+       pageLimit = 100
+       skipCount=0
+       upperBound=pageLimit
+
+       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+
+
+       try:
+        skipCount = (int(request.pageNumber)-1)*pageLimit
+        upperBound = int(request.pageNumber)*pageLimit
+
+       except:
+          print "Didnt give pageNumber-Default to 1"
+
+       pylist = []
+       #query = LiveComments.query(LiveComments.collegeId==collegeId,LiveComments.reportcount<3).order(-LiveComments.timestamp)
+       query = LiveComments.query(LiveComments.collegeId==collegeId,LiveComments.reportCount<3)
+       for q in query:
+            ob = LiveCommentsForm()
+            for field in ob.all_fields():
+                if field.name == "date" or field.name == "time":
+                    #setattr(ob,"date", str(q.timestamp.strftime("%Y-%m-%d")))
+                    #setattr(ob, "time", str(q.timestamp.strftime("%H:%M:%S")))
+                    continue
+
+                elif field.name == "tags":
+                    setattr(ob,field.name,getattr(q,field.name))
+
+                elif field.name == "messageId":
+                    setattr(ob,field.name,str(q.key.id()))
+
+                elif field.name == "collegeId":
+                    setattr(ob,field.name,str(q.collegeId.id()))
+
+                elif field.name == "reportCount":
+                    #setattr(ob,field.name,int(q.reportCount))
+                    continue
+                else:
+                    setattr(ob,field.name,str(getattr(q,field.name)))
+
+            pylist.append(ob)
+
+
+       pylist.sort(key=lambda x: x.timestamp, reverse=True)
+       finalList = []
+       for i in xrange(skipCount,upperBound):
+           if(i>=len(pylist)):
+            break
+           finalList.append(pylist[i])
+
+       cf = LiveCommentsResponse()
+       cf.items = finalList
+       cf.completed=str(0)
+       if(upperBound>=len(pylist)):
+                cf.completed=str(1)
+
+
+       return cf
+
+   @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
+   def scoreboardForm(self,request):
+       ob = SlamDunkScoreBoard()
+       for field in request.all_fields():
+            if field.name == "completed":
+                completed = str(getattr(request,field.name))
+                setattr(ob,field.name,completed.upper())
+            else:
+                setattr(ob,field.name,getattr(request,field.name))
+
+       flag=0
+       query = SlamDunkScoreBoard.query()
+       for q in query:
+           if (q.team1.upper() == ob.team1.upper() and q.team2.upper() == ob.team2.upper() and q.round.upper() == ob.round.upper()) or (q.team1.upper() == ob.team2.upper() and q.team2.upper() == ob.team1.upper() and q.round.upper() == ob.round.upper()):
+               q.score1 = ob.score1
+               q.score2 = ob.score2
+               q.completed = ob.completed
+               q.put()
+               flag=1
+
+       if flag==0:
+           ob.put()
+
+       return message_types.VoidMessage()
+
+   @endpoints.method(message_types.VoidMessage,ScoreResponse,path='scoreBoard', http_method='GET', name='scoreBoard')
+   def scoreBoard(self,request):
+       ob = SlamDunkScoreBoardForm()
+       pylist=[]
+       query = SlamDunkScoreBoard.query(SlamDunkScoreBoard.completed=="N")
+       for q in query:
+            ob = SlamDunkScoreBoardForm()
+            for field in ob.all_fields():
+                   setattr(ob,field.name,getattr(q,field.name))
+
+            pylist.append(ob)
+
+       return ScoreResponse(items = pylist)
+
+
+   @endpoints.method(GetInformation,MessageResponse,path='reportApi', http_method='POST', name='reportApi')
+   def reportApi(self,request):
+       try:
+           messageId = ndb.Key('LiveComments',int(request.messageId))
+           message = messageId.get()
+           message.reportCount+=1
+           message.put()
+
+           response = MessageResponse()
+           response.status = "1"
+           response.text = "Reported"
+
+       except:
+           response.status = "2"
+           response.text = "Not Reported"
+
+       return response
+
 # api = endpoints.api_server([CampusConnectApi])   # register API
