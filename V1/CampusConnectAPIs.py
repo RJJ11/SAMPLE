@@ -1919,12 +1919,25 @@ class CampusConnectApi(remote.Service):
            elif field.name == "time":
                temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
 
-           setattr(ob,field.name,getattr(request,field.name))
+           elif field.name == "collegeId":
+               collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+               setattr(ob,field.name,collegeId)
+
+           elif field.name == "personPhotoUrl":
+               setattr(ob,field.name,str(getattr(request,field.name)))
+
+           else:
+            setattr(ob,field.name,getattr(request,field.name))
 
 
        setattr(ob,"timestamp",datetime.combine(temp,temp1))
 
+       if getattr(request,"reportCount") is None:
+           ob.reportCount = 0
+
        ob.put()
+
+       #print "REPORT COUNT ", getattr(request,"reportCount")
 
        return message_types.VoidMessage()
 
@@ -1937,6 +1950,7 @@ class CampusConnectApi(remote.Service):
        skipCount=0
        upperBound=pageLimit
 
+       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
 
 
        try:
@@ -1947,7 +1961,8 @@ class CampusConnectApi(remote.Service):
           print "Didnt give pageNumber-Default to 1"
 
        pylist = []
-       query = LiveComments.query().order(-LiveComments.timestamp)
+       #query = LiveComments.query(LiveComments.collegeId==collegeId,LiveComments.reportcount<3).order(-LiveComments.timestamp)
+       query = LiveComments.query(LiveComments.collegeId==collegeId,LiveComments.reportCount<3)
        for q in query:
             ob = LiveCommentsForm()
             for field in ob.all_fields():
@@ -1959,6 +1974,15 @@ class CampusConnectApi(remote.Service):
                 elif field.name == "tags":
                     setattr(ob,field.name,getattr(q,field.name))
 
+                elif field.name == "messageId":
+                    setattr(ob,field.name,str(q.key.id()))
+
+                elif field.name == "collegeId":
+                    setattr(ob,field.name,str(q.collegeId.id()))
+
+                elif field.name == "reportCount":
+                    #setattr(ob,field.name,int(q.reportCount))
+                    continue
                 else:
                     setattr(ob,field.name,str(getattr(q,field.name)))
 
@@ -2021,4 +2045,21 @@ class CampusConnectApi(remote.Service):
        return ScoreResponse(items = pylist)
 
 
+   @endpoints.method(GetInformation,MessageResponse,path='reportApi', http_method='POST', name='reportApi')
+   def reportApi(self,request):
+       try:
+           messageId = ndb.Key('LiveComments',int(request.messageId))
+           message = messageId.get()
+           message.reportCount+=1
+           message.put()
+
+           response = MessageResponse()
+           response.status = "1"
+           response.text = "Reported"
+
+       except:
+           response.status = "2"
+           response.text = "Not Reported"
+
+       return response
 # api = endpoints.api_server([CampusConnectApi])   # register API

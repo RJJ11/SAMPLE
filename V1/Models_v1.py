@@ -167,7 +167,7 @@ class GetInformation(messages.Message):
     pageNumber = messages.StringField(5)
     eventId = messages.StringField(6)
     postId = messages.StringField(7)
-
+    messageId = messages.StringField(8)
 
 
 
@@ -641,21 +641,26 @@ class EventsByDate(messages.Message):
 
 class LiveComments(ndb.Model):
     name = ndb.StringProperty()
-    photoUrl = ndb.StringProperty()
+    personPhotoUrl = ndb.BlobProperty()
     imageUrl = ndb.StringProperty()
     description = ndb.StringProperty()
-    tags = ndb.StringProperty(repeated=True)
+    tags = ndb.StringProperty()
     timestamp = ndb.DateTimeProperty()
+    collegeId = ndb.KeyProperty(kind = 'CollegeDb')
+    reportCount = ndb.IntegerProperty()
 
 class LiveCommentsForm(messages.Message):
     name = messages.StringField(1)
-    photoUrl = messages.StringField(2)
+    personPhotoUrl = messages.StringField(2)
     imageUrl = messages.StringField(3)
     description = messages.StringField(4)
-    tags = messages.StringField(5,repeated=True)
+    tags = messages.StringField(5)
     date = messages.StringField(6)
     time = messages.StringField(7)
     timestamp = messages.StringField(8)
+    collegeId = messages.StringField(9)
+    messageId = messages.StringField(10)
+    reportCount = messages.IntegerField(11)
 
 class LiveCommentsResponse(messages.Message):
     items = messages.MessageField(LiveCommentsForm,1,repeated=True)
