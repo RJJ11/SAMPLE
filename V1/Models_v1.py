@@ -630,6 +630,18 @@ class ProspectiveColleges(messages.Message):
     items = messages.MessageField(AddCollegeForm,1,repeated=True)
 
 
+
+class GetEventsEitherSideMiniForm(messages.Message):
+    timestamp = messages.StringField(1,required=True)
+    collegeId = messages.StringField(2,required=True)
+class GetEventsESReturnForm(messages.Message):
+    name = messages.StringField(1)
+    startTime =  messages.StringField(2)
+    collegeId =   messages.StringField(3)
+
+class GetEventsResponse(messages.Message):
+    items = messages.MessageField(GetEventsESReturnForm,1,repeated=True)     
+
 class EventsByDateForm(messages.Message):
     collegeId = messages.StringField(1)
     date = messages.StringField(2)
@@ -689,3 +701,4 @@ class SlamDunkScoreBoardForm(messages.Message):
 
 class ScoreResponse(messages.Message):
     items = messages.MessageField(SlamDunkScoreBoardForm,1,repeated=True)
+

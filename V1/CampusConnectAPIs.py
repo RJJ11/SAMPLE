@@ -22,7 +22,7 @@ from Models_v1 import CollegeDb,Notifications,NotificationResponseForm,Notificat
 from Models_v1 import CollegeDbMiniForm
 from Models_v1 import ClubMiniForm
 from Models_v1 import GetClubMiniForm
-from Models_v1 import JoinClubMiniForm
+from Models_v1 import JoinClubMiniForm,GetEventsEitherSideMiniForm,GetEventsESReturnForm,GetEventsResponse
 from Models_v1 import FollowClubMiniForm,RequestMiniForm,NotificationMiniForm,PersonalInfoRequest,PersonalInfoResponse,PersonalResponse
 from Models_v1 import ClubListResponse
 from Models_v1 import ProfileMiniForm,Events,Event,ModifyEvent
@@ -32,7 +32,7 @@ from PostsAPI import editPostFn
 from PostsAPI_v1 import postEntry,postRequest,deletePost,unlikePost,likePost,commentForm,copyPostToForm,editpost,copyCommentToForm
 from Models_v1 import AdminStatus,UpdateStatus,DelClubMiniForm,UpdateGCMMessageMiniForm,EditBatchMiniForm,DelProfileMiniForm,UnjoinClubMiniForm
 from PostsAPI_v1 import copyPostRequestToForm,update
-from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend, editEventFn
+from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,attendeeDetails, unAttend, editEventFn,getEventsEitherSide
 from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
     deleteClub,unJoinClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm,deleteProfile
@@ -1892,21 +1892,11 @@ class CampusConnectApi(remote.Service):
    def prospectiveColleges(self,request):
 
        return prospectiveCollegeFn()
+   @endpoints.method(GetEventsEitherSideMiniForm,GetEventsResponse,path='getEventsES', http_method='GET', name='getEventsES')
+   def getEventsES(self,request):
+       return getEventsEitherSide(request) 
 
-
-   @endpoints.method(EventsByDateForm,message_types.VoidMessage,path='events12hours', http_method='GET', name='events12hours')
-   def events12hours(self,request):
-       collegeId = ndb.Key('CollegeDb',int(request.collegeId))
-       temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
-       temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
-       timestamp = datetime.combine(temp,temp1)
-
-       query = Event.query(Event.collegeId==collegeId)
-       for q in query:
-           print "Difference", datetime.strptime(str(q.start_time),"%H:%M:%S") - datetime.strptime(str(temp1),"%H:%M:%S")
-
-       return message_types.VoidMessage()
-
+   
 
 
    @endpoints.method(LiveCommentsForm,message_types.VoidMessage,path='liveComments', http_method='POST', name='liveComments')
@@ -2062,4 +2052,5 @@ class CampusConnectApi(remote.Service):
            response.text = "Not Reported"
 
        return response
+
 # api = endpoints.api_server([CampusConnectApi])   # register API
