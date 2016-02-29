@@ -12,6 +12,7 @@ from datetime import datetime,date,time
 from Models_v1 import Event,CollegeDb,Profile,Club,EventForm,ModifyEvent,Notifications,PersonalResponse,PersonalInfoResponse
 from ProfileAPI_v1 import PersonalInfoForm
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
+from Models_v1 import GetEventsEitherSideMiniForm,GetEventsESReturnForm,GetEventsResponse
 def eventEntry(requestentity=None):
 
         event_request = Event()
@@ -392,3 +393,37 @@ def editEventFn(request,event):
 
     key1 = event.put()
     return event
+def getEventsEitherSide(request):
+    
+    timestamp = request.timestamp
+    collegeId = request.collegeId
+
+    timestampdatetime = dt.datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
+    upperbound = timestampdatetime + dt.timedelta(hours=12)
+    lowerbound = timestampdatetime - dt.timedelta(hours=12)
+
+
+    print timestampdatetime
+    print upperbound
+    print lowerbound
+    college_key = ndb.Key('CollegeDb',int(collegeId))
+    print college_key
+
+    eventlist = Event.query(Event.collegeId == college_key)
+    newList = []
+    print eventlist
+
+    for event in eventlist:
+        start_datetime = event.start_time + dt.timedelta(hours=5,minutes=30)
+        #print "Considering"
+        #print event.title
+        #print start_datetime 
+        if(start_datetime>=lowerbound and start_datetime<=upperbound):
+            returnobj = GetEventsESReturnForm()
+            returnobj.name = event.title
+            returnobj.startTime = str(start_datetime)
+            returnobj.collegeId = request.collegeId
+            newList.append(returnobj)
+
+    return GetEventsResponse(items=newList)        
+
