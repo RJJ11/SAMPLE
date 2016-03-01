@@ -1,4 +1,4 @@
-from V1.Models_v1 import Event
+from V1.Models_v1 import Event, SlamDunkScoreBoard
 from V1.CollegesAPI_v1 import copyToCollegeFeed
 from V1.Models_v1 import CollegeFeed, Post
 import time as t
@@ -575,3 +575,43 @@ def createPostHelper(request):
 
 
         return response
+
+
+def scoreBoardHelper(request):
+       ob = SlamDunkScoreBoard()
+       for field in request.all_fields():
+            if field.name == "completed":
+                if request.completed is None:
+                    ob.completed = "N"
+                    print "ENTERED HERE"
+                else:
+                    completed = str(getattr(request,field.name))
+                    setattr(ob,field.name,completed.upper())
+            else:
+                setattr(ob,field.name,getattr(request,field.name))
+
+       flag=0
+       query = SlamDunkScoreBoard.query()
+       for q in query:
+           if (q.team1.upper() == ob.team1.upper() and q.team2.upper() == ob.team2.upper() and q.round.upper() == ob.round.upper()) or (q.team1.upper() == ob.team2.upper() and q.team2.upper() == ob.team1.upper() and q.round.upper() == ob.round.upper()):
+               if (q.score1 != ob.score1 or q.score2 != ob.score2):
+                q.score1 = ob.score1
+                q.score2 = ob.score2
+                if request.crazy is not None:
+                        print ""
+                        #INSERT GCM HERE
+
+               if q.completed!=ob.completed and request.completed is not None:
+                q.completed = ob.completed
+
+               if q.quarter != ob.quarter:
+                q.quarter = ob.quarter
+                #Insert GCM HERE
+
+               q.put()
+               flag=1
+
+       if flag==0:
+           ob.put()
+
+       return message_types.VoidMessage()
