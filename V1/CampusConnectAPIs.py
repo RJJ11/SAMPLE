@@ -1903,12 +1903,9 @@ class CampusConnectApi(remote.Service):
    def liveComments(self,request):
        ob = LiveComments()
        for field in request.all_fields():
-           if field.name == "date":
-                temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
-
-           elif field.name == "time":
-               temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
-
+           if field.name == "timestamp":
+                timestampdatetime = dt.datetime.strptime(request.timestamp, '%Y-%m-%d %H:%M:%S')
+                setattr(ob,field.name,timestampdatetime)    
            elif field.name == "collegeId":
                collegeId = ndb.Key('CollegeDb',int(request.collegeId))
                setattr(ob,field.name,collegeId)
@@ -1920,7 +1917,7 @@ class CampusConnectApi(remote.Service):
             setattr(ob,field.name,getattr(request,field.name))
 
 
-       setattr(ob,"timestamp",datetime.combine(temp,temp1))
+       
 
        if getattr(request,"reportCount") is None:
            ob.reportCount = 0
@@ -1936,7 +1933,7 @@ class CampusConnectApi(remote.Service):
    def liveCommentsFeed(self,request):
 
        flag =0
-       pageLimit = 100
+       pageLimit = 10
        skipCount=0
        upperBound=pageLimit
 
@@ -2002,6 +1999,9 @@ class CampusConnectApi(remote.Service):
             if field.name == "completed":
                 completed = str(getattr(request,field.name))
                 setattr(ob,field.name,completed.upper())
+            elif field.name == "matchId":
+                matchId = request.team1 + request.team2 + request.gender
+                setattr(ob,field.name,matchId)
             else:
                 setattr(ob,field.name,getattr(request,field.name))
 
