@@ -699,7 +699,8 @@ class SlamDunkScoreBoardForm(messages.Message):
     gender = messages.StringField(6)
     round = messages.StringField(7)
     completed = messages.StringField(8)
-
+    matchId = messages.StringField(9)
+    crazy = messages.StringField(10)
 
 class ScoreResponse(messages.Message):
     items = messages.MessageField(SlamDunkScoreBoardForm,1,repeated=True)

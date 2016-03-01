@@ -36,7 +36,7 @@ from EventsAPI_v1 import eventEntry,copyEventToForm,deleteEvent,attendEvent,atte
 from ClubAPI_v1 import createClub,createClubAfterApproval,getClub,unfollowClub,approveClub,copyJoinRequestToForm,copyToSuperAdminList, \
     deleteClub,unJoinClub
 from ProfileAPI_v1 import _copyProfileToForm,_doProfile,_getProfileFromEmail,changeGcm,PersonalInfoForm,deleteProfile
-from V1.Helpers import collegeFeedHelper
+from V1.Helpers import collegeFeedHelper, scoreBoardHelper
 from settings import ANROID_CLIENT_ID,WEB_CLIENT_ID,ANDROID_ID2,ANDROID_ID3
 from gae_python_gcm.gcm import GCMMessage, GCMConnection
 from Helpers import messageProp,createCollegeHelper,createClubRequestHelper,approveClubHelper,createEventHelper,createPostHelper
@@ -1997,33 +1997,7 @@ class CampusConnectApi(remote.Service):
 
    @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
    def scoreboardForm(self,request):
-       ob = SlamDunkScoreBoard()
-       for field in request.all_fields():
-            if field.name == "completed":
-                if request.completed is None:
-                    ob.completed = "N"
-                    print "ENTERED HERE"
-                else:
-                    completed = str(getattr(request,field.name))
-                    setattr(ob,field.name,completed.upper())
-            else:
-                setattr(ob,field.name,getattr(request,field.name))
-
-       flag=0
-       query = SlamDunkScoreBoard.query()
-       for q in query:
-           if (q.team1.upper() == ob.team1.upper() and q.team2.upper() == ob.team2.upper() and q.round.upper() == ob.round.upper()) or (q.team1.upper() == ob.team2.upper() and q.team2.upper() == ob.team1.upper() and q.round.upper() == ob.round.upper()):
-               q.score1 = ob.score1
-               q.score2 = ob.score2
-               q.completed = ob.completed
-               q.quarter = ob.quarter
-               q.put()
-               flag=1
-
-       if flag==0:
-           ob.put()
-
-       return message_types.VoidMessage()
+       return scoreBoardHelper(request)
 
    @endpoints.method(message_types.VoidMessage,ScoreResponse,path='scoreBoard', http_method='GET', name='scoreBoard')
    def scoreBoard(self,request):
@@ -2033,7 +2007,10 @@ class CampusConnectApi(remote.Service):
        for q in query:
             ob = SlamDunkScoreBoardForm()
             for field in ob.all_fields():
+                if hasattr(q,field.name):
                    setattr(ob,field.name,getattr(q,field.name))
+                elif field.name == "matchId":
+                   setattr(ob,field.name,str(q.key.id()))
 
             pylist.append(ob)
 
