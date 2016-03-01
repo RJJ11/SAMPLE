@@ -1992,7 +1992,7 @@ class CampusConnectApi(remote.Service):
 
        return cf
 
-    @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
+   @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
    def scoreboardForm(self,request):
        ob = SlamDunkScoreBoard()
        for field in request.all_fields():
