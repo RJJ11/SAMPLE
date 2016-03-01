@@ -1992,16 +1992,17 @@ class CampusConnectApi(remote.Service):
 
        return cf
 
-   @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
+    @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
    def scoreboardForm(self,request):
        ob = SlamDunkScoreBoard()
        for field in request.all_fields():
             if field.name == "completed":
-                completed = str(getattr(request,field.name))
-                setattr(ob,field.name,completed.upper())
-            elif field.name == "matchId":
-                matchId = request.team1 + request.team2 + request.gender
-                setattr(ob,field.name,matchId)
+                if request.completed is None:
+                    ob.completed = "N"
+                    print "ENTERED HERE"
+                else:
+                    completed = str(getattr(request,field.name))
+                    setattr(ob,field.name,completed.upper())
             else:
                 setattr(ob,field.name,getattr(request,field.name))
 
@@ -2012,7 +2013,7 @@ class CampusConnectApi(remote.Service):
                q.score1 = ob.score1
                q.score2 = ob.score2
                q.completed = ob.completed
-               q.round = ob.round
+               q.quarter = ob.quarter
                q.put()
                flag=1
 
