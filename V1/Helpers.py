@@ -96,8 +96,22 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
                if x.feedType == "Event":
                    delattr(x,"hasLiked")
                """
+           finalList = []
+           for i in xrange(skipCount,upperBound):
+               if(i>=len(tempFeed.items)):
+                break
+               print "TEMPFEED ", tempFeed.items[i]
+               finalList.append(tempFeed.items[i])
 
-           return tempFeed
+           cf = CollegeFeed()
+           cf.items = finalList
+           cf.completed=str(0)
+           if(upperBound>=len(tempFeed.items)):
+                    cf.completed=str(1)
+
+
+           return cf
+           #return tempFeed
        else:
            posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
            events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
@@ -139,7 +153,22 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
                if x.feedType == "Event":
                    delattr(x,"hasLiked")
                """
-           return tempFeed
+
+           finalList = []
+           for i in xrange(skipCount,upperBound):
+               if(i>=len(tempFeed.items)):
+                break
+               print "TEMPFEED ", tempFeed.items[i]
+               finalList.append(tempFeed.items[i])
+
+           cf = CollegeFeed()
+           cf.items = finalList
+           cf.completed=str(0)
+           if(upperBound>=len(tempFeed.items)):
+                    cf.completed=str(1)
+
+
+           return cf
        else:
         posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
         events = Event.query(Event.club_id==clubId).order(-Event.timestamp)

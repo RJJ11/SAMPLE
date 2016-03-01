@@ -690,6 +690,8 @@ class SlamDunkScoreBoard(ndb.Model):
     gender = ndb.StringProperty()
     completed = ndb.StringProperty()
     matchId = ndb.StringProperty()
+    subscribers = ndb.KeyProperty(kind='Profile',repeated=True)
+
 
 class SlamDunkScoreBoardForm(messages.Message):
     team1 = messages.StringField(1)
@@ -702,6 +704,11 @@ class SlamDunkScoreBoardForm(messages.Message):
     completed = messages.StringField(8)
     matchId = messages.StringField(9)
 
+
 class ScoreResponse(messages.Message):
     items = messages.MessageField(SlamDunkScoreBoardForm,1,repeated=True)
+
+class SubscribeMatch(messages.Message):
+    matchId = messages.StringField(1)
+    pid = messages.StringField(2)
 

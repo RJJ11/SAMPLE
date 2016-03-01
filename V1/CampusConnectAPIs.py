@@ -14,7 +14,7 @@ from google.appengine.ext import ndb
 from Models_v1 import ClubRequestMiniForm, PostMiniForm,Colleges, Posts, GetAllPosts, LikePost, CommentsForm,CommentsResponseForm,CommentsResponse, Comments, GetPostRequestsForm,ProfileRetrievalMiniForm, \
     MessageResponse, ProfileResponse, BDCommentResponse, BDCommentCount, BDComments, MiscCount, KMCScoreHandler, KMCScore, \
     KMCScoreModel, AddCollegeForm, ProspectiveColleges, EventsByDateForm, EventsByDate, LiveCommentsForm, LiveComments, \
-    LiveCommentsResponse, SlamDunkScoreBoardForm, SlamDunkScoreBoard, ScoreResponse
+    LiveCommentsResponse, SlamDunkScoreBoardForm, SlamDunkScoreBoard, ScoreResponse, SubscribeMatch
 from Models_v1 import Club, Post_Request, Post, EventMiniForm, PostForm, GetCollege, EditPostForm
 from Models_v1 import Club_Creation, GetInformation,GetAllPostRequests, UpdatePostRequests
 from Models_v1 import Profile,CollegeFeed
@@ -1933,7 +1933,7 @@ class CampusConnectApi(remote.Service):
    def liveCommentsFeed(self,request):
 
        flag =0
-       pageLimit = 10
+       pageLimit = 150
        skipCount=0
        upperBound=pageLimit
 
@@ -2012,6 +2012,7 @@ class CampusConnectApi(remote.Service):
                q.score1 = ob.score1
                q.score2 = ob.score2
                q.completed = ob.completed
+               q.round = ob.round
                q.put()
                flag=1
 
@@ -2035,7 +2036,7 @@ class CampusConnectApi(remote.Service):
        return ScoreResponse(items = pylist)
 
 
-   @endpoints.method(GetInformation,MessageResponse,path='reportApi', http_method='POST', name='reportApi')
+   @endpoints.method(GetInformation,message_types.VoidMessage,path='reportApi', http_method='POST', name='reportApi')
    def reportApi(self,request):
        try:
            messageId = ndb.Key('LiveComments',int(request.messageId))
@@ -2051,6 +2052,32 @@ class CampusConnectApi(remote.Service):
            response.status = "2"
            response.text = "Not Reported"
 
-       return response
+       return message_types.VoidMessage()
+
+
+   @endpoints.method(SubscribeMatch,message_types.VoidMessage,path='subscribeMatch', http_method='POST', name='subscribeMatch')
+   def subscribeMatch(self,request):
+       matchId = ndb.Key('SlamDunkScoreBoard',int(request.matchId))
+       pid = ndb.Key('Profile',int(request.pid))
+
+       match = matchId.get()
+       match.subscribers.append(pid)
+       match.put()
+
+       return message_types.VoidMessage()
+
+
+   @endpoints.method(SubscribeMatch,message_types.VoidMessage,path='unsubscribeMatch', http_method='POST', name='unsubscribeMatch')
+   def unsubscribeMatch(self,request):
+       matchId = ndb.Key('SlamDunkScoreBoard',int(request.matchId))
+       pid = ndb.Key('Profile',int(request.pid))
+
+       match = matchId.get()
+       if pid in match.subscribers:
+        match.subscribers.remove(pid)
+        match.put()
+
+       return message_types.VoidMessage()
+
 
 # api = endpoints.api_server([CampusConnectApi])   # register API
