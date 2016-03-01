@@ -1903,12 +1903,9 @@ class CampusConnectApi(remote.Service):
    def liveComments(self,request):
        ob = LiveComments()
        for field in request.all_fields():
-           if field.name == "date":
-                temp = datetime.strptime(getattr(request,"date"),"%Y-%m-%d").date()
-
-           elif field.name == "time":
-               temp1 = datetime.strptime(getattr(request,"time"),"%H:%M:%S").time()
-
+           if field.name == "timestamp":
+                timestampdatetime = dt.datetime.strptime(request.timestamp, '%Y-%m-%d %H:%M:%S')
+                setattr(ob,field.name,timestampdatetime)    
            elif field.name == "collegeId":
                collegeId = ndb.Key('CollegeDb',int(request.collegeId))
                setattr(ob,field.name,collegeId)
@@ -1920,7 +1917,7 @@ class CampusConnectApi(remote.Service):
             setattr(ob,field.name,getattr(request,field.name))
 
 
-       setattr(ob,"timestamp",datetime.combine(temp,temp1))
+       
 
        if getattr(request,"reportCount") is None:
            ob.reportCount = 0
@@ -1995,7 +1992,7 @@ class CampusConnectApi(remote.Service):
 
        return cf
 
-   @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
+    @endpoints.method(SlamDunkScoreBoardForm,message_types.VoidMessage,path='scoreboardForm', http_method='POST', name='scoreboardForm')
    def scoreboardForm(self,request):
        ob = SlamDunkScoreBoard()
        for field in request.all_fields():
