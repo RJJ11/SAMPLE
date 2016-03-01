@@ -2000,8 +2000,9 @@ class CampusConnectApi(remote.Service):
        ob = SlamDunkScoreBoard()
        for field in request.all_fields():
             if field.name == "completed":
-                if ob.completed is None:
+                if request.completed is None:
                     ob.completed = "N"
+                    print "ENTERED HERE"
                 else:
                     completed = str(getattr(request,field.name))
                     setattr(ob,field.name,completed.upper())
@@ -2015,7 +2016,7 @@ class CampusConnectApi(remote.Service):
                q.score1 = ob.score1
                q.score2 = ob.score2
                q.completed = ob.completed
-               q.round = ob.round
+               q.quarter = ob.quarter
                q.put()
                flag=1
 
