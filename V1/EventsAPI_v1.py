@@ -246,14 +246,14 @@ def getEventsBasedonTimeLeft():
     eventlist = []   
     event_query = Event.query().fetch()
     for event in event_query:
-        LOG.info("Event")
-        LOG.info(event.title)
-        LOG.info(event.start_time)
+        #LOG.info("Event")
+        #LOG.info(event.title)
+        #LOG.info(event.start_time)
         start_time_utc = event.start_time - dt.timedelta(hours=5,minutes=30) 
         start_date =  start_time_utc.date()
         diff = start_date - currentDate
-        LOG.info("Considering this event")
-        LOG.info(event.title)
+        #LOG.info("Considering this event")
+        #LOG.info(event.title)
         
         if(diff == dt.timedelta(hours=0) and diff == dt.timedelta(minutes=0) and diff == dt.timedelta(seconds = 0)):
              LOG.info("this event is happening today")
@@ -419,11 +419,51 @@ def getEventsEitherSide(request):
         #print event.title
         #print start_datetime 
         if(start_datetime>=lowerbound and start_datetime<=upperbound):
-            returnobj = GetEventsESReturnForm()
-            returnobj.name = event.title
-            returnobj.startTime = str(start_datetime)
-            returnobj.collegeId = request.collegeId
-            newList.append(returnobj)
+            newList.append(event)
 
-    return GetEventsResponse(items=newList)        
+    #eventlist2 = Event.query(ndb.AND(Event.collegeId == college_key, ndb.OR(Event.completed == "N",Event.completed == "No"))).fetch()
+    #print eventlist2
 
+    for event in eventlist:
+        if(event.completed == "N" or event.completed == "No") : 
+            start_datetime = event.start_time + dt.timedelta(hours=5,minutes=30)
+            if(start_datetime<=timestampdatetime):
+               print event.completed
+               if event not in newList:
+                  newList.append(event) 
+    newList.sort(key=lambda x: x.start_time)
+    
+    finallist = []
+    for x in newList:
+        returnobj = GetEventsESReturnForm()
+        returnobj.name = str(x.title)
+        returnobj.startTime = str(x.start_time)
+        returnobj.collegeId = str(x.collegeId)
+        returnobj.status = str(x.completed)
+        finallist.append(returnobj)
+  
+    
+
+    return GetEventsResponse(items=finallist)        
+
+def changeStatusCompletedEvents():
+    logging.basicConfig(level=logging.DEBUG)
+    LOG = logging.getLogger(__name__)
+    current  = dt.datetime.now().replace(microsecond = 0)
+    current_utc = current + dt.timedelta(hours =5,minutes=30)
+    currentDate = current.date()
+    currentTime  = current.time()
+    LOG.info("Current datetime")
+    LOG.info(current_utc)
+    eventlist = []   
+    event_query = Event.query(ndb.OR(Event.completed == "N",Event.completed == "No")).fetch()
+    for event in event_query:
+        LOG.info("Event")
+        LOG.info(event.title)
+        end_datetime = event.end_time + dt.timedelta(hours =5,minutes=30)
+        LOG.info(end_datetime)
+        LOG.info(event.completed)
+        
+        if(end_datetime<=current_utc): #event has been completed
+           event.completed = "Yes"
+           event.put()

@@ -638,6 +638,7 @@ class GetEventsESReturnForm(messages.Message):
     name = messages.StringField(1)
     startTime =  messages.StringField(2)
     collegeId =   messages.StringField(3)
+    status = messages.StringField(4)
 
 class GetEventsResponse(messages.Message):
     items = messages.MessageField(GetEventsESReturnForm,1,repeated=True)     
@@ -667,8 +668,8 @@ class LiveCommentsForm(messages.Message):
     imageUrl = messages.StringField(3)
     description = messages.StringField(4)
     tags = messages.StringField(5)
-    date = messages.StringField(6)
-    time = messages.StringField(7)
+    #date = messages.StringField(6)
+    #time = messages.StringField(7)
     timestamp = messages.StringField(8)
     collegeId = messages.StringField(9)
     messageId = messages.StringField(10)
@@ -688,7 +689,9 @@ class SlamDunkScoreBoard(ndb.Model):
     round = ndb.StringProperty()
     gender = ndb.StringProperty()
     completed = ndb.StringProperty()
+    matchId = ndb.StringProperty()
     subscribers = ndb.KeyProperty(kind='Profile',repeated=True)
+
 
 class SlamDunkScoreBoardForm(messages.Message):
     team1 = messages.StringField(1)
@@ -701,6 +704,7 @@ class SlamDunkScoreBoardForm(messages.Message):
     completed = messages.StringField(8)
     matchId = messages.StringField(9)
     crazy = messages.StringField(10)
+
 
 class ScoreResponse(messages.Message):
     items = messages.MessageField(SlamDunkScoreBoardForm,1,repeated=True)

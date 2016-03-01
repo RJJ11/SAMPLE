@@ -1,4 +1,4 @@
-application: campus-connect-live
+application: campus-connect-test
 version: 1
 runtime: python27
 api_version: 1
@@ -39,6 +39,7 @@ handlers:       # static then dynamic
   secure: always
 - url: /crontasks
   script: cronmodule.py 
+
    
 - url: /get_upload_url
   script: main.app
