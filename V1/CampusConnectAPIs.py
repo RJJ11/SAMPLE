@@ -2004,9 +2004,11 @@ class CampusConnectApi(remote.Service):
        for q in query:
             ob = SlamDunkScoreBoardForm()
             for field in ob.all_fields():
+                print field.name
                 if hasattr(q,field.name):
                    setattr(ob,field.name,getattr(q,field.name))
                 elif field.name == "matchId":
+                   print "MATCH ID"
                    setattr(ob,field.name,str(q.key.id()))
 
             pylist.append(ob)
