@@ -607,7 +607,7 @@ class CampusConnectApi(remote.Service):
         newList = []
         colleges = CollegeDb.query()
         for x in colleges:
-          if(str(x.key.id()) != '5720605454237696' and str(x.key.id()) != '5743114304094208'):
+          if(str(x.key.id()) != '5720605454237696' and str(x.key.id()) != '5743114304094208' and str(x.key.id()) != '5692767623708672'):
              newList.append(x)
 
         return Colleges(collegeList=[getColleges(x) for x in newList])
@@ -1398,17 +1398,14 @@ class CampusConnectApi(remote.Service):
                            'id':request.id,'type':request.type}
       print data             
 
-      if(request.batch != None):# and request.type == "BatchRequest"):
+      #if(request.batch != None):# and request.type == "BatchRequest"):
           #sending GCM message to a batch
-          print "Entered batch in campusConnectApis"
-          
-
-          messageProp(request.batch,data)
-      else :
+          #print "Entered batch in campusConnectApis"
+      messageProp(request.batch,request.collegeId,data)
+      #else :
           #send message to everyone
-          print "Entered none in campusConnectApis"
-          
-          messageProp(None,data) 
+       #   print "Entered none in campusConnectApis"
+       #  messageProp(None,request.collegeId,data) 
       return message_types.VoidMessage()
     
    @endpoints.method(EditBatchMiniForm,message_types.VoidMessage,path='modifyBatch', http_method='POST', name='modifyBatch')
