@@ -22,18 +22,47 @@ from EventsAPI_v1 import eventEntry
 from PostsAPI_v1 import postEntry
 
 
-def messageProp(batch,data):
+def messageProp(batch,collegeId,data):
        postList = []
-       if(batch!=None):
-          print data
-          print batch
-          print "Entered batchRequest"
-          profileList = Profile.query(Profile.batch == batch)
-       else:
-          print data
-          print "Entered normal"
-          profileList = Profile.query()
+       print ("collegeId",collegeId)
+       if collegeId == None or collegeId =="":
+          college = None
+       else:   
+          collegeId = ndb.Key('CollegeDb',int(collegeId))
+          college = collegeId.get()
+       if batch == None or batch == "":
+          batch = None
 
+       
+       if(college !=None and batch!=None): 
+         print "CASE 1"
+         print data
+         print batch
+         print college
+         profileList = Profile.query(ndb.AND(Profile.batch == batch,Profile.collegeId == collegeId))  
+       elif (college == None and batch == None):
+         print "Case 2"
+         print data
+         print batch
+         print college
+         print "Entered normal"
+         profileList = Profile.query() 
+       elif (college != None and batch == None):
+         print data
+         print batch
+         print college
+         print "Case 3"
+         profileList = Profile.query(Profile.collegeId == collegeId)
+       else: 
+         print data
+         print batch
+         print college
+         print "Case 4"
+         profileList = Profile.query(Profile.batch == batch)
+       
+
+       print "Reached"
+       print profileList
        for profile in profileList :
            if(profile.gcmId):
               postList.append(profile.gcmId)
