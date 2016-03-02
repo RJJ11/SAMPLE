@@ -607,7 +607,7 @@ class CampusConnectApi(remote.Service):
         newList = []
         colleges = CollegeDb.query()
         for x in colleges:
-          if(str(x.key.id()) != '5720605454237696' and str(x.key.id()) != '5743114304094208'):
+          if(str(x.key.id()) != '5720605454237696' and str(x.key.id()) != '5743114304094208' and str(x.key.id()) != '5692767623708672'):
              newList.append(x)
 
         return Colleges(collegeList=[getColleges(x) for x in newList])
