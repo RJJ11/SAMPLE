@@ -208,6 +208,7 @@ def attendEvent(request):
        lp = ModifyEvent()
        event_id = ndb.Key('Event',int(request.eventId))
        from_pid = ndb.Key('Profile',int(request.fromPid))
+
        event = event_id.get()
        person = from_pid.get()
        pylist = event.attendees
@@ -230,7 +231,9 @@ def attendEvent(request):
        else:
             print "Sorry Already Attending"
 
-       print ("Event Attendees List",person.eventsAttending)     
+       print ("Event Attendees List",person.eventsAttending)
+       memcache.delete("collegeFeed"+str(event.collegeId.id()))
+       memcache.delete("clubFeed"+str(event.club_id.id()))
 
        return message_types.VoidMessage
 

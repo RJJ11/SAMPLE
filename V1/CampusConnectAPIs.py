@@ -876,17 +876,17 @@ class CampusConnectApi(remote.Service):
         if(temp2==None):
             print "No CLubId"
             collegeId = ndb.Key('CollegeDb',int(temp))
-            events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
+            events = Event.query(Event.collegeId==collegeId).order(-Event.start_time)
         elif(temp==None):
             print "No collegeID"
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.club_id==clubId).order(-Event.timestamp)
+            events = Event.query(Event.club_id==clubId).order(-Event.start_time)
 
         else:
             print "Not None"
             collegeId = ndb.Key('CollegeDb',int(temp))
             clubId = ndb.Key('Club',int(temp2))
-            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.timestamp)
+            events = Event.query(Event.collegeId==collegeId,Event.club_id==clubId).order(-Event.start_time)
 
         #All events have been obtained, check if date field is provided and take only those that have start date = req.date
 
@@ -1567,7 +1567,7 @@ class CampusConnectApi(remote.Service):
         evententryrequest1.photoUrl = "TAIOCCE1PhotoUrl"
         evententryrequest1.clubId = clubId
         evententryrequest1.venue = "Surathkal"
-        evententryrequest1.startDate = "2016-03-12"
+        evententryrequest1.startDate = "2016-03-08"
         evententryrequest1.startTime = "06:00:00"
         evententryrequest1.endDate = "2016-03-12"
         evententryrequest1.endTime = "10:00:00"

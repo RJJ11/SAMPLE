@@ -111,10 +111,25 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
 
 
            return cf
+       elif data:
+           print "Updating the cache"
+           tempFeed = data.items
+           pylist2=[]
+           tempFeed.append(copyToCollegeFeed(personId,newPost))
+           tempFeed.sort(key=lambda x: x.timestamp, reverse=True)
+
+           memData = CollegeFeed()
+           memData.items = tempFeed
+           memData.completed = str(1)
+           memcache.delete("collegeFeed"+request.collegeId)
+           memcache.flush_all()
+           #time.sleep(10)
+           memcache.set(key="collegeFeed"+request.collegeId, value=memData, time=86400)
+           return
            #return tempFeed
        else:
            posts = Post.query(Post.collegeId==collegeId).order(-Post.timestamp)
-           events = Event.query(Event.collegeId==collegeId).order(-Event.timestamp)
+           events = Event.query(Event.collegeId==collegeId).order(-Event.start_time)
 
        print "TEMP IS NONE"
 
@@ -169,9 +184,25 @@ def collegeFeedHelper(request,callFlag,newPost="abcd",editFlag="N"):
 
 
            return cf
+
+       elif data:
+           print "Updating the cache"
+           tempFeed = data.items
+           pylist2=[]
+           tempFeed.append(copyToCollegeFeed(personId,newPost))
+           tempFeed.sort(key=lambda x: x.timestamp, reverse=True)
+
+           memData = CollegeFeed()
+           memData.items = tempFeed
+           memData.completed = str(1)
+           memcache.delete("clubFeed"+request.clubId)
+           memcache.flush_all()
+           #time.sleep(10)
+           memcache.set(key="clubFeed"+request.clubId, value=memData, time=86400)
+           return
        else:
         posts = Post.query(Post.club_id==clubId).order(-Post.timestamp)
-        events = Event.query(Event.club_id==clubId).order(-Event.timestamp)
+        events = Event.query(Event.club_id==clubId).order(-Event.start_time)
         flagclub=1      #INDICATING THAT A CALL HAS BEEN MADE WITH CLUB AND NOT COLLEGE ID
 
    print events
