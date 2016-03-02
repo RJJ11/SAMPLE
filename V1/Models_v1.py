@@ -561,6 +561,7 @@ class AdminStatus(messages.Message):
 
 class UpdateStatus(messages.Message):
     update = messages.StringField(1)
+    message = messages.StringField(2)
 class UpdateGCMMessageMiniForm(messages.Message):
     title = messages.StringField(1)
     type = messages.StringField(2)
@@ -690,6 +691,7 @@ class SlamDunkScoreBoard(ndb.Model):
     gender = ndb.StringProperty()
     completed = ndb.StringProperty()
     subscribers = ndb.KeyProperty(kind='Profile',repeated=True)
+    crazy = ndb.StringProperty()
 
 
 class SlamDunkScoreBoardForm(messages.Message):

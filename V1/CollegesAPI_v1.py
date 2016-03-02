@@ -97,6 +97,8 @@ def createCollege(requestentity=None):
                             collegeId= collegeId)
             profile.superadmin.append(collegeId)
             key1 = profile.put()
+            newCollege.student_count = 1
+            newCollege.put()
             return newCollege
 
 

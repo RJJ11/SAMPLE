@@ -83,7 +83,15 @@ def _doProfile(email,save_request=None):
         print ("Here Bitch")
 
         prof = _getProfileFromEmail(email)
+        print ("Profile is",prof)
+
+        if(prof.email == ''):
+           key = None 
+        else:
+           key = prof.key
+           print key   
         flag=0
+        college = CollegeDb()
         print ("Save Request",save_request)
         
 
@@ -104,6 +112,7 @@ def _doProfile(email,save_request=None):
                     if field.name is 'collegeId':
                         #college=CollegeDb.query(CollegeDb.name==val,CollegeDb.location==collegeLocation).fetch()
                         collegeId = ndb.Key('CollegeDb',int(val))
+                        college = collegeId.get()
                         print ("coll",collegeId)
                         pylist = [x.key for x in CollegeDb.query()]
                         print pylist
@@ -116,6 +125,16 @@ def _doProfile(email,save_request=None):
                         setattr(prof,field.name,val)
             if flag==1:
                 k1 = prof.put()
+                
+                if (key==None):
+                    length = college.student_count
+                    if(length == None):
+                       length = 0                   
+ 
+                    length = length + 1
+                    college.student_count = length
+                    college.put()
+
                 print "Inserted"
                 print k1
 

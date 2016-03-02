@@ -302,7 +302,7 @@ def createClubRequestHelper(request):
 
               print("Notification to be inserted in club creation request",newNotif)
               newNotifKey = newNotif.put()
-              data = {'message': clubRequest.club_name,"title": "Creation Request",'id':str(clubRequest.key.id()),'type':"Club_Creation"}
+              data = {'message': clubRequest.club_name,"title": "Creation Request",'id':str(clubRequest.key.id()),'type':"Admin"}
               print (data)
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
@@ -597,16 +597,72 @@ def scoreBoardHelper(request):
                if (q.score1 != ob.score1 or q.score2 != ob.score2):
                 q.score1 = ob.score1
                 q.score2 = ob.score2
-                if request.crazy is not None:
-                        print ""
-                        #INSERT GCM HERE
+                eventlist = []
+                if request.crazy == "Y":
+                        if(q.crazy=="C"):
+
+                           eventlist = []
+                           dynamicmessage = "Quarter " + str(q.quarter) + " Score : " + str(q.score1) + " : " + str(q.score2) 
+                           title = str(q.team1) + " vs " + str(q.team2)
+                           data = {'message': dynamicmessage,"title": title,
+                                    'id':None,'type':"ScoreBoard"}
+                           print "Gonna send GCM"
+                           for profile in q.subscribers:
+                               person = profile.get()
+                               gcmId = person.gcmId
+                               if (gcmId):
+                                 print ("GCM ID is",gcmId)
+                                 eventlist.append(gcmId)
+                           print ("Event list is",eventlist)
+                           gcm_message = GCMMessage(eventlist, data)
+                           gcm_conn = GCMConnection()
+                           #gcm_conn.notify_device(gcm_message)
+                           print("Should have worked")     
+
+  
+                        else:
+                           dynamicmessage = "Things are heating up! Stay tuned for live updates "
+                           data = {'message': dynamicmessage,"title": "ScoreBoard",
+                                    'id':None,'type':"ScoreBoard"}
+                           print "Gonna send GCM"
+                           for profile in q.subscribers:
+                              person = profile.get()
+                              gcmId = person.gcmId
+                              if (gcmId):
+                                 print ("GCM ID is",gcmId)
+                                 eventlist.append(gcmId)
+                           print ("Event list is",eventlist)
+                           gcm_message = GCMMessage(eventlist, data)
+                           gcm_conn = GCMConnection()
+                           #gcm_conn.notify_device(gcm_message)
+                           print("Should have worked") 
+                           q.crazy = "C"
+
+
 
                if q.completed!=ob.completed and request.completed is not None:
                 q.completed = ob.completed
 
                if q.quarter != ob.quarter:
-                q.quarter = ob.quarter
-                #Insert GCM HERE
+                    q.quarter = ob.quarter
+                    #Insert GCM HERE
+                    eventlist = []
+                    dynamicmessage = "End of quarter " + str(q.quarter) + " Score : " + str(q.score1) + " : " + str(q.score2) 
+                    title = str(q.team1) + " vs " + str(q.team2)
+                    data = {'message': dynamicmessage,"title": title,
+                        'id':None,'type':"ScoreBoard"}
+                    print "Gonna send GCM"
+                    for profile in q.subscribers:
+                           person = profile.get()
+                           gcmId = person.gcmId
+                           if (gcmId):
+                             print ("GCM ID is",gcmId)
+                             eventlist.append(gcmId)
+                    print ("Event list is",eventlist)
+                    gcm_message = GCMMessage(eventlist, data)
+                    gcm_conn = GCMConnection()
+                    #gcm_conn.notify_device(gcm_message)
+                    print("Should have worked")
 
                q.put()
                flag=1
