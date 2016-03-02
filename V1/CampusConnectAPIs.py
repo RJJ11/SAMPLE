@@ -120,7 +120,7 @@ class CampusConnectApi(remote.Service):
                 newNotifKey = newNotif.put()
                  
                 data = {'message': profile.name + " wishes to join","title":  club.name,
-                        'id':str(joinCreationObjKey.id()),'type':"Join_Creation"
+                        'id':str(joinCreationObjKey.id()),'type':"Admin"
                        }
                 print (data)
                 gcmId = to_pidProfile.gcmId
@@ -369,7 +369,7 @@ class CampusConnectApi(remote.Service):
 
               print("Notification to be inserted in club creation request",newNotif)
               newNotifKey = newNotif.put()
-              data = {'message': clubRequest.club_name,"title": "Creation Request",'id':str(clubRequest.key.id()),'type':"Club_Creation"}
+              data = {'message': clubRequest.club_name,"title": "Creation Request",'id':str(clubRequest.key.id()),'type':"Admin"}
               print (data)
               gcmId = currentProfile.gcmId
               gcm_message = GCMMessage(gcmId, data)
@@ -498,7 +498,7 @@ class CampusConnectApi(remote.Service):
         print("Notification to be inserted in Post Creation Request",newNotif)
         newNotifKey = newNotif.put()
         data = {'message': clubRequest.title,"title": "Post Creation Request",
-                'id':str(clubRequest.key.id()),'type':"Post_Request"}
+                'id':str(clubRequest.key.id()),'type':"Admin"}
         print (data)
         gcmId = currentProfile.gcmId
         gcm_message = GCMMessage(gcmId, data)
@@ -1331,7 +1331,7 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(message_types.VoidMessage,UpdateStatus,path='updateStatus', http_method='GET', name='updateStatus')
    def updateStatus(self,request):
        update="5"
-       return UpdateStatus(update=update)
+       return UpdateStatus(update=update,message="Incident Update")
 
    @endpoints.method(DelClubMiniForm,message_types.VoidMessage,path='delClub', http_method='POST', name='delClub')
    def delClub(self,request):
@@ -2061,3 +2061,23 @@ class CampusConnectApi(remote.Service):
 
 
 # api = endpoints.api_server([CampusConnectApi])   # register API
+   @endpoints.method(message_types.VoidMessage,message_types.VoidMessage,path='profileCount', http_method='POST', name='profileCount')
+   def profileCount(self,request):
+       colleges = CollegeDb.query()
+
+       for college in colleges:
+           length = 0
+           profiles = Profile.query(Profile.collegeId == college.key)
+
+           for profile in profiles:
+               length = length+1
+           college.student_count = length
+           college.put()
+       
+
+
+
+
+
+
+       return message_types.VoidMessage() 
