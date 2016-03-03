@@ -1899,27 +1899,31 @@ class CampusConnectApi(remote.Service):
    @endpoints.method(LiveCommentsForm,message_types.VoidMessage,path='liveComments', http_method='POST', name='liveComments')
    def liveComments(self,request):
        ob = LiveComments()
-       for field in request.all_fields():
-           if field.name == "timestamp":
-                timestampdatetime = dt.datetime.strptime(request.timestamp, '%Y-%m-%d %H:%M:%S')
-                setattr(ob,field.name,timestampdatetime)    
-           elif field.name == "collegeId":
-               collegeId = ndb.Key('CollegeDb',int(request.collegeId))
-               setattr(ob,field.name,collegeId)
+       try:
+           for field in request.all_fields():
+               if field.name == "timestamp":
+                    timestampdatetime = dt.datetime.strptime(request.timestamp, '%Y-%m-%d %H:%M:%S')
+                    setattr(ob,field.name,timestampdatetime)
+               elif field.name == "collegeId":
+                   collegeId = ndb.Key('CollegeDb',int(request.collegeId))
+                   setattr(ob,field.name,collegeId)
 
-           elif field.name == "personPhotoUrl":
-               setattr(ob,field.name,str(getattr(request,field.name)))
+               elif field.name == "personPhotoUrl":
+                   setattr(ob,field.name,str(getattr(request,field.name)))
 
-           else:
-            setattr(ob,field.name,getattr(request,field.name))
+               else:
+                setattr(ob,field.name,getattr(request,field.name))
 
 
-       
 
-       if getattr(request,"reportCount") is None:
-           ob.reportCount = 0
 
-       ob.put()
+           if getattr(request,"reportCount") is None:
+               ob.reportCount = 0
+
+           ob.put()
+
+       except:
+           print "Sorry some error"
 
        #print "REPORT COUNT ", getattr(request,"reportCount")
 
